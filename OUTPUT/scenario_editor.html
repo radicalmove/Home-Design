@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Scenario Editor</title>
+  <style>
+    :root {
+      --bg: #e9e4d8;
+      --panel: #ffffff;
+      --ink: #202923;
+      --muted: #657067;
+      --line: #d5ccbd;
+      --accent: #2d6f8f;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Arial, sans-serif;
+    }
+    main {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 320px;
+    }
+    .canvas {
+      padding: 16px;
+      overflow: auto;
+    }
+    .canvas svg {
+      display: block;
+      width: min(100%, 1600px);
+      height: auto;
+      background: white;
+      border: 1px solid var(--line);
+      box-shadow: 0 12px 30px rgba(42, 35, 25, 0.14);
+      user-select: none;
+    }
+    aside {
+      background: var(--panel);
+      border-left: 1px solid var(--line);
+      padding: 16px;
+      overflow: auto;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 20px;
+    }
+    p {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    label {
+      display: block;
+      margin: 10px 0 4px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    input, textarea, select, button {
+      width: 100%;
+      font: inherit;
+    }
+    input, textarea, select {
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 7px;
+      background: #fffdf8;
+    }
+    textarea {
+      min-height: 88px;
+      resize: vertical;
+    }
+    button {
+      margin-top: 8px;
+      border: 1px solid #adb6ae;
+      border-radius: 4px;
+      padding: 8px 10px;
+      background: #f5f2eb;
+      color: var(--ink);
+      cursor: pointer;
+    }
+    button.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    #furniture-layer {
+      opacity: 0.28;
+      pointer-events: none;
+    }
+    #editable-layer .editor-object {
+      cursor: move;
+    }
+    #editable-layer .editor-object rect {
+      stroke: #1f2824;
+      stroke-width: 2;
+      vector-effect: non-scaling-stroke;
+    }
+    #editable-layer .editor-object.selected rect {
+      stroke: #2d6f8f;
+      stroke-width: 4;
+    }
+    #editable-layer text {
+      font-size: 12px;
+      font-weight: 700;
+      text-anchor: middle;
+      dominant-baseline: middle;
+      paint-order: stroke;
+      stroke: #fffdf8;
+      stroke-width: 4px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="canvas" aria-label="Editable renovation scenario canvas">
+      <svg data-locked-base="true" id="presentation-plan" xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+<defs>
+<g id="materials"></g>
+<pattern id="timber" width="18" height="18" patternUnits="userSpaceOnUse">
+  <rect width="18" height="18" fill="#9b6235"/>
+  <path d="M0 3 H18 M0 9 H18 M0 15 H18" stroke="#7e4d2a" stroke-width="1"/>
+</pattern>
+<pattern id="timber-light" width="22" height="22" patternUnits="userSpaceOnUse">
+  <rect width="22" height="22" fill="#efd2a5"/>
+  <path d="M0 5 H22 M0 12 H22 M0 19 H22" stroke="#e2bd85" stroke-width="1"/>
+</pattern>
+<pattern id="grass" width="20" height="20" patternUnits="userSpaceOnUse">
+  <rect width="20" height="20" fill="#79b75b"/>
+  <path d="M3 18 L8 2 M12 20 L16 4 M0 10 L20 6" stroke="#5c9b43" stroke-width="1.2"/>
+</pattern>
+<pattern id="stone" width="34" height="24" patternUnits="userSpaceOnUse">
+  <rect width="34" height="24" fill="#d7d0c2"/>
+  <path d="M0 8 H34 M0 17 H34 M10 0 V8 M23 8 V17 M14 17 V24" stroke="#b7ad9b" stroke-width="1"/>
+</pattern>
+<pattern id="tile" width="28" height="28" patternUnits="userSpaceOnUse">
+  <rect width="28" height="28" fill="#eceff1"/>
+  <path d="M0 0 L28 28 M28 0 L0 28" stroke="#d0d6d9" stroke-width="1"/>
+</pattern>
+</defs>
+<style>
+text { font-family: Arial, sans-serif; fill: #1f2824; }
+.title { font-size: 28px; font-weight: 700; }
+.subtitle { font-size: 13px; fill: #5d675f; }
+.room-label { font-size: 13px; font-weight: 700; text-anchor: middle; dominant-baseline: middle; }
+.site-label { font-size: 14px; font-weight: 700; text-anchor: middle; dominant-baseline: middle; fill: #263126; }
+.space { stroke: #d2c8b8; stroke-width: 2.5; fill: url(#timber-light); }
+.space.wet { fill: url(#tile); }
+.space.circulation { fill: #efe6d5; }
+.space.bedroom { fill: url(#timber-light); }
+.site.boundary { stroke: #607068; stroke-width: 4; fill: url(#grass); }
+.site.hardscape { stroke: #a49b8b; stroke-width: 2; fill: url(#stone); }
+.site.deck { stroke: #7a5734; stroke-width: 2; fill: url(#timber); }
+.site.building { stroke: #65705c; stroke-width: 3; fill: #d9dfca; }
+.site.planting { stroke: #32663b; stroke-width: 2; fill: url(#grass); }
+.wall-segment { fill: none; stroke: #656d72; stroke-linecap: square; stroke-linejoin: round; }
+.exterior-wall { stroke-width: 9; }
+.interior-wall { stroke-width: 5; stroke: #8a8f93; }
+.opening { stroke-width: 5; fill: none; stroke-linecap: round; }
+.opening.window { stroke: #75c9df; }
+.opening.slider, .opening.door_group { stroke: #7b5bc2; }
+.opening.door, .opening.opening, .opening.sliding_door { stroke: #b97233; }
+.furniture { fill: #ffffff; stroke: #c3b7a5; stroke-width: 2; }
+.furniture.accent { fill: #7ab85d; stroke: #5d9747; }
+.furniture.appliance { fill: #f7f8f6; stroke: #aeb8bb; }
+.furniture.cabinet { fill: #315f8c; stroke: #234766; }
+.furniture.dark { fill: #33312e; stroke: #24221f; }
+.furniture.outdoor { fill: #596f49; stroke: #394b31; }
+.furniture.screen { fill: #24282c; stroke: #151719; }
+.furniture.storage { fill: #d6a05f; stroke: #9d7140; }
+.furniture.car { fill: #9a8c7d; stroke: #373331; }
+.furniture-detail { fill: none; stroke: #6e645b; stroke-width: 2; }
+.confidence-note { font-size: 12px; fill: #5d675f; }
+</style>
+<rect width="100%" height="100%" fill="#f4f1ea"/>
+<text class="title" x="42" y="50">Presentation 2D Plan</text>
+<text class="subtitle" x="42" y="72">Current measured/photo-context model rendered for visual feedback. Approximate elements remain labelled in metadata.</text>
+<g id="site-layer">
+<polygon class="site boundary" data-plan-site="property_boundary" points="177.0,228.0 1495.0,228.0 1495.0,644.0 177.0,644.0"><title>property_boundary; dimensioned_from_legacy_site_plan; Overall site boundary from Matplotlib-005 property dimensions. Boundary position is schematic until cadastral/survey data is added.</title></polygon>
+<polygon class="site planting" data-plan-site="boundary_hedges_and_fences" points="188.0,307.0 650.0,263.0 650.0,288.0 194.0,393.0"><title>boundary_hedges_and_fences; photo_verified_approx; Photo-verified tall hedges/fences along the driveway side and rear/side garden boundaries. These are important shade and privacy constraints.</title></polygon>
+<polygon class="site planting" data-plan-site="boundary_hedges_and_fences" points="1010.0,228.0 1495.0,228.0 1495.0,236.0 1010.0,236.0"><title>boundary_hedges_and_fences; photo_verified_approx; Photo-verified tall hedges/fences along the driveway side and rear/side garden boundaries. These are important shade and privacy constraints.</title></polygon>
+<polygon class="site hardscape" data-plan-site="upper_side_driveway" points="188.0,307.0 650.0,263.0 1034.0,267.0 1034.0,338.0 872.0,336.0 842.0,365.0 518.0,361.0 474.0,376.0 194.0,393.0"><title>upper_side_driveway; satellite_photo_verified_approx; Satellite/photo-verified main concrete driveway running from the street side along the upper side of the property toward the garage. Replaces the earlier generic path polygon.</title></polygon>
+<polygon class="site hardscape" data-plan-site="front_diagonal_path" points="474.0,376.0 518.0,361.0 586.0,465.0 563.0,477.0"><title>front_diagonal_path; satellite_photo_verified_approx; Satellite-visible diagonal concrete path from the driveway/front hardscape toward the sunroom/front-house area.</title></polygon>
+<polygon class="site hardscape" data-plan-site="garage_concrete_pad" points="960.0,354.0 1390.0,354.0 1390.0,460.0 990.0,460.0 990.0,410.0 960.0,410.0"><title>garage_concrete_pad; satellite_photo_verified_approx; Satellite/photo-verified larger concrete area in front of the garage/cottage line where the driveway/service area opens out. Edges are approximate pending direct measurements.</title></polygon>
+<polygon class="site hardscape" data-plan-site="garage_cottage_side_path" points="990.0,354.0 1390.0,354.0 1390.0,382.0 990.0,382.0"><title>garage_cottage_side_path; photo_verified_approx; Photo-verified narrow concrete path running along the house-facing side of the cottage and garage, meeting the larger concrete area. This replaces the incorrect broad rear concrete block.</title></polygon>
+<polygon class="site deck" data-plan-site="rear_timber_deck" points="822.0,338.0 945.0,338.0 985.0,410.0 985.0,493.0 890.0,523.0 800.0,523.0 800.0,500.0 822.0,396.0"><title>rear_timber_deck; photo_verified_approx; Photo-verified timber deck outside the kitchen/dining double doors and entrance/laundry side of the house. Satellite and deck photos show a diagonal edge near the dining/kitchen end, then a straighter edge running toward the property/garage side. Geometry is approximate until deck edge measurements are taken.</title></polygon>
+<rect class="site deck" data-plan-site="cottage_end_deck" x="1390.0" y="270.0" width="58.0" height="72.0"><title>cottage_end_deck; photo_verified_approx; Photo-verified small deck/landing at the end of the cottage. Position and size are approximate until measured.</title></rect>
+<rect class="site building" data-plan-site="garage_shed" x="1010.0" y="236.0" width="190.0" height="118.0"><title>garage_shed; photo_verified_approx; Photo-verified remaining garage/shed at the end of the driveway with visible roller door. Current model places it on the same horizontal line and width as the cottage, with only a small gap to the top boundary.</title></rect>
+<rect class="site building" data-plan-site="cottage" x="1200.0" y="236.0" width="190.0" height="118.0"><title>cottage; photo_verified_satellite_outdated; Photo-verified cottage added after the satellite image was taken. The cottage sits to the right of the garage on the same horizontal line and approximate width, replacing part of the old rear garage footprint. Display geometry is approximate until measured or newer aerial imagery is available.</title></rect>
+</g>
+<g id="rooms-layer">
+<polygon class="space living" data-plan-room="sunroom" points="536.0,486.0 646.0,486.0 646.0,360.0 597.0,360.0 597.0,408.0 552.0,452.0 536.0,452.0 536.0,486.0"><title>sunroom; measured_approx; First current-structure slice: measured sunroom shape with photo-verified wraparound glazing.</title></polygon>
+<rect class="space living" data-plan-room="lounge" x="638.0" y="358.0" width="104.0" height="127.0"><title>lounge; measured_dimensions_inferred_position; Included only to anchor the photo-verified sunroom-to-lounge slider relationship.</title></rect>
+<polygon class="space living" data-plan-room="kitchen_dining" points="742.0,314.0 822.0,314.0 822.0,496.0 800.0,496.0 800.0,523.0 758.0,523.0 758.0,500.0 742.0,500.0"><title>kitchen_dining; measured_dimensions_photo_verified_openings; Promoted after deck-side photos verified the large door group and adjacent glazing. Position remains visually calibrated until full metric alignment is completed.</title></polygon>
+<rect class="space circulation" data-plan-room="entrance" x="800.0" y="500.0" width="90.0" height="23.0"><title>entrance; measured_dimensions_photo_verified; Photo-verified glazed deck-side entrance/back-entry space connected to laundry.</title></rect>
+<rect class="space wet" data-plan-room="laundry" x="890.0" y="500.0" width="50.0" height="80.0"><title>laundry; measured_dimensions_photo_verified; Photo-verified laundry beyond entrance with washing machines, sink/bench, and exterior window.</title></rect>
+<rect class="space wet" data-plan-room="toilet" x="890.0" y="580.0" width="50.0" height="30.0"><title>toilet; measured_dimensions_photo_verified; Photo-verified small toilet room connected from laundry with frosted exterior window.</title></rect>
+<rect class="space circulation" data-plan-room="hallway" x="608.0" y="485.0" width="150.0" height="38.0"><title>hallway; measured_dimensions_photo_verified; Photo-verified interior circulation spine connecting lounge/office side toward entrance and laundry, with bathroom sliding door visible on the side wall.</title></rect>
+<rect class="space bedroom" data-plan-room="master_bedroom" x="530.0" y="485.0" width="78.0" height="125.0"><title>master_bedroom; measured_dimensions_reference_position_photo_context; Measured room dimensions promoted into the current layer. Pixel position follows the calibrated reference plan and is photo-context checked against master bedroom photos and exterior street/front views.</title></rect>
+<rect class="space bedroom" data-plan-room="office" x="608.0" y="523.0" width="80.0" height="87.0"><title>office; measured_dimensions_reference_position_photo_context; Measured room dimensions promoted into the current layer. Pixel position follows the calibrated reference plan and is supported by office photos and hallway doorway photos.</title></rect>
+<rect class="space wet" data-plan-room="bathroom" x="688.0" y="523.0" width="70.0" height="87.0"><title>bathroom; measured_dimensions_reference_position_photo_context; Measured bathroom dimensions promoted into the current layer. Pixel position follows the calibrated reference plan and is supported by bathroom photos plus hallway sliding-door evidence.</title></rect>
+<rect class="space bedroom" data-plan-room="bedroom_2" x="758.0" y="523.0" width="132.0" height="87.0"><title>bedroom_2; measured_dimensions_reference_position_photo_context; Measured room dimensions promoted into the current layer. Pixel position follows the calibrated reference plan and is photo-context checked against bedroom 2 interior photos.</title></rect>
+</g>
+<g id="wall-layer">
+<polygon class="wall-segment exterior-wall" points="536.0,486.0 646.0,486.0 646.0,360.0 597.0,360.0 597.0,408.0 552.0,452.0 536.0,452.0 536.0,486.0"><title>sunroom wall outline</title></polygon>
+<rect class="wall-segment exterior-wall" x="638.0" y="358.0" width="104.0" height="127.0"><title>lounge wall outline</title></rect>
+<polygon class="wall-segment exterior-wall" points="742.0,314.0 822.0,314.0 822.0,496.0 800.0,496.0 800.0,523.0 758.0,523.0 758.0,500.0 742.0,500.0"><title>kitchen_dining wall outline</title></polygon>
+<rect class="wall-segment exterior-wall" x="800.0" y="500.0" width="90.0" height="23.0"><title>entrance wall outline</title></rect>
+<rect class="wall-segment exterior-wall" x="890.0" y="500.0" width="50.0" height="80.0"><title>laundry wall outline</title></rect>
+<rect class="wall-segment exterior-wall" x="890.0" y="580.0" width="50.0" height="30.0"><title>toilet wall outline</title></rect>
+<rect class="wall-segment exterior-wall" x="608.0" y="485.0" width="150.0" height="38.0"><title>hallway wall outline</title></rect>
+<rect class="wall-segment exterior-wall" x="530.0" y="485.0" width="78.0" height="125.0"><title>master_bedroom wall outline</title></rect>
+<rect class="wall-segment exterior-wall" x="608.0" y="523.0" width="80.0" height="87.0"><title>office wall outline</title></rect>
+<rect class="wall-segment exterior-wall" x="688.0" y="523.0" width="70.0" height="87.0"><title>bathroom wall outline</title></rect>
+<rect class="wall-segment exterior-wall" x="758.0" y="523.0" width="132.0" height="87.0"><title>bedroom_2 wall outline</title></rect>
+</g>
+<g id="furniture-layer">
+  <g data-furniture="dining_table" data-evidence="Inside-Dining-Room-looking-N.jpg">
+    <title>Dining table and four chairs visible in dining photos.</title>
+    <rect class="furniture" x="761" y="384" width="42" height="68" rx="5"/>
+    <circle class="furniture" cx="750" cy="399" r="7"/>
+    <circle class="furniture" cx="814" cy="399" r="7"/>
+    <circle class="furniture" cx="750" cy="438" r="7"/>
+    <circle class="furniture" cx="814" cy="438" r="7"/>
+  </g>
+  <g data-furniture="kitchen_cabinetry" data-evidence="Inside-Kitchen-Looking-NW.jpg; Inside-Kitchen-Looking-SE.jpg">
+    <title>Kitchen benches, blue cabinetry, pantry/fridge wall, and sink/cooktop run are visible in kitchen photos.</title>
+    <rect class="furniture cabinet" x="746" y="330" width="12" height="150" rx="2"/>
+    <rect class="furniture cabinet" x="805" y="326" width="13" height="154" rx="2"/>
+    <rect class="furniture appliance" x="787" y="342" width="18" height="28" rx="3"/>
+    <circle class="furniture-detail" cx="751" cy="362" r="5"/>
+  </g>
+  <g data-furniture="lounge_seating" data-placement="l_shape_with_rear_flow_gap" data-evidence="Inside-Lounge-Looking-NE.jpg; Inside-Lounge-Looking-SW.jpg; Inside-Lounge-Looking-SE.jpg">
+    <title>L-shaped lounge sofa pulled off the lower wall to leave a circulation gap behind it, plus coffee table and TV/media wall visible in lounge photos.</title>
+    <rect class="furniture dark" x="656" y="438" width="64" height="24" rx="6"/>
+    <rect class="furniture dark" x="656" y="412" width="24" height="50" rx="6"/>
+    <line class="furniture-detail" x1="652" y1="470" x2="724" y2="470"/>
+    <rect class="furniture" x="686" y="404" width="28" height="20" rx="4"/>
+    <rect class="furniture screen" x="718" y="376" width="10" height="58" rx="2"/>
+  </g>
+  <g data-furniture="master_bed" data-evidence="Inside-Master-Bedroom-Looking-S.jpg">
+    <title>Master bed and headboard visible against the dark feature wall.</title>
+    <rect class="furniture" x="541" y="528" width="56" height="68" rx="5"/>
+    <rect class="furniture storage" x="541" y="528" width="56" height="12" rx="3"/>
+    <line class="furniture-detail" x1="569" y1="540" x2="569" y2="596"/>
+  </g>
+  <g data-furniture="bedroom2_bed_and_storage" data-evidence="Inside-Bedroom-2-Looking-N.jpg; Inside-Bedroom-2-Looking-SW.jpg; Inside-Bedroom-2-Looking-W.jpg">
+    <title>Bedroom 2 photos show bed/daybed along the pink feature wall with storage/bookcase and open wardrobe on the opposite side.</title>
+    <rect class="furniture" x="772" y="532" width="62" height="42" rx="5"/>
+    <rect class="furniture accent" x="772" y="532" width="62" height="11" rx="3"/>
+    <rect class="furniture storage" x="850" y="532" width="28" height="14" rx="2"/>
+    <rect class="furniture storage" x="868" y="548" width="12" height="48" rx="2"/>
+    <line class="furniture-detail" x1="802" y1="543" x2="802" y2="574"/>
+  </g>
+  <g data-furniture="office_desk" data-evidence="Inside-Office-Looking-SE.jpg">
+    <title>Office desk, chair, screens, and shelving visible in office photos.</title>
+    <rect class="furniture" x="628" y="580" width="48" height="18" rx="3"/>
+    <rect class="furniture screen" x="636" y="568" width="16" height="10" rx="2"/>
+    <rect class="furniture screen" x="656" y="568" width="16" height="10" rx="2"/>
+    <circle class="furniture dark" cx="652" cy="558" r="7"/>
+  </g>
+  <g data-furniture="laundry_appliances" data-evidence="Inside-Laundry-Looking-NE.jpg">
+    <title>Laundry bench, sink, and two front-loading appliances visible in laundry photos.</title>
+    <rect class="furniture" x="897" y="508" width="36" height="10" rx="2"/>
+    <rect class="furniture appliance" x="898" y="524" width="16" height="24" rx="2"/>
+    <rect class="furniture appliance" x="916" y="524" width="16" height="24" rx="2"/>
+    <circle class="furniture-detail" cx="906" cy="537" r="5"/>
+    <circle class="furniture-detail" cx="924" cy="537" r="5"/>
+  </g>
+  <g data-furniture="garage_car_pair" data-evidence="user_confirmed_two_cars">
+    <title>Two cars shown because the user confirmed the garage can be represented with two cars.</title>
+    <rect class="furniture car" x="1030" y="260" width="72" height="36" rx="15"/>
+    <rect class="furniture-detail" x="1050" y="266" width="30" height="24" rx="5"/>
+    <circle class="furniture dark" cx="1046" cy="297" r="4"/>
+    <circle class="furniture dark" cx="1086" cy="297" r="4"/>
+    <rect class="furniture car" x="1108" y="260" width="72" height="36" rx="15"/>
+    <rect class="furniture-detail" x="1128" y="266" width="30" height="24" rx="5"/>
+    <circle class="furniture dark" cx="1124" cy="297" r="4"/>
+    <circle class="furniture dark" cx="1164" cy="297" r="4"/>
+  </g>
+  <g data-furniture="deck_seating" data-evidence="From-Back-Door-looking-onto-deck.jpg">
+    <title>Small outdoor table/chairs and wicker seating visible on the deck photos.</title>
+    <circle class="furniture outdoor" cx="850" cy="401" r="14"/>
+    <rect class="furniture outdoor" x="830" y="418" width="14" height="22" rx="4"/>
+    <rect class="furniture outdoor" x="858" y="418" width="14" height="22" rx="4"/>
+    <rect class="furniture outdoor" x="918" y="424" width="42" height="22" rx="5"/>
+    <line class="furniture-detail" x1="925" y1="435" x2="953" y2="435"/>
+  </g>
+</g>
+<g id="openings-layer">
+<polygon class="opening slider" data-plan-feature="sunroom_lounge_slider" points="641.0,388.0 646.0,388.0 646.0,454.0 641.0,454.0"><title>sunroom_lounge_slider; photo_verified</title></polygon>
+<polygon class="opening window_group" data-plan-feature="sunroom_wraparound_glazing" points="640.0,368.0 646.0,368.0 646.0,476.0 640.0,476.0"><title>sunroom_wraparound_glazing; photo_verified</title></polygon>
+<polygon class="opening window_group" data-plan-feature="sunroom_wraparound_glazing" points="604.0,362.0 640.0,362.0 640.0,368.0 604.0,368.0"><title>sunroom_wraparound_glazing; photo_verified</title></polygon>
+<polygon class="opening window_group" data-plan-feature="sunroom_wraparound_glazing" points="590.0,410.0 596.0,416.0 558.0,452.0 552.0,446.0"><title>sunroom_wraparound_glazing; photo_verified</title></polygon>
+<polygon class="opening door_group" data-plan-feature="deck_door_group" points="822.0,338.0 830.0,338.0 830.0,396.0 822.0,396.0"><title>deck_door_group; photo_verified; Photo-verified large deck-side glazed door group. Old reference geometry is retained as display_px pending full metric calibration.</title></polygon>
+<polygon class="opening window" data-plan-feature="deck_side_dining_window" points="822.0,410.0 828.0,410.0 828.0,484.0 822.0,484.0"><title>deck_side_dining_window; photo_verified; Photo-verified tall deck-side glazing adjacent to the door group; renamed from the legacy kitchen_window reference for clarity.</title></polygon>
+<polygon class="opening slider" data-plan-feature="entrance_deck_slider" points="800.0,500.0 890.0,500.0 890.0,506.0 800.0,506.0"><title>entrance_deck_slider; photo_verified; Photo-verified deck-side glazed entrance/slider. Display geometry marks the deck-facing edge of the entrance zone.</title></polygon>
+<polygon class="opening door" data-plan-feature="laundry_to_toilet_door" points="890.0,580.0 940.0,580.0 940.0,586.0 890.0,586.0"><title>laundry_to_toilet_door; photo_verified; Photo-verified connection from laundry into toilet; exact swing/opening direction remains approximate.</title></polygon>
+<polygon class="opening window" data-plan-feature="toilet_frosted_window" points="936.0,586.0 940.0,586.0 940.0,606.0 936.0,606.0"><title>toilet_frosted_window; photo_verified; Photo-verified frosted toilet window. Display geometry is approximate pending exterior side-wall calibration.</title></polygon>
+<polygon class="opening opening" data-plan-feature="hallway_to_entrance_laundry" points="758.0,500.0 800.0,500.0 800.0,523.0 758.0,523.0"><title>hallway_to_entrance_laundry; photo_verified; Photo-verified hallway continuation toward the entrance/laundry end. Display geometry marks the transitional circulation zone.</title></polygon>
+<polygon class="opening sliding_door" data-plan-feature="hallway_to_bathroom_sliding_door" points="688.0,523.0 722.0,523.0 722.0,529.0 688.0,529.0"><title>hallway_to_bathroom_sliding_door; photo_verified; Photo-verified bathroom sliding door opening off the hallway; exact lateral placement remains approximate until a hallway wall survey.</title></polygon>
+<polygon class="opening door" data-plan-feature="hallway_to_office_door" points="608.0,523.0 648.0,523.0 648.0,529.0 608.0,529.0"><title>hallway_to_office_door; photo_verified; Photo-verified office doorway relationship to the hallway. Door swing direction is not yet modelled.</title></polygon>
+<polygon class="opening window" data-plan-feature="master_street_window" points="530.0,528.0 536.0,528.0 536.0,588.0 530.0,588.0"><title>master_street_window; photo_context_approx; Approximate street/front-facing master bedroom window marker. Position needs direct wall/window offset measurement.</title></polygon>
+<polygon class="opening window" data-plan-feature="master_sunroom_window" points="552.0,485.0 604.0,485.0 604.0,491.0 552.0,491.0"><title>master_sunroom_window; photo_context_approx; Approximate master bedroom window facing the sunroom side. Position needs direct wall/window offset measurement.</title></polygon>
+<polygon class="opening window" data-plan-feature="office_se_window" points="625.0,604.0 675.0,604.0 675.0,610.0 625.0,610.0"><title>office_se_window; photo_context_approx; Approximate SE-facing office window marker. Position needs exterior wall/window offset measurement.</title></polygon>
+<polygon class="opening window" data-plan-feature="bathroom_se_window" points="704.0,604.0 746.0,604.0 746.0,610.0 704.0,610.0"><title>bathroom_se_window; photo_context_approx; Approximate SE-facing bathroom window marker. Position needs exterior wall/window offset measurement.</title></polygon>
+<polygon class="opening window" data-plan-feature="bedroom2_se_window" points="790.0,604.0 862.0,604.0 862.0,610.0 790.0,610.0"><title>bedroom2_se_window; photo_context_approx; Approximate SE-facing bedroom 2 window marker. Position needs exterior wall/window offset measurement.</title></polygon>
+</g>
+<g id="labels-layer">
+<text class="site-label" x="841.5" y="310.5">Hedges / Fences</text>
+<text class="site-label" x="611.0" y="328.0">Upper Side Driveway</text>
+<text class="site-label" x="530.0" y="419.0">Front Path</text>
+<text class="site-label" x="1175.0" y="407.0">Garage Concrete</text>
+<text class="site-label" x="1190.0" y="368.0">Garage / Cottage Path</text>
+<text class="site-label" x="892.5" y="430.5">Rear Timber Deck</text>
+<text class="site-label" x="1419.0" y="306.0">Cottage End Deck</text>
+<text class="site-label" x="1105.0" y="295.0">Garage / Shed</text>
+<text class="site-label" x="1295.0" y="295.0">Cottage</text>
+<text class="room-label" x="591.0" y="423.0">Sunroom</text>
+<text class="room-label" x="690.0" y="421.5">Lounge</text>
+<text class="room-label" x="782.0" y="418.5">Kitchen / Dining</text>
+<text class="room-label" x="845.0" y="511.5">Entrance</text>
+<text class="room-label" x="915.0" y="540.0">Laundry</text>
+<text class="room-label" x="915.0" y="595.0">Toilet</text>
+<text class="room-label" x="683.0" y="504.0">Hallway</text>
+<text class="room-label" x="569.0" y="547.5">Master Bedroom</text>
+<text class="room-label" x="648.0" y="566.5">Office</text>
+<text class="room-label" x="723.0" y="566.5">Bathroom</text>
+<text class="room-label" x="824.0" y="566.5">Bedroom 2</text>
+</g>
+<text class="confidence-note" x="42" y="842">Approximate/reference-positioned items: 18. Use this plan for visual feedback, not construction documentation.</text>
+<g id="editable-layer" data-editor-layer="scenario">
+<g class="editor-object" data-editor-object="lounge_sofa" transform="translate(656 412) rotate(0 32.0 25.0)"><rect width="64" height="50" rx="5" fill="#33312e" opacity="0.92"/><text x="32.0" y="25.0">L-shaped sofa</text></g>
+<g class="editor-object" data-editor-object="dining_table" transform="translate(761 384) rotate(0 21.0 34.0)"><rect width="42" height="68" rx="5" fill="#ffffff" opacity="0.92"/><text x="21.0" y="34.0">Dining table</text></g>
+<g class="editor-object" data-editor-object="bedroom2_bed" transform="translate(772 532) rotate(0 31.0 21.0)"><rect width="62" height="42" rx="5" fill="#ffffff" opacity="0.92"/><text x="31.0" y="21.0">Bedroom 2 bed</text></g>
+<g class="editor-object" data-editor-object="office_desk" transform="translate(628 580) rotate(0 24.0 9.0)"><rect width="48" height="18" rx="5" fill="#ffffff" opacity="0.92"/><text x="24.0" y="9.0">Office desk</text></g>
+<g class="editor-object" data-editor-object="deck_option" transform="translate(920 350) rotate(0 65.0 60.0)"><rect width="130" height="120" rx="5" fill="#9b6235" opacity="0.92"/><text x="65.0" y="60.0">Deck idea</text></g>
+</g>
+</svg>
+    </section>
+    <aside>
+      <h1>Scenario Editor</h1>
+      <p>Select an editable object, drag it on the plan, then adjust size, rotation, colour, label, and notes. The measured house layer stays locked.</p>
+
+      <label for="object-select">Selected object</label>
+      <select id="object-select"></select>
+
+      <label for="object-label">Label</label>
+      <input id="object-label" type="text">
+
+      <div class="row">
+        <div>
+          <label for="object-type">Type</label>
+          <select id="object-type">
+            <option value="furniture">Furniture</option>
+            <option value="external">External</option>
+            <option value="renovation">Renovation idea</option>
+            <option value="note">Note</option>
+          </select>
+        </div>
+        <div>
+          <label for="object-colour">Colour</label>
+          <input id="object-colour" type="color">
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label for="object-width">Width</label>
+          <input id="object-width" type="number" min="4" step="1">
+        </div>
+        <div>
+          <label for="object-height">Height</label>
+          <input id="object-height" type="number" min="4" step="1">
+        </div>
+      </div>
+
+      <label for="object-rotation">Rotation</label>
+      <input id="object-rotation" type="range" min="-180" max="180" step="1">
+
+      <label for="object-notes">Notes</label>
+      <textarea id="object-notes"></textarea>
+
+      <button class="primary" id="add-object" type="button">Add Object</button>
+      <button id="duplicate-object" type="button">Duplicate Object</button>
+      <button id="delete-object" type="button">Delete Object</button>
+
+      <label for="scenario-editor-json">Scenario JSON</label>
+      <textarea id="scenario-editor-json" spellcheck="false"></textarea>
+      <button class="primary" id="export-scenario" type="button">Export JSON</button>
+      <button id="import-scenario" type="button">Import JSON</button>
+    </aside>
+  </main>
+  <script>
+    const initialScenario = {"source":"scenario_editor","version":1,"objects":[{"id":"lounge_sofa","label":"L-shaped sofa","type":"furniture","x":656,"y":412,"width":64,"height":50,"rotation":0,"colour":"#33312e","notes":"Photo-based lounge sofa with rear flow gap."},{"id":"dining_table","label":"Dining table","type":"furniture","x":761,"y":384,"width":42,"height":68,"rotation":0,"colour":"#ffffff","notes":"Photo-based dining table position."},{"id":"bedroom2_bed","label":"Bedroom 2 bed","type":"furniture","x":772,"y":532,"width":62,"height":42,"rotation":0,"colour":"#ffffff","notes":"Approximate bed/daybed position from bedroom photos."},{"id":"office_desk","label":"Office desk","type":"furniture","x":628,"y":580,"width":48,"height":18,"rotation":0,"colour":"#ffffff","notes":"Desk placed near the window wall."},{"id":"deck_option","label":"Deck idea","type":"external","x":920,"y":350,"width":130,"height":120,"rotation":0,"colour":"#9b6235","notes":"Editable deck marker for correcting or testing ideas."}]};
+    let scenario = structuredClone(initialScenario);
+    let selectedId = scenario.objects[0]?.id || null;
+    let dragState = null;
+
+    const svg = document.getElementById('presentation-plan');
+    const layer = document.getElementById('editable-layer');
+    const objectSelect = document.getElementById('object-select');
+    const fields = {
+      label: document.getElementById('object-label'),
+      type: document.getElementById('object-type'),
+      colour: document.getElementById('object-colour'),
+      width: document.getElementById('object-width'),
+      height: document.getElementById('object-height'),
+      rotation: document.getElementById('object-rotation'),
+      notes: document.getElementById('object-notes'),
+      json: document.getElementById('scenario-editor-json'),
+    };
+
+    function svgPoint(event) {
+      const point = svg.createSVGPoint();
+      point.x = event.clientX;
+      point.y = event.clientY;
+      return point.matrixTransform(svg.getScreenCTM().inverse());
+    }
+
+    function selectedObject() {
+      return scenario.objects.find((object) => object.id === selectedId) || null;
+    }
+
+    function renderEditableObjects() {
+      layer.replaceChildren();
+      objectSelect.replaceChildren();
+      for (const object of scenario.objects) {
+        const option = document.createElement('option');
+        option.value = object.id;
+        option.textContent = object.label;
+        objectSelect.append(option);
+
+        const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        group.dataset.editorObject = object.id;
+        group.classList.add('editor-object');
+        if (object.id === selectedId) group.classList.add('selected');
+        group.setAttribute('transform', `translate(${object.x} ${object.y}) rotate(${object.rotation} ${object.width / 2} ${object.height / 2})`);
+
+        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('width', object.width);
+        rect.setAttribute('height', object.height);
+        rect.setAttribute('rx', object.type === 'note' ? 2 : 5);
+        rect.setAttribute('fill', object.colour);
+        rect.setAttribute('opacity', object.type === 'renovation' ? 0.64 : 0.92);
+        group.append(rect);
+
+        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        label.setAttribute('x', object.width / 2);
+        label.setAttribute('y', object.height / 2);
+        label.textContent = object.label;
+        group.append(label);
+
+        group.addEventListener('pointerdown', (event) => beginDrag(event, object.id));
+        layer.append(group);
+      }
+      objectSelect.value = selectedId || '';
+      syncInspector();
+    }
+
+    function beginDrag(event, id) {
+      selectedId = id;
+      const object = selectedObject();
+      const point = svgPoint(event);
+      dragState = { id, dx: point.x - object.x, dy: point.y - object.y };
+      svg.setPointerCapture(event.pointerId);
+      renderEditableObjects();
+      event.preventDefault();
+    }
+
+    svg.addEventListener('pointermove', (event) => {
+      if (!dragState) return;
+      const object = selectedObject();
+      const point = svgPoint(event);
+      object.x = Math.round(point.x - dragState.dx);
+      object.y = Math.round(point.y - dragState.dy);
+      renderEditableObjects();
+    });
+
+    svg.addEventListener('pointerup', () => {
+      dragState = null;
+      updateJsonPreview();
+    });
+
+    function syncInspector() {
+      const object = selectedObject();
+      if (!object) return;
+      fields.label.value = object.label;
+      fields.type.value = object.type;
+      fields.colour.value = object.colour;
+      fields.width.value = object.width;
+      fields.height.value = object.height;
+      fields.rotation.value = object.rotation;
+      fields.notes.value = object.notes || '';
+    }
+
+    function updateSelectedFromInspector() {
+      const object = selectedObject();
+      if (!object) return;
+      object.label = fields.label.value;
+      object.type = fields.type.value;
+      object.colour = fields.colour.value;
+      object.width = Math.max(4, Number(fields.width.value) || object.width);
+      object.height = Math.max(4, Number(fields.height.value) || object.height);
+      object.rotation = Number(fields.rotation.value) || 0;
+      object.notes = fields.notes.value;
+      renderEditableObjects();
+      updateJsonPreview();
+    }
+
+    function addObject() {
+      const nextNumber = scenario.objects.length + 1;
+      const object = {
+        id: `object_${Date.now()}`,
+        label: `Object ${nextNumber}`,
+        type: 'renovation',
+        x: 720,
+        y: 470,
+        width: 70,
+        height: 40,
+        rotation: 0,
+        colour: '#d88b38',
+        notes: 'New editable object.',
+      };
+      scenario.objects.push(object);
+      selectedId = object.id;
+      renderEditableObjects();
+      updateJsonPreview();
+    }
+
+    function duplicateObject() {
+      const object = selectedObject();
+      if (!object) return;
+      const copy = { ...object, id: `${object.id}_copy_${Date.now()}`, label: `${object.label} copy`, x: object.x + 16, y: object.y + 16 };
+      scenario.objects.push(copy);
+      selectedId = copy.id;
+      renderEditableObjects();
+      updateJsonPreview();
+    }
+
+    function deleteObject() {
+      if (!selectedId) return;
+      scenario.objects = scenario.objects.filter((object) => object.id !== selectedId);
+      selectedId = scenario.objects[0]?.id || null;
+      renderEditableObjects();
+      updateJsonPreview();
+    }
+
+    function exportScenario() {
+      updateJsonPreview();
+      fields.json.select();
+    }
+
+    function updateJsonPreview() {
+      fields.json.value = JSON.stringify(scenario, null, 2);
+    }
+
+    function importScenarioText(text) {
+      const parsed = JSON.parse(text);
+      if (!Array.isArray(parsed.objects)) throw new Error('Scenario JSON must include an objects array.');
+      scenario = parsed;
+      selectedId = scenario.objects[0]?.id || null;
+      renderEditableObjects();
+      updateJsonPreview();
+    }
+
+    objectSelect.addEventListener('change', () => {
+      selectedId = objectSelect.value;
+      renderEditableObjects();
+    });
+    for (const input of [fields.label, fields.type, fields.colour, fields.width, fields.height, fields.rotation, fields.notes]) {
+      input.addEventListener('input', updateSelectedFromInspector);
+    }
+    document.getElementById('add-object').addEventListener('click', addObject);
+    document.getElementById('duplicate-object').addEventListener('click', duplicateObject);
+    document.getElementById('delete-object').addEventListener('click', deleteObject);
+    document.getElementById('export-scenario').addEventListener('click', exportScenario);
+    document.getElementById('import-scenario').addEventListener('click', () => importScenarioText(fields.json.value));
+
+    renderEditableObjects();
+    updateJsonPreview();
+  </script>
+</body>
+</html>

@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Calibration Viewer</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f3ec;
+      --panel: #ffffff;
+      --ink: #1f2d26;
+      --muted: #657169;
+      --line: #d8d1c4;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Arial, sans-serif;
+    }
+    .app {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 300px;
+      min-height: 100vh;
+    }
+    .canvas {
+      overflow: auto;
+      padding: 18px;
+    }
+    .canvas svg {
+      display: block;
+      width: min(100%, 1600px);
+      height: auto;
+      background: white;
+      border: 1px solid var(--line);
+    }
+    aside {
+      border-left: 1px solid var(--line);
+      background: var(--panel);
+      padding: 18px;
+    }
+    h1 {
+      margin: 0 0 4px;
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+    .source {
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+    .control {
+      display: grid;
+      gap: 7px;
+      margin: 0 0 14px;
+      font-size: 13px;
+    }
+    .control.inline {
+      grid-template-columns: auto 1fr;
+      align-items: center;
+    }
+    input[type="range"] {
+      width: 100%;
+    }
+    h2 {
+      margin: 22px 0 10px;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+      color: var(--muted);
+    }
+    ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 8px;
+    }
+    li {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 8px;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+    .opening-id {
+      display: block;
+      font-weight: 700;
+    }
+    .meta {
+      color: var(--muted);
+    }
+    @media (max-width: 900px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+      aside {
+        border-left: 0;
+        border-top: 1px solid var(--line);
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="canvas" aria-label="Calibration overlay">
+      <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+<style>
+text { font-family: Arial, sans-serif; fill: #203026; }
+.title { font-size: 18px; font-weight: 700; }
+.label { font-size: 10px; font-weight: 700; text-anchor: middle; dominant-baseline: middle; }
+.room-overlay { stroke: #005bbb; stroke-width: 3; fill: #5aa6ff; }
+.sunroom-overlay { stroke: #d43f00; fill: #ffb36c; }
+.opening-overlay { stroke: #d06a00; stroke-width: 3; fill: #ffe0b6; }
+.opening-overlay.window { stroke: #007f93; fill: #c9f1fb; }
+.opening-overlay.slider { stroke: #7a32b8; fill: #ead7ff; }
+.opening-overlay.door_gap { stroke: #b65400; fill: #fff0d8; }
+.current-space { stroke: #167a3f; stroke-width: 4; fill: #7bd88f; fill-opacity: 0.26; }
+.current-feature { stroke: #0b5f33; stroke-width: 5; fill: #42c56a; fill-opacity: 0.68; }
+.current-feature.window_group { stroke: #00816f; fill: #8ee6d2; }
+.current-site { stroke: #7a5f1d; stroke-width: 3; fill: #d8c46b; fill-opacity: 0.20; }
+.current-site.hardscape { stroke: #6f6b61; fill: #c8c2b5; fill-opacity: 0.42; }
+.current-site.deck { stroke: #7d5a2f; fill: #c79153; fill-opacity: 0.48; }
+.current-site.building { stroke: #4d5b40; fill: #b7cf9a; fill-opacity: 0.46; }
+.current-site.planting { stroke: #326b3a; fill: #4f9a58; fill-opacity: 0.30; }
+</style>
+<image href="House-Outline-Internal-walls.png" x="0" y="0" width="1600" height="900" preserveAspectRatio="none"/>
+<rect x="0" y="0" width="100%" height="100%" fill="white" opacity="0.08"/>
+<text class="title" x="32" y="42">Calibration Overlay</text>
+<text x="32" y="62" font-size="11">Reference pixel layout: CODE/Matplotlib-008-House-only-sunroom.py</text>
+<g id="model-overlay" opacity="0.42">
+<rect class="room-overlay" x="530.0" y="485.0" width="78.0" height="125.0"><title>Master Bedroom</title></rect>
+<text class="label" x="569.0" y="547.5">Master Bedroom</text>
+<rect class="room-overlay" x="608.0" y="523.0" width="80.0" height="87.0"><title>Office</title></rect>
+<text class="label" x="648.0" y="566.5">Office</text>
+<rect class="room-overlay" x="688.0" y="523.0" width="70.0" height="87.0"><title>Bathroom</title></rect>
+<text class="label" x="723.0" y="566.5">Bathroom</text>
+<rect class="room-overlay" x="758.0" y="523.0" width="132.0" height="87.0"><title>Bedroom 2</title></rect>
+<text class="label" x="824.0" y="566.5">Bedroom 2</text>
+<rect class="room-overlay" x="800.0" y="500.0" width="90.0" height="23.0"><title>Entrance</title></rect>
+<text class="label" x="845.0" y="511.5">Entrance</text>
+<rect class="room-overlay" x="890.0" y="500.0" width="50.0" height="80.0"><title>Laundry</title></rect>
+<text class="label" x="915.0" y="540.0">Laundry</text>
+<rect class="room-overlay" x="890.0" y="580.0" width="50.0" height="30.0"><title>Toilet</title></rect>
+<text class="label" x="915.0" y="595.0">Toilet</text>
+<rect class="room-overlay" x="608.0" y="485.0" width="150.0" height="38.0"><title>Hallway</title></rect>
+<text class="label" x="683.0" y="504.0">Hallway</text>
+<rect class="room-overlay" x="638.0" y="358.0" width="104.0" height="127.0"><title>Lounge</title></rect>
+<text class="label" x="690.0" y="421.5">Lounge</text>
+<polygon class="room-overlay" points="742.0,314.0 822.0,314.0 822.0,496.0 800.0,496.0 800.0,523.0 758.0,523.0 758.0,500.0 742.0,500.0"><title>Kitchen / Dining</title></polygon>
+<text class="label" x="780.5" y="458.2">Kitchen / Dining</text>
+<polygon class="room-overlay sunroom-overlay" points="536.0,486.0 646.0,486.0 646.0,360.0 597.0,360.0 597.0,408.0 552.0,452.0 536.0,452.0 536.0,486.0"><title>Sunroom</title></polygon>
+<text class="label" x="580.8" y="436.2">Sunroom</text>
+<g id="opening-overlay" opacity="0.9">
+<polygon class="opening-overlay slider" data-opening-id="deck_doors" points="822.0,338.0 830.0,338.0 830.0,396.0 822.0,396.0"><title>deck_doors; slider; room: kitchen_dining</title></polygon>
+<polygon class="opening-overlay window" data-opening-id="kitchen_window" points="822.0,410.0 828.0,410.0 828.0,484.0 822.0,484.0"><title>kitchen_window; window; room: kitchen_dining</title></polygon>
+<polygon class="opening-overlay slider" data-opening-id="sunroom_lounge_slider" points="641.0,388.0 646.0,388.0 646.0,454.0 641.0,454.0"><title>sunroom_lounge_slider; slider; between: sunroom / lounge</title></polygon>
+<polygon class="opening-overlay opening" data-opening-id="sunroom_open_gap" points="641.0,454.0 646.0,454.0 646.0,474.0 641.0,474.0"><title>sunroom_open_gap; opening; between: sunroom / lounge</title></polygon>
+<polygon class="opening-overlay door_gap" data-opening-id="hallway_to_sunroom_door_gap" points="604.0,484.0 626.0,484.0 626.0,488.0 604.0,488.0"><title>hallway_to_sunroom_door_gap; door_gap; between: hallway / sunroom</title></polygon>
+<polygon class="opening-overlay window" data-opening-id="sunroom_right_glazing" points="640.0,368.0 646.0,368.0 646.0,476.0 640.0,476.0"><title>sunroom_right_glazing; window; room: sunroom</title></polygon>
+<polygon class="opening-overlay window" data-opening-id="sunroom_top_window" points="604.0,362.0 640.0,362.0 640.0,368.0 604.0,368.0"><title>sunroom_top_window; window; room: sunroom</title></polygon>
+<polygon class="opening-overlay window" data-opening-id="sunroom_left_window" points="590.0,410.0 596.0,416.0 558.0,452.0 552.0,446.0"><title>sunroom_left_window; window; room: sunroom</title></polygon>
+</g>
+<g id="current-structure-overlay" opacity="0.96">
+<polygon class="current-space" data-current-id="sunroom" points="536.0,486.0 646.0,486.0 646.0,360.0 597.0,360.0 597.0,408.0 552.0,452.0 536.0,452.0 536.0,486.0"><title>sunroom; measured_approx</title></polygon>
+<rect class="current-space" data-current-id="lounge" x="638.0" y="358.0" width="104.0" height="127.0"><title>lounge; measured_dimensions_inferred_position</title></rect>
+<polygon class="current-space" data-current-id="kitchen_dining" points="742.0,314.0 822.0,314.0 822.0,496.0 800.0,496.0 800.0,523.0 758.0,523.0 758.0,500.0 742.0,500.0"><title>kitchen_dining; measured_dimensions_photo_verified_openings</title></polygon>
+<rect class="current-space" data-current-id="entrance" x="800.0" y="500.0" width="90.0" height="23.0"><title>entrance; measured_dimensions_photo_verified</title></rect>
+<rect class="current-space" data-current-id="laundry" x="890.0" y="500.0" width="50.0" height="80.0"><title>laundry; measured_dimensions_photo_verified</title></rect>
+<rect class="current-space" data-current-id="toilet" x="890.0" y="580.0" width="50.0" height="30.0"><title>toilet; measured_dimensions_photo_verified</title></rect>
+<rect class="current-space" data-current-id="hallway" x="608.0" y="485.0" width="150.0" height="38.0"><title>hallway; measured_dimensions_photo_verified</title></rect>
+<rect class="current-space" data-current-id="master_bedroom" x="530.0" y="485.0" width="78.0" height="125.0"><title>master_bedroom; measured_dimensions_reference_position_photo_context</title></rect>
+<rect class="current-space" data-current-id="office" x="608.0" y="523.0" width="80.0" height="87.0"><title>office; measured_dimensions_reference_position_photo_context</title></rect>
+<rect class="current-space" data-current-id="bathroom" x="688.0" y="523.0" width="70.0" height="87.0"><title>bathroom; measured_dimensions_reference_position_photo_context</title></rect>
+<rect class="current-space" data-current-id="bedroom_2" x="758.0" y="523.0" width="132.0" height="87.0"><title>bedroom_2; measured_dimensions_reference_position_photo_context</title></rect>
+<polygon class="current-feature slider" data-current-id="sunroom_lounge_slider" points="641.0,388.0 646.0,388.0 646.0,454.0 641.0,454.0"><title>sunroom_lounge_slider; photo_verified</title></polygon>
+<polygon class="current-feature window_group" data-current-id="sunroom_wraparound_glazing" points="640.0,368.0 646.0,368.0 646.0,476.0 640.0,476.0"><title>sunroom_wraparound_glazing; photo_verified</title></polygon>
+<polygon class="current-feature window_group" data-current-id="sunroom_wraparound_glazing" points="604.0,362.0 640.0,362.0 640.0,368.0 604.0,368.0"><title>sunroom_wraparound_glazing; photo_verified</title></polygon>
+<polygon class="current-feature window_group" data-current-id="sunroom_wraparound_glazing" points="590.0,410.0 596.0,416.0 558.0,452.0 552.0,446.0"><title>sunroom_wraparound_glazing; photo_verified</title></polygon>
+<polygon class="current-feature door_group" data-current-id="deck_door_group" points="822.0,338.0 830.0,338.0 830.0,396.0 822.0,396.0"><title>deck_door_group; photo_verified</title></polygon>
+<polygon class="current-feature window" data-current-id="deck_side_dining_window" points="822.0,410.0 828.0,410.0 828.0,484.0 822.0,484.0"><title>deck_side_dining_window; photo_verified</title></polygon>
+<polygon class="current-feature slider" data-current-id="entrance_deck_slider" points="800.0,500.0 890.0,500.0 890.0,506.0 800.0,506.0"><title>entrance_deck_slider; photo_verified</title></polygon>
+<polygon class="current-feature door" data-current-id="laundry_to_toilet_door" points="890.0,580.0 940.0,580.0 940.0,586.0 890.0,586.0"><title>laundry_to_toilet_door; photo_verified</title></polygon>
+<polygon class="current-feature window" data-current-id="toilet_frosted_window" points="936.0,586.0 940.0,586.0 940.0,606.0 936.0,606.0"><title>toilet_frosted_window; photo_verified</title></polygon>
+<polygon class="current-feature opening" data-current-id="hallway_to_entrance_laundry" points="758.0,500.0 800.0,500.0 800.0,523.0 758.0,523.0"><title>hallway_to_entrance_laundry; photo_verified</title></polygon>
+<polygon class="current-feature sliding_door" data-current-id="hallway_to_bathroom_sliding_door" points="688.0,523.0 722.0,523.0 722.0,529.0 688.0,529.0"><title>hallway_to_bathroom_sliding_door; photo_verified</title></polygon>
+<polygon class="current-feature door" data-current-id="hallway_to_office_door" points="608.0,523.0 648.0,523.0 648.0,529.0 608.0,529.0"><title>hallway_to_office_door; photo_verified</title></polygon>
+<polygon class="current-feature window" data-current-id="master_street_window" points="530.0,528.0 536.0,528.0 536.0,588.0 530.0,588.0"><title>master_street_window; photo_context_approx</title></polygon>
+<polygon class="current-feature window" data-current-id="master_sunroom_window" points="552.0,485.0 604.0,485.0 604.0,491.0 552.0,491.0"><title>master_sunroom_window; photo_context_approx</title></polygon>
+<polygon class="current-feature window" data-current-id="office_se_window" points="625.0,604.0 675.0,604.0 675.0,610.0 625.0,610.0"><title>office_se_window; photo_context_approx</title></polygon>
+<polygon class="current-feature window" data-current-id="bathroom_se_window" points="704.0,604.0 746.0,604.0 746.0,610.0 704.0,610.0"><title>bathroom_se_window; photo_context_approx</title></polygon>
+<polygon class="current-feature window" data-current-id="bedroom2_se_window" points="790.0,604.0 862.0,604.0 862.0,610.0 790.0,610.0"><title>bedroom2_se_window; photo_context_approx</title></polygon>
+</g>
+<g id="current-site-overlay" opacity="0.9">
+<polygon class="current-site boundary" data-site-id="property_boundary" points="177.0,228.0 1495.0,228.0 1495.0,644.0 177.0,644.0"><title>property_boundary; dimensioned_from_legacy_site_plan</title></polygon>
+<polygon class="current-site hardscape" data-site-id="upper_side_driveway" points="188.0,307.0 650.0,263.0 1034.0,267.0 1034.0,338.0 872.0,336.0 842.0,365.0 518.0,361.0 474.0,376.0 194.0,393.0"><title>upper_side_driveway; satellite_photo_verified_approx</title></polygon>
+<polygon class="current-site hardscape" data-site-id="front_diagonal_path" points="474.0,376.0 518.0,361.0 586.0,465.0 563.0,477.0"><title>front_diagonal_path; satellite_photo_verified_approx</title></polygon>
+<polygon class="current-site deck" data-site-id="rear_timber_deck" points="822.0,339.0 946.0,476.0 965.0,476.0 979.0,488.0 979.0,520.0 822.0,520.0"><title>rear_timber_deck; photo_verified_approx</title></polygon>
+<rect class="current-site deck" data-site-id="cottage_end_deck" x="1390.0" y="270.0" width="58.0" height="72.0"><title>cottage_end_deck; photo_verified_approx</title></rect>
+<rect class="current-site building" data-site-id="garage_shed" x="1010.0" y="236.0" width="190.0" height="118.0"><title>garage_shed; photo_verified_approx</title></rect>
+<polygon class="current-site hardscape" data-site-id="garage_concrete_pad" points="890.0,352.0 1390.0,354.0 1390.0,460.0 990.0,460.0 990.0,500.0 940.0,500.0"><title>garage_concrete_pad; satellite_photo_verified_approx</title></polygon>
+<polygon class="current-site hardscape" data-site-id="garage_cottage_side_path" points="990.0,354.0 1390.0,354.0 1390.0,382.0 990.0,382.0"><title>garage_cottage_side_path; photo_verified_approx</title></polygon>
+<rect class="current-site building" data-site-id="cottage" x="1200.0" y="236.0" width="190.0" height="118.0"><title>cottage; photo_verified_satellite_outdated</title></rect>
+<polygon class="current-site planting" data-site-id="boundary_hedges_and_fences" points="188.0,307.0 650.0,263.0 650.0,288.0 194.0,393.0"><title>boundary_hedges_and_fences; photo_verified_approx</title></polygon>
+<polygon class="current-site planting" data-site-id="boundary_hedges_and_fences" points="1010.0,228.0 1495.0,228.0 1495.0,236.0 1010.0,236.0"><title>boundary_hedges_and_fences; photo_verified_approx</title></polygon>
+</g>
+</g>
+<text x="32" y="82" font-size="12">Blue/orange model layer is generated from DATA/house_model.json.</text>
+<text x="32" y="100" font-size="12">Current structure: photo/measured source of truth. Legacy pixels remain for comparison.</text>
+<text x="32" y="118" font-size="12">Current site: external source of truth for outside design and shadow/light context.</text>
+</svg>
+    </section>
+    <aside>
+      <h1>Calibration Viewer</h1>
+      <p class="source">Reference layer: CODE/Matplotlib-008-House-only-sunroom.py</p>
+      <label class="control" for="referenceOpacity">
+        Reference image opacity
+        <input id="referenceOpacity" type="range" min="0" max="1" step="0.05" value="1">
+      </label>
+      <label class="control inline" for="modelOverlayToggle">
+        <input id="modelOverlayToggle" type="checkbox" checked>
+        Rooms
+      </label>
+      <label class="control inline" for="openingOverlayToggle">
+        <input id="openingOverlayToggle" type="checkbox" checked>
+        Openings
+      </label>
+      <label class="control inline" for="currentStructureToggle">
+        <input id="currentStructureToggle" type="checkbox" checked>
+        Current structure
+      </label>
+      <label class="control inline" for="currentSiteToggle">
+        <input id="currentSiteToggle" type="checkbox" checked>
+        Current site
+      </label>
+      <h2>Current structure</h2>
+      <ul id="currentStructureList">
+        <li><span class="opening-id">status</span><span class="meta">active_source_of_truth</span></li>
+        <li><span class="opening-id">sunroom</span><span class="meta">measured_approx | evidence: sunroom_wraparound_glazing</span></li>
+<li><span class="opening-id">lounge</span><span class="meta">measured_dimensions_inferred_position | evidence: sunroom_lounge_slider</span></li>
+<li><span class="opening-id">kitchen_dining</span><span class="meta">measured_dimensions_photo_verified_openings | evidence: deck_doors_and_kitchen_window</span></li>
+<li><span class="opening-id">entrance</span><span class="meta">measured_dimensions_photo_verified | evidence: entrance_laundry_back_entry</span></li>
+<li><span class="opening-id">laundry</span><span class="meta">measured_dimensions_photo_verified | evidence: entrance_laundry_back_entry</span></li>
+<li><span class="opening-id">toilet</span><span class="meta">measured_dimensions_photo_verified | evidence: toilet_laundry_connection</span></li>
+<li><span class="opening-id">hallway</span><span class="meta">measured_dimensions_photo_verified | evidence: hallway_spine_and_room_connections</span></li>
+<li><span class="opening-id">master_bedroom</span><span class="meta">measured_dimensions_reference_position_photo_context | evidence: master_bedroom_photo_context</span></li>
+<li><span class="opening-id">office</span><span class="meta">measured_dimensions_reference_position_photo_context | evidence: office_photo_context, hallway_spine_and_room_connections</span></li>
+<li><span class="opening-id">bathroom</span><span class="meta">measured_dimensions_reference_position_photo_context | evidence: bathroom_photo_context, hallway_spine_and_room_connections</span></li>
+<li><span class="opening-id">bedroom_2</span><span class="meta">measured_dimensions_reference_position_photo_context | evidence: bedroom2_photo_context</span></li>
+<li><span class="opening-id">sunroom_lounge_slider</span><span class="meta">photo_verified | evidence: sunroom_lounge_slider</span></li>
+<li><span class="opening-id">sunroom_wraparound_glazing</span><span class="meta">photo_verified | evidence: sunroom_wraparound_glazing</span></li>
+<li><span class="opening-id">deck_door_group</span><span class="meta">photo_verified | evidence: deck_doors_and_kitchen_window</span></li>
+<li><span class="opening-id">deck_side_dining_window</span><span class="meta">photo_verified | evidence: deck_doors_and_kitchen_window</span></li>
+<li><span class="opening-id">entrance_deck_slider</span><span class="meta">photo_verified | evidence: entrance_laundry_back_entry</span></li>
+<li><span class="opening-id">laundry_to_toilet_door</span><span class="meta">photo_verified | evidence: toilet_laundry_connection</span></li>
+<li><span class="opening-id">toilet_frosted_window</span><span class="meta">photo_verified | evidence: toilet_laundry_connection</span></li>
+<li><span class="opening-id">hallway_to_entrance_laundry</span><span class="meta">photo_verified | evidence: hallway_spine_and_room_connections</span></li>
+<li><span class="opening-id">hallway_to_bathroom_sliding_door</span><span class="meta">photo_verified | evidence: hallway_spine_and_room_connections</span></li>
+<li><span class="opening-id">hallway_to_office_door</span><span class="meta">photo_verified | evidence: hallway_spine_and_room_connections</span></li>
+<li><span class="opening-id">master_street_window</span><span class="meta">photo_context_approx | evidence: master_bedroom_photo_context</span></li>
+<li><span class="opening-id">master_sunroom_window</span><span class="meta">photo_context_approx | evidence: master_bedroom_photo_context, sunroom_wraparound_glazing</span></li>
+<li><span class="opening-id">office_se_window</span><span class="meta">photo_context_approx | evidence: office_photo_context</span></li>
+<li><span class="opening-id">bathroom_se_window</span><span class="meta">photo_context_approx | evidence: bathroom_photo_context</span></li>
+<li><span class="opening-id">bedroom2_se_window</span><span class="meta">photo_context_approx | evidence: bedroom2_photo_context</span></li>
+      </ul>
+      <h2>Current site</h2>
+      <ul id="currentSiteList">
+        <li><span class="opening-id">status</span><span class="meta">active_site_source_of_truth</span></li>
+        <li><span class="opening-id">property_boundary</span><span class="meta">dimensioned_from_legacy_site_plan | evidence: external_site_driveway_garage_deck_rear_garden</span></li>
+<li><span class="opening-id">upper_side_driveway</span><span class="meta">satellite_photo_verified_approx | evidence: external_site_driveway_garage_deck_rear_garden</span></li>
+<li><span class="opening-id">front_diagonal_path</span><span class="meta">satellite_photo_verified_approx | evidence: external_site_driveway_garage_deck_rear_garden</span></li>
+<li><span class="opening-id">rear_timber_deck</span><span class="meta">photo_verified_approx | evidence: external_site_driveway_garage_deck_rear_garden, deck_doors_and_kitchen_window, entrance_laundry_back_entry</span></li>
+<li><span class="opening-id">cottage_end_deck</span><span class="meta">photo_verified_approx | evidence: external_site_driveway_garage_deck_rear_garden</span></li>
+<li><span class="opening-id">garage_shed</span><span class="meta">photo_verified_approx | evidence: external_site_driveway_garage_deck_rear_garden</span></li>
+<li><span class="opening-id">garage_concrete_pad</span><span class="meta">satellite_photo_verified_approx | evidence: external_site_driveway_garage_deck_rear_garden</span></li>
+<li><span class="opening-id">garage_cottage_side_path</span><span class="meta">photo_verified_approx | evidence: external_site_driveway_garage_deck_rear_garden</span></li>
+<li><span class="opening-id">cottage</span><span class="meta">photo_verified_satellite_outdated | evidence: external_site_driveway_garage_deck_rear_garden</span></li>
+<li><span class="opening-id">boundary_hedges_and_fences</span><span class="meta">photo_verified_approx | evidence: external_site_driveway_garage_deck_rear_garden</span></li>
+      </ul>
+      <h2>Openings</h2>
+      <ul id="openingList">
+        <li><span class="opening-id">deck_doors</span><span class="meta">slider | kitchen_dining | visual_reference</span></li>
+<li><span class="opening-id">kitchen_window</span><span class="meta">window | kitchen_dining | visual_reference</span></li>
+<li><span class="opening-id">sunroom_lounge_slider</span><span class="meta">slider | sunroom / lounge | visual_reference</span></li>
+<li><span class="opening-id">sunroom_open_gap</span><span class="meta">opening | sunroom / lounge | visual_reference</span></li>
+<li><span class="opening-id">hallway_to_sunroom_door_gap</span><span class="meta">door_gap | hallway / sunroom | visual_reference</span></li>
+<li><span class="opening-id">sunroom_right_glazing</span><span class="meta">window | sunroom | visual_reference</span></li>
+<li><span class="opening-id">sunroom_top_window</span><span class="meta">window | sunroom | visual_reference</span></li>
+<li><span class="opening-id">sunroom_left_window</span><span class="meta">window | sunroom | visual_reference</span></li>
+      </ul>
+      <h2>Photo evidence</h2>
+      <ul id="photoEvidenceList">
+        <li><span class="opening-id">sunroom_wraparound_glazing</span><span class="meta">photo_verified | sunroom_right_glazing, sunroom_top_window, sunroom_left_window</span> <a href="../OUTPUT/jpeg_photos/From-Outside-front-looking-NE-towards-sunroom.jpg">From-Outside-front-looking-NE-towards-sunroom.jpg</a>  <a href="../OUTPUT/jpeg_photos/From-Outside-front-looking-NW-towards-sunroom.jpg">From-Outside-front-looking-NW-towards-sunroom.jpg</a>  <a href="../OUTPUT/jpeg_photos/Inside-Sunroom-Looking-NW.jpg">Inside-Sunroom-Looking-NW.jpg</a></li>
+<li><span class="opening-id">sunroom_lounge_slider</span><span class="meta">photo_verified | sunroom_lounge_slider, sunroom_open_gap</span> <a href="../OUTPUT/jpeg_photos/Inside-Sunroom-Looking-NE.jpg">Inside-Sunroom-Looking-NE.jpg</a>  <a href="../OUTPUT/jpeg_photos/Inside-Sunroom-Looking-NW.jpg">Inside-Sunroom-Looking-NW.jpg</a></li>
+<li><span class="opening-id">deck_doors_and_kitchen_window</span><span class="meta">photo_verified | deck_doors, kitchen_window</span> <a href="../OUTPUT/jpeg_photos/From-Outside-Looking-SW-to-Deck-double-doors.jpg">From-Outside-Looking-SW-to-Deck-double-doors.jpg</a>  <a href="../OUTPUT/jpeg_photos/Inside-Kitchen-Looking-NW-2.jpg">Inside-Kitchen-Looking-NW-2.jpg</a></li>
+<li><span class="opening-id">entrance_laundry_back_entry</span><span class="meta">photo_verified | entrance, laundry, entrance_deck_slider</span> <a href="../OUTPUT/jpeg_photos/Inside-Entrance-Looking-NE.jpg">Inside-Entrance-Looking-NE.jpg</a>  <a href="../OUTPUT/jpeg_photos/Inside-Entrance-Looking-into-back-entrance-2.jpg">Inside-Entrance-Looking-into-back-entrance-2.jpg</a>  <a href="../OUTPUT/jpeg_photos/Inside-Laundry-Looking-NE.jpg">Inside-Laundry-Looking-NE.jpg</a>  <a href="../OUTPUT/jpeg_photos/From-Deck-Looking-SE-to-laundry.jpg">From-Deck-Looking-SE-to-laundry.jpg</a></li>
+<li><span class="opening-id">toilet_laundry_connection</span><span class="meta">photo_verified | toilet, laundry_to_toilet_door, toilet_frosted_window</span> <a href="../OUTPUT/jpeg_photos/Inside-Laundry-Looking-SW.jpg">Inside-Laundry-Looking-SW.jpg</a>  <a href="../OUTPUT/jpeg_photos/Inside-Toilet-Looking-N.jpg">Inside-Toilet-Looking-N.jpg</a>  <a href="../OUTPUT/jpeg_photos/Inside-Toilet-Looking-S.jpg">Inside-Toilet-Looking-S.jpg</a>  <a href="../OUTPUT/jpeg_photos/Inside-Toilet-Looking-SW.jpg">Inside-Toilet-Looking-SW.jpg</a></li>
+<li><span class="opening-id">hallway_spine_and_room_connections</span><span class="meta">photo_verified | hallway, hallway_to_entrance_laundry, hallway_to_bathroom_sliding_door, hallway_to_office_door</span> <a href="../OUTPUT/jpeg_photos/Inside-hallway-looking-NE.jpg">Inside-hallway-looking-NE.jpg</a>  <a href="../OUTPUT/jpeg_photos/Inside-Hallway-Looking-NE-2.jpg">Inside-Hallway-Looking-NE-2.jpg</a>  <a href="../OUTPUT/jpeg_photos/Inside-Hallway-looking-SW.jpg">Inside-Hallway-looking-SW.jpg</a>  <a href="../OUTPUT/jpeg_photos/Inside-hallway-looking-SW-2.jpg">Inside-hallway-looking-SW-2.jpg</a>  <a href="../OUTPUT/jpeg_photos/Inside-Office-Looking-N.jpg">Inside-Office-Looking-N.jpg</a>  <a href="../OUTPUT/jpeg_photos/Inside-Bathroom-looking-N.jpg">Inside-Bathroom-looking-N.jpg</a>  <a href="../OUTPUT/jpeg_photos/Inside-Bathroom-Looking-NW.jpg">Inside-Bathroom-Looking-NW.jpg</a></li>
+<li><span class="opening-id">master_bedroom_photo_context</span><span class="meta">photo_context_verified | master_bedroom, master_street_window, master_sunroom_window</span> <a href="../OUTPUT/jpeg_photos/Inside-Master-Bedroom-looking-SW.jpg">Inside-Master-Bedroom-looking-SW.jpg</a>  <a href="../OUTPUT/jpeg_photos/Inside-Master-Bedroom-Looking-SW-2.jpg">Inside-Master-Bedroom-Looking-SW-2.jpg</a>  <a href="../OUTPUT/jpeg_photos/Inside-Master-Bedroom-Looking-NW.jpg">Inside-Master-Bedroom-Looking-NW.jpg</a>  <a href="../OUTPUT/jpeg_photos/Inside-Master-Bedroom-Looking-N.jpg">Inside-Master-Bedroom-Looking-N.jpg</a>  <a href="../OUTPUT/jpeg_photos/From-Outside-front-looking-SW-towards-road.jpg">From-Outside-front-looking-SW-towards-road.jpg</a></li>
+<li><span class="opening-id">office_photo_context</span><span class="meta">photo_context_verified | office, office_se_window, hallway_to_office_door</span> <a href="../OUTPUT/jpeg_photos/Inside-Office-Looking-N.jpg">Inside-Office-Looking-N.jpg</a>  <a href="../OUTPUT/jpeg_photos/Inside-Office-Looking-SE.jpg">Inside-Office-Looking-SE.jpg</a>  <a href="../OUTPUT/jpeg_photos/Inside-Office-looking-E.jpg">Inside-Office-looking-E.jpg</a>  <a href="../OUTPUT/jpeg_photos/Inside-Office-Looking-S.jpg">Inside-Office-Looking-S.jpg</a></li>
+<li><span class="opening-id">bathroom_photo_context</span><span class="meta">photo_context_verified | bathroom, bathroom_se_window, hallway_to_bathroom_sliding_door</span> <a href="../OUTPUT/jpeg_photos/Inside-Bathroom-looking-N.jpg">Inside-Bathroom-looking-N.jpg</a>  <a href="../OUTPUT/jpeg_photos/Inside-Bathroom-Looking-NW.jpg">Inside-Bathroom-Looking-NW.jpg</a>  <a href="../OUTPUT/jpeg_photos/Inside-Bathroom-Looking-SE-2.jpg">Inside-Bathroom-Looking-SE-2.jpg</a>  <a href="../OUTPUT/jpeg_photos/Inside-Bathroom-Looking-SE-3.jpg">Inside-Bathroom-Looking-SE-3.jpg</a></li>
+<li><span class="opening-id">bedroom2_photo_context</span><span class="meta">photo_context_verified | bedroom_2, bedroom2_se_window</span> <a href="../OUTPUT/jpeg_photos/Inside-Bedroom-2-Looking-SE.jpg">Inside-Bedroom-2-Looking-SE.jpg</a>  <a href="../OUTPUT/jpeg_photos/Inside-Bedroom-2-Looking-S.jpg">Inside-Bedroom-2-Looking-S.jpg</a>  <a href="../OUTPUT/jpeg_photos/Inside-Bedroom-2-Looking-NW.jpg">Inside-Bedroom-2-Looking-NW.jpg</a>  <a href="../OUTPUT/jpeg_photos/Inside-Bedroom-2-Looking-W.jpg">Inside-Bedroom-2-Looking-W.jpg</a></li>
+<li><span class="opening-id">external_site_driveway_garage_deck_rear_garden</span><span class="meta">photo_verified | property_boundary, upper_side_driveway, front_diagonal_path, rear_timber_deck, cottage_end_deck, garage_concrete_pad, garage_cottage_side_path, garage_shed, cottage, boundary_hedges_and_fences</span> <a href="../OUTPUT/jpeg_photos/From-Outside-front-looking-NE-towards-garage.jpg">From-Outside-front-looking-NE-towards-garage.jpg</a>  <a href="../OUTPUT/jpeg_photos/From-Outside-side-looking-SW-down-driveway-3.jpg">From-Outside-side-looking-SW-down-driveway-3.jpg</a>  <a href="../OUTPUT/jpeg_photos/From-Deck-Looking-NE-to-back.jpg">From-Deck-Looking-NE-to-back.jpg</a>  <a href="../OUTPUT/jpeg_photos/From-Outside-Back-looking-NW-to-garage-door.jpg">From-Outside-Back-looking-NW-to-garage-door.jpg</a>  <a href="../OUTPUT/jpeg_photos/From-Outside-Back-Looking-NE-to-back-of-property.jpg">From-Outside-Back-Looking-NE-to-back-of-property.jpg</a>  <a href="../OUTPUT/jpeg_photos/From-Outside-Back-of-section-looking-W.jpg">From-Outside-Back-of-section-looking-W.jpg</a>  <a href="../OUTPUT/jpeg_photos/From-Outside-Back-of-section-looking-NW-to-back-of-cottage.jpg">From-Outside-Back-of-section-looking-NW-to-back-of-cottage.jpg</a></li>
+      </ul>
+    </aside>
+  </main>
+  <script>
+    const referenceOpacity = document.getElementById('referenceOpacity');
+    const modelOverlayToggle = document.getElementById('modelOverlayToggle');
+    const openingOverlayToggle = document.getElementById('openingOverlayToggle');
+    const currentStructureToggle = document.getElementById('currentStructureToggle');
+    const currentSiteToggle = document.getElementById('currentSiteToggle');
+    const referenceImage = document.querySelector('.canvas svg image');
+    const modelOverlay = document.getElementById('model-overlay');
+    const openingOverlay = document.getElementById('opening-overlay');
+    const currentStructureOverlay = document.getElementById('current-structure-overlay');
+    const currentSiteOverlay = document.getElementById('current-site-overlay');
+
+    referenceOpacity.addEventListener('input', () => {
+      referenceImage.style.opacity = referenceOpacity.value;
+    });
+    modelOverlayToggle.addEventListener('change', () => {
+      modelOverlay.style.display = modelOverlayToggle.checked ? '' : 'none';
+    });
+    openingOverlayToggle.addEventListener('change', () => {
+      openingOverlay.style.display = openingOverlayToggle.checked ? '' : 'none';
+    });
+    currentStructureToggle.addEventListener('change', () => {
+      currentStructureOverlay.style.display = currentStructureToggle.checked ? '' : 'none';
+    });
+    currentSiteToggle.addEventListener('change', () => {
+      currentSiteOverlay.style.display = currentSiteToggle.checked ? '' : 'none';
+    });
+  </script>
+</body>
+</html>
