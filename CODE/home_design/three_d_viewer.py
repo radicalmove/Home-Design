@@ -20,6 +20,9 @@ MATERIALS = {
 }
 
 WET_ROOM_IDS = {"bathroom", "laundry", "toilet"}
+PIXEL_TO_METRE = 0.81 / 22.0
+REFERENCE_PIXEL_ORIGIN = {"x": 518.0, "y": 314.0}
+GLAZING_TYPES = {"window", "window_group", "slider", "sliding_door"}
 
 
 def _room_material(room_id: str, category: str) -> str:
@@ -72,6 +75,107 @@ def _room_config(model: HouseModel) -> tuple[list[dict[str, Any]], list[str]]:
     return rooms, warnings
 
 
+def _scene_point_from_px(point: list[float] | tuple[float, float]) -> dict[str, float]:
+    return {
+        "x": (float(point[0]) - REFERENCE_PIXEL_ORIGIN["x"]) * PIXEL_TO_METRE,
+        "z": (float(point[1]) - REFERENCE_PIXEL_ORIGIN["y"]) * PIXEL_TO_METRE,
+    }
+
+
+def _scene_geometry_from_display_px(display_px: dict[str, Any]) -> dict[str, Any] | None:
+    geometry_type = display_px.get("type")
+    if geometry_type == "rect":
+        origin = _scene_point_from_px([display_px["x"], display_px["y"]])
+        return {
+            "type": "rect",
+            "x": origin["x"],
+            "z": origin["z"],
+            "width": float(display_px["width"]) * PIXEL_TO_METRE,
+            "depth": float(display_px["height"]) * PIXEL_TO_METRE,
+        }
+    if geometry_type == "polygon":
+        return {
+            "type": "polygon",
+            "points": [_scene_point_from_px(point) for point in display_px.get("points", [])],
+        }
+    if geometry_type == "multi_polygon":
+        return {
+            "type": "multi_polygon",
+            "polygons": [
+                [_scene_point_from_px(point) for point in polygon]
+                for polygon in display_px.get("polygons", [])
+            ],
+        }
+    return None
+
+
+def _feature_material(feature: dict[str, Any]) -> str:
+    feature_type = str(feature.get("type", ""))
+    if feature_type in GLAZING_TYPES or "glazing" in str(feature.get("id", "")):
+        return "glazing"
+    return "painted_wall"
+
+
+def _feature_config(model: HouseModel) -> list[dict[str, Any]]:
+    features = []
+    for feature in model.raw.get("current_structure", {}).get("features", []):
+        display_px = feature.get("display_px")
+        if not isinstance(display_px, dict):
+            continue
+        geometry = _scene_geometry_from_display_px(display_px)
+        if geometry is None:
+            continue
+        features.append(
+            {
+                "id": feature["id"],
+                "type": feature.get("type", "feature"),
+                "status": feature.get("status", "unknown"),
+                "room": feature.get("room"),
+                "between": feature.get("between", []),
+                "geometry": geometry,
+                "material": _feature_material(feature),
+                "evidence_photo_paths": feature.get("evidence_photo_paths", []),
+            }
+        )
+    return features
+
+
+def _site_material(element: dict[str, Any]) -> str:
+    category = str(element.get("category") or element.get("surface") or element.get("type", ""))
+    element_type = str(element.get("type", ""))
+    if "deck" in category or "deck" in element_type:
+        return "deck_timber"
+    if category in {"hardscape", "driveway", "concrete_pad", "concrete_path"} or "path" in element_type:
+        return "paver_concrete"
+    if category in {"building", "accessory_cottage"} or element_type in {"outbuilding", "accessory_cottage"}:
+        return "painted_wall"
+    return "lawn"
+
+
+def _site_config(model: HouseModel) -> list[dict[str, Any]]:
+    site = []
+    for element in model.raw.get("current_site", {}).get("elements", []):
+        layout = element.get("display_px") or element.get("layout")
+        if not isinstance(layout, dict):
+            continue
+        geometry = _scene_geometry_from_display_px(layout)
+        if geometry is None:
+            continue
+        material = _site_material(element)
+        site.append(
+            {
+                "id": element["id"],
+                "type": element.get("type", "site"),
+                "surface": element.get("surface"),
+                "category": element.get("category"),
+                "geometry": geometry,
+                "material": material,
+                "height": 0.08 if material != "painted_wall" else 2.7,
+            }
+        )
+    return site
+
+
 def build_house_3d_config(model: HouseModel) -> dict[str, Any]:
     rooms, warnings = _room_config(model)
     return {
@@ -79,8 +183,8 @@ def build_house_3d_config(model: HouseModel) -> dict[str, Any]:
         "units": model.units,
         "orientation": model.raw.get("orientation", {}),
         "rooms": rooms,
-        "features": [],
-        "site": [],
+        "features": _feature_config(model),
+        "site": _site_config(model),
         "materials": MATERIALS,
         "warnings": warnings,
     }

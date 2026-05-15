@@ -79,3 +79,43 @@ class House3DViewerHtmlTests(unittest.TestCase):
             "lawn",
         ]:
             self.assertIn(material_id, config["materials"])
+
+    def test_house_3d_config_includes_photo_verified_openings(self):
+        model = load_model("DATA/house_model.json")
+
+        config = _embedded_config(render_house_3d_html(model))
+        feature_ids = {feature["id"] for feature in config["features"]}
+
+        for feature_id in [
+            "deck_door_group",
+            "sunroom_lounge_slider",
+            "entrance_deck_slider",
+            "sunroom_wraparound_glazing",
+            "bedroom2_se_window",
+            "laundry_east_window",
+        ]:
+            self.assertIn(feature_id, feature_ids)
+
+        sunroom_glazing = next(
+            feature for feature in config["features"] if feature["id"] == "sunroom_wraparound_glazing"
+        )
+        self.assertEqual(sunroom_glazing["material"], "glazing")
+        self.assertTrue(sunroom_glazing["evidence_photo_paths"])
+
+    def test_house_3d_config_includes_site_context_elements(self):
+        model = load_model("DATA/house_model.json")
+
+        config = _embedded_config(render_house_3d_html(model))
+        site_ids = {element["id"] for element in config["site"]}
+
+        for element_id in [
+            "property_boundary",
+            "upper_side_driveway",
+            "rear_timber_deck",
+            "garage_shed",
+            "cottage",
+        ]:
+            self.assertIn(element_id, site_ids)
+
+        deck = next(element for element in config["site"] if element["id"] == "rear_timber_deck")
+        self.assertEqual(deck["material"], "deck_timber")
