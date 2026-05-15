@@ -20,6 +20,7 @@ def build_parser() -> argparse.ArgumentParser:
             "editor",
             "base-plan",
             "reference-plan",
+            "house-3d",
         ],
     )
     parser.add_argument("--model", default="DATA/house_model.json")
@@ -113,6 +114,15 @@ def main(argv: list[str] | None = None) -> int:
             output.write_text(render_reference_plan_svg(model))
         else:
             output.write_text(render_reference_plan_html(model))
+        print(f"wrote {args.output}")
+    elif args.command == "house-3d":
+        from pathlib import Path
+
+        from .three_d_viewer import render_house_3d_html
+
+        output = Path(args.output)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(render_house_3d_html(model))
         print(f"wrote {args.output}")
     else:
         print("model valid")
