@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>House 3D Viewer</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; overflow: hidden; background: #d8d4ca; font-family: Arial, sans-serif; }
+    #house-3d-stage { position: fixed; inset: 0; }
+    #house-3d-status {
+      position: fixed; left: 14px; top: 14px; z-index: 2; max-width: 360px;
+      padding: 10px 12px; border: 1px solid rgba(40, 44, 42, 0.18);
+      border-radius: 6px; background: rgba(255, 253, 248, 0.92); color: #1f2522;
+      font-size: 13px; line-height: 1.35;
+    }
+    #house-3d-stage canvas { display: block; width: 100%; height: 100%; }
+    #reset-view {
+      position: fixed; right: 14px; top: 14px; z-index: 2;
+      border: 1px solid rgba(40, 44, 42, 0.2); border-radius: 5px;
+      padding: 8px 10px; background: rgba(255, 253, 248, 0.92);
+      color: #1f2522; font: inherit; cursor: pointer;
+    }
+  </style>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <main id="house-3d-stage" aria-label="Interactive 3D house viewer"></main>
+  <aside id="house-3d-status">Click the scene to explore. Use W A S D and mouse look.</aside>
+  <button id="reset-view" type="button">Reset view</button>
+  <script type="application/json" id="house-3d-config">{"title":"House 3D Viewer","units":"metres","orientation":{"plan_convention":{"x_axis":"street/front side toward rear/back of property","y_axis":"deck/driveway side toward opposite long side"},"site_notes":["Street/road side is on the left of the property diagram.","Property extends rightward/rearward from the street.","Compass-facing notes are taken from the measurement brief and photo filenames."],"compass":{"north":"slightly up-right on the straightened plan","south":"slightly down-left on the straightened plan","east":"slightly down-right on the straightened plan","west":"slightly up-left on the straightened plan","north_arrow_degrees_clockwise_from_plan_up":37.5,"plan_right_bearing_degrees":52.5,"source":"Cadastral map screenshot shared 2026-05-16; parcel-line image orientation places the straightened plan's front-to-rear axis at approximately 52.5 degrees clockwise from true north.","confidence":"estimated_from_cadastral_map"},"confidence":"inferred"},"rooms":[{"id":"kitchen_dining","name":"Kitchen / Dining","category":"living","confidence":"measured","geometry":{"type":"rect","x":6.9,"z":0.8,"width":8.2,"depth":2.5},"height":2.4,"floor_material":"timber_floor","wall_material":"painted_wall","notes":["Kitchen and dining are completely open to each other.","Kitchen length is 4.5m and dining length is 3.7m.","Combined space is close to the deck/patio."]},{"id":"lounge","name":"Lounge","category":"living","confidence":"measured","geometry":{"type":"rect","x":2.4,"z":2.1,"width":4.9,"depth":3.7},"height":2.4,"floor_material":"timber_floor","wall_material":"painted_wall","notes":["Connects to kitchen/dining through a large opening.","Connects to sunroom through large sliding/glass doors."]},{"id":"sunroom","name":"Sunroom","category":"living","confidence":"partly_measured","geometry":{"type":"polygon","points":[{"x":0.0,"z":1.54},{"x":2.7,"z":1.54},{"x":2.7,"z":5.68},{"x":1.86,"z":5.68},{"x":1.86,"z":4.97},{"x":0.85,"z":3.41},{"x":0.0,"z":3.41}]},"height":2.1,"floor_material":"timber_floor","wall_material":"painted_wall","notes":["Irregular glazed enclosure.","Hand sketch gives internal segment measurements: 5.0m top run, 4.14m right side, 1.55m bottom run, 0.71m lower vertical return, 1.86m diagonal, 1.20m inset horizontal, and 2.15m left side.","Angled exterior/front door is important and still approximate."]},{"id":"hallway","name":"Hallway","category":"circulation","confidence":"measured","geometry":{"type":"rect","x":2.4,"z":5.8,"width":4.8,"depth":1.3},"height":2.4,"floor_material":"timber_floor","wall_material":"painted_wall","notes":["Runs from kitchen area to master bedroom end.","Office and bathroom are off the SE side; lounge opening is on the NW side."]},{"id":"master_bedroom","name":"Master Bedroom","category":"bedroom","confidence":"measured","geometry":{"type":"rect","x":0.0,"z":7.58,"width":3.3,"depth":4.2},"height":2.4,"floor_material":"timber_floor","wall_material":"painted_wall","notes":["Street-facing exterior width measured at approximately 4.77m.","Window facing SW out to road and another window facing NW into sunroom.","Wardrobe side is NE."]},{"id":"office","name":"Office","category":"bedroom","confidence":"measured","geometry":{"type":"rect","x":3.3,"z":7.58,"width":2.9,"depth":2.7},"height":2.4,"floor_material":"timber_floor","wall_material":"painted_wall","notes":["Off hallway.","Window side/facing is SE."]},{"id":"bathroom","name":"Bathroom","category":"wet","confidence":"measured","geometry":{"type":"rect","x":6.2,"z":7.58,"width":2.7,"depth":1.64},"height":2.4,"floor_material":"wet_tile","wall_material":"painted_wall","notes":["Off hallway and next to Bedroom 2.","Window side/facing is SE.","Shower is 0.88m x 0.74m; bath is 1.74m x 0.73m."]},{"id":"bedroom_2","name":"Bedroom 2","category":"bedroom","confidence":"measured","geometry":{"type":"rect","x":8.9,"z":7.58,"width":4.73,"depth":2.8},"height":2.4,"floor_material":"timber_floor","wall_material":"painted_wall","notes":["Longer, narrower room; dimensions must not be swapped.","Window side/facing is SE toward neighbours' fence.","Door connects to kitchen on NW side."]},{"id":"entrance","name":"Entrance","category":"circulation","confidence":"measured","geometry":{"type":"rect","x":10.0,"z":3.3,"width":3.7,"depth":1.15},"height":2.45,"floor_material":"timber_floor","wall_material":"painted_wall","notes":["Entrance connects off the deck/patio side.","Narrower at the kitchen end, approximately 0.9m wide.","Sliding door width is 1.7m."]},{"id":"laundry","name":"Laundry","category":"wet","confidence":"measured","geometry":{"type":"rect","x":13.7,"z":3.3,"width":1.8,"depth":3.0},"height":2.45,"floor_material":"wet_tile","wall_material":"painted_wall","notes":["At end of house near Bedroom 2 and toilet.","Two windows, one facing NE and one facing NW.","Door connects to entrance on SW side."]},{"id":"toilet","name":"Toilet","category":"wet","confidence":"measured","geometry":{"type":"rect","x":13.7,"z":6.3,"width":0.92,"depth":1.85},"height":2.45,"floor_material":"wet_tile","wall_material":"painted_wall","notes":["Connects from laundry."]}],"features":[{"id":"sunroom_lounge_slider","type":"slider","status":"photo_verified","room":null,"between":["sunroom","lounge"],"geometry":{"type":"polygon","points":[{"x":4.528636363636363,"z":2.4447272727272717},{"x":4.712727272727273,"z":2.4447272727272717},{"x":4.712727272727273,"z":5.471181818181819},{"x":4.528636363636363,"z":5.471181818181819}]},"material":"glazing","evidence_photo_paths":["OUTPUT/jpeg_photos/Inside-Sunroom-Looking-NE.jpg","OUTPUT/jpeg_photos/Inside-Sunroom-Looking-NW.jpg"]},{"id":"sunroom_wraparound_glazing","type":"window_group","status":"photo_verified","room":"sunroom","between":[],"geometry":{"type":"multi_polygon","polygons":[[{"x":3.24,"z":1.62},{"x":4.418181818181818,"z":1.62},{"x":4.418181818181818,"z":1.7672727272727273},{"x":3.24,"z":1.7672727272727273}],[{"x":2.835,"z":1.9145454545454546},{"x":2.9822727272727274,"z":1.9145454545454546},{"x":2.9822727272727274,"z":3.0927272727272728},{"x":2.835,"z":3.0927272727272728}],[{"x":0.81,"z":5.007272727272728},{"x":1.251818181818182,"z":5.007272727272728},{"x":1.251818181818182,"z":5.154545454545454},{"x":0.81,"z":5.154545454545454}],[{"x":0.5890909090909091,"z":5.2465909090909095},{"x":0.7363636363636363,"z":5.2465909090909095},{"x":0.7363636363636363,"z":6.130227272727273},{"x":0.5890909090909091,"z":6.130227272727273}]]},"material":"glazing","evidence_photo_paths":["OUTPUT/jpeg_photos/From-Outside-front-looking-NE-towards-sunroom.jpg","OUTPUT/jpeg_photos/From-Outside-front-looking-NW-towards-sunroom.jpg","OUTPUT/jpeg_photos/Inside-Sunroom-Looking-NW.jpg"]},{"id":"sunroom_front_double_doors","type":"door_group","status":"photo_verified","room":null,"between":["sunroom","front_path"],"geometry":{"type":"polygon","points":[{"x":2.7981818181818183,"z":3.3504545454545456},{"x":3.019090909090909,"z":3.5713636363636363},{"x":1.3622727272727273,"z":5.191363636363636},{"x":1.1413636363636364,"z":4.970454545454546}]},"material":"painted_wall","evidence_photo_paths":["OUTPUT/jpeg_photos/From-Outside-front-looking-NE-towards-sunroom.jpg","OUTPUT/jpeg_photos/From-Outside-front-looking-NW-towards-sunroom.jpg"]},{"id":"lounge_north_left_window","type":"window","status":"measured_position_photo_context","room":"lounge","between":[],"geometry":{"type":"polygon","points":[{"x":5.033045454545457,"z":1.62},{"x":5.452772727272729,"z":1.62},{"x":5.452772727272729,"z":1.840909090909091},{"x":5.033045454545457,"z":1.840909090909091}]},"material":"glazing","evidence_photo_paths":["OUTPUT/jpeg_photos/Inside-Lounge-looking-N.jpg","OUTPUT/jpeg_photos/Inside-Lounge-Looking-NE.jpg"]},{"id":"lounge_north_right_window","type":"window","status":"measured_position_photo_context","room":"lounge","between":[],"geometry":{"type":"polygon","points":[{"x":7.2863181818181815,"z":1.62},{"x":7.706045454545453,"z":1.62},{"x":7.706045454545453,"z":1.840909090909091},{"x":7.2863181818181815,"z":1.840909090909091}]},"material":"glazing","evidence_photo_paths":["OUTPUT/jpeg_photos/Inside-Lounge-looking-N.jpg","OUTPUT/jpeg_photos/Inside-Lounge-Looking-NE.jpg"]},{"id":"deck_door_group","type":"door_group","status":"photo_verified","room":"kitchen_dining","between":[],"geometry":{"type":"polygon","points":[{"x":11.192727272727273,"z":0.8836363636363637},{"x":11.487272727272728,"z":0.8836363636363637},{"x":11.487272727272728,"z":3.019090909090909},{"x":11.192727272727273,"z":3.019090909090909}]},"material":"painted_wall","evidence_photo_paths":["OUTPUT/jpeg_photos/From-Outside-Looking-SW-to-Deck-double-doors.jpg","OUTPUT/jpeg_photos/From-Back-Door-looking-onto-deck.jpg","OUTPUT/jpeg_photos/Inside-Kitchen-Looking-NW-2.jpg"]},{"id":"deck_side_dining_window","type":"window","status":"photo_verified","room":"kitchen_dining","between":[],"geometry":{"type":"polygon","points":[{"x":11.192727272727273,"z":3.5345454545454547},{"x":11.413636363636364,"z":3.5345454545454547},{"x":11.413636363636364,"z":6.25909090909091},{"x":11.192727272727273,"z":6.25909090909091}]},"material":"glazing","evidence_photo_paths":["OUTPUT/jpeg_photos/From-Outside-Looking-SW-to-Deck-double-doors.jpg","OUTPUT/jpeg_photos/Inside-Kitchen-Looking-NW-2.jpg"]},{"id":"dining_west_window","type":"window","status":"measured_position_photo_context","room":"kitchen_dining","between":[],"geometry":{"type":"polygon","points":[{"x":8.247272727272728,"z":0.5817272727272732},{"x":8.468181818181819,"z":0.5817272727272732},{"x":8.468181818181819,"z":1.1524090909090914},{"x":8.247272727272728,"z":1.1524090909090914}]},"material":"glazing","evidence_photo_paths":["OUTPUT/jpeg_photos/Inside-Dining-Room-looking-N.jpg","OUTPUT/jpeg_photos/Inside-Dining-Room-looking-NW.jpg"]},{"id":"entrance_deck_slider","type":"slider","status":"photo_verified","room":"entrance","between":[],"geometry":{"type":"polygon","points":[{"x":11.708181818181819,"z":6.700909090909091},{"x":13.40918181818182,"z":6.700909090909091},{"x":13.40918181818182,"z":6.921818181818182},{"x":11.708181818181819,"z":6.921818181818182}]},"material":"glazing","evidence_photo_paths":["OUTPUT/jpeg_photos/Inside-Entrance-Looking-NE.jpg","OUTPUT/jpeg_photos/Inside-Entrance-Looking-into-back-entrance-2.jpg","OUTPUT/jpeg_photos/From-Deck-Looking-SE-to-laundry.jpg"]},{"id":"entrance_to_laundry_opening","type":"opening","status":"photo_verified","room":null,"between":["entrance","laundry"],"geometry":{"type":"polygon","points":[{"x":13.585909090909091,"z":6.995454545454546},{"x":13.806818181818182,"z":6.995454545454546},{"x":13.806818181818182,"z":7.735500000000001},{"x":13.585909090909091,"z":7.735500000000001}]},"material":"painted_wall","evidence_photo_paths":["OUTPUT/jpeg_photos/Inside-Entrance-Looking-NE.jpg","OUTPUT/jpeg_photos/Inside-Laundry-Looking-NE.jpg","OUTPUT/jpeg_photos/From-Deck-Looking-SE-to-laundry.jpg"]},{"id":"laundry_north_window","type":"window","status":"photo_context_approx","room":"laundry","between":[],"geometry":{"type":"polygon","points":[{"x":14.064545454545454,"z":6.700909090909091},{"x":15.316363636363636,"z":6.700909090909091},{"x":15.316363636363636,"z":6.921818181818182},{"x":14.064545454545454,"z":6.921818181818182}]},"material":"glazing","evidence_photo_paths":["OUTPUT/jpeg_photos/Inside-Laundry-Looking-N.jpg","OUTPUT/jpeg_photos/Inside-Laundry-Looking-NE.jpg","OUTPUT/jpeg_photos/From-Deck-Looking-SE-to-laundry.jpg"]},{"id":"laundry_east_window","type":"window","status":"photo_context_approx","room":"laundry","between":[],"geometry":{"type":"polygon","points":[{"x":15.39,"z":7.363636363636364},{"x":15.537272727272727,"z":7.363636363636364},{"x":15.537272727272727,"z":8.91},{"x":15.39,"z":8.91}]},"material":"glazing","evidence_photo_paths":["OUTPUT/jpeg_photos/Inside-Laundry-Looking-NW.jpg","OUTPUT/jpeg_photos/Inside-Laundry-Looking-NE.jpg"]},{"id":"laundry_to_toilet_door","type":"door","status":"photo_verified","room":null,"between":["laundry","toilet"],"geometry":{"type":"polygon","points":[{"x":13.917272727272728,"z":9.793636363636365},{"x":14.506363636363638,"z":9.793636363636365},{"x":14.506363636363638,"z":10.014545454545456},{"x":13.917272727272728,"z":10.014545454545456}]},"material":"painted_wall","evidence_photo_paths":["OUTPUT/jpeg_photos/Inside-Laundry-Looking-SW.jpg","OUTPUT/jpeg_photos/Inside-Toilet-Looking-N.jpg","OUTPUT/jpeg_photos/Inside-Toilet-Looking-S.jpg"]},{"id":"toilet_frosted_window","type":"window","status":"photo_verified","room":"toilet","between":[],"geometry":{"type":"polygon","points":[{"x":15.39,"z":10.125},{"x":15.537272727272727,"z":10.125},{"x":15.537272727272727,"z":10.566818181818181},{"x":15.39,"z":10.566818181818181}]},"material":"glazing","evidence_photo_paths":["OUTPUT/jpeg_photos/Inside-Toilet-Looking-S.jpg","OUTPUT/jpeg_photos/Inside-Toilet-Looking-SW.jpg"]},{"id":"hallway_to_entrance_laundry","type":"opening","status":"photo_verified","room":null,"between":["hallway","entrance"],"geometry":{"type":"polygon","points":[{"x":8.836363636363636,"z":6.848181818181819},{"x":9.793636363636365,"z":6.848181818181819},{"x":9.793636363636365,"z":7.695},{"x":8.836363636363636,"z":7.695}]},"material":"painted_wall","evidence_photo_paths":["OUTPUT/jpeg_photos/Inside-Hallway-Looking-NE-2.jpg","OUTPUT/jpeg_photos/Inside-hallway-looking-NE.jpg"]},{"id":"kitchen_dining_to_bedroom2_door","type":"door","status":"photo_verified","room":null,"between":["kitchen_dining","bedroom_2"],"geometry":{"type":"polygon","points":[{"x":8.983636363636364,"z":7.584545454545455},{"x":9.793636363636365,"z":7.584545454545455},{"x":9.793636363636365,"z":7.805454545454546},{"x":8.983636363636364,"z":7.805454545454546}]},"material":"painted_wall","evidence_photo_paths":["OUTPUT/jpeg_photos/Inside-Bedroom-2-Looking-NW.jpg","OUTPUT/jpeg_photos/Inside-Kitchen-Looking-SE.jpg","OUTPUT/jpeg_photos/Inside-Kitchen-Looking-S.jpg"]},{"id":"entrance_to_kitchen_dining_door","type":"door","status":"photo_verified","room":null,"between":["entrance","kitchen_dining"],"geometry":{"type":"polygon","points":[{"x":9.775227272727273,"z":6.925500000000001},{"x":9.996136363636364,"z":6.925500000000001},{"x":9.996136363636364,"z":7.6545},{"x":9.775227272727273,"z":7.6545}]},"material":"painted_wall","evidence_photo_paths":["OUTPUT/jpeg_photos/Inside-Kitchen-Looking-S.jpg","OUTPUT/jpeg_photos/Inside-Kitchen-Looking-SE.jpg","OUTPUT/jpeg_photos/Inside-Entrance-Looking-NE.jpg","OUTPUT/jpeg_photos/Inside-Entrance-Looking-NE-2.jpg"]},{"id":"hallway_to_lounge_door","type":"door","status":"photo_verified","room":null,"between":["hallway","lounge"],"geometry":{"type":"polygon","points":[{"x":6.075,"z":6.332727272727273},{"x":6.885,"z":6.332727272727273},{"x":6.885,"z":6.553636363636364},{"x":6.075,"z":6.553636363636364}]},"material":"painted_wall","evidence_photo_paths":["OUTPUT/jpeg_photos/Inside-Lounge-Looking-SE.jpg","OUTPUT/jpeg_photos/Inside-Hallway-looking-SW.jpg","OUTPUT/jpeg_photos/Inside-hallway-looking-SW-2.jpg"]},{"id":"hallway_to_kitchen_dining_door","type":"door","status":"photo_verified","room":null,"between":["hallway","kitchen_dining"],"geometry":{"type":"polygon","points":[{"x":8.376136363636364,"z":6.590454545454546},{"x":8.597045454545455,"z":6.590454545454546},{"x":8.597045454545455,"z":7.400454545454545},{"x":8.376136363636364,"z":7.400454545454545}]},"material":"painted_wall","evidence_photo_paths":["OUTPUT/jpeg_photos/Inside-Kitchen-Looking-SW.jpg","OUTPUT/jpeg_photos/Inside-hallway-looking-NE.jpg","OUTPUT/jpeg_photos/Inside-Hallway-Looking-NE-2.jpg"]},{"id":"hallway_to_bathroom_sliding_door","type":"sliding_door","status":"photo_verified","room":null,"between":["hallway","bathroom"],"geometry":{"type":"polygon","points":[{"x":6.25909090909091,"z":7.695},{"x":7.510909090909091,"z":7.695},{"x":7.510909090909091,"z":7.915909090909091},{"x":6.25909090909091,"z":7.915909090909091}]},"material":"glazing","evidence_photo_paths":["OUTPUT/jpeg_photos/Inside-hallway-looking-NE.jpg","OUTPUT/jpeg_photos/Inside-Bathroom-looking-N.jpg","OUTPUT/jpeg_photos/Inside-Bathroom-Looking-NW.jpg"]},{"id":"hallway_to_master_bedroom_door","type":"door","status":"photo_verified","room":null,"between":["hallway","master_bedroom"],"geometry":{"type":"polygon","points":[{"x":3.313636363636364,"z":6.627272727272728},{"x":3.5345454545454547,"z":6.627272727272728},{"x":3.5345454545454547,"z":7.4372727272727275},{"x":3.313636363636364,"z":7.4372727272727275}]},"material":"painted_wall","evidence_photo_paths":["OUTPUT/jpeg_photos/Inside-Master-Bedroom-Looking-NE.jpg","OUTPUT/jpeg_photos/Inside-Master-Bedroom-Looking-N.jpg","OUTPUT/jpeg_photos/Inside-Master-Bedroom-Looking-N-2.jpg","OUTPUT/jpeg_photos/Inside-Hallway-looking-SW.jpg"]},{"id":"hallway_to_office_door","type":"door","status":"photo_verified","room":null,"between":["hallway","office"],"geometry":{"type":"polygon","points":[{"x":5.117727272727273,"z":7.584545454545455},{"x":5.927727272727273,"z":7.584545454545455},{"x":5.927727272727273,"z":7.805454545454546},{"x":5.117727272727273,"z":7.805454545454546}]},"material":"painted_wall","evidence_photo_paths":["OUTPUT/jpeg_photos/Inside-Office-Looking-N.jpg","OUTPUT/jpeg_photos/Inside-Office-Looking-S.jpg","OUTPUT/jpeg_photos/Inside-Hallway-looking-SW.jpg","OUTPUT/jpeg_photos/Inside-hallway-looking-SW-2.jpg"]},{"id":"master_street_window","type":"window","status":"measured_position_photo_context","room":"master_bedroom","between":[],"geometry":{"type":"polygon","points":[{"x":0.03681818181818182,"z":7.356272727272726},{"x":0.25772727272727275,"z":7.356272727272726},{"x":0.25772727272727275,"z":9.837818181818184},{"x":0.03681818181818182,"z":9.837818181818184}]},"material":"glazing","evidence_photo_paths":["OUTPUT/jpeg_photos/Inside-Master-Bedroom-looking-SW.jpg","OUTPUT/jpeg_photos/Inside-Master-Bedroom-Looking-SW-2.jpg","OUTPUT/jpeg_photos/From-Outside-front-looking-SW-towards-road.jpg"]},{"id":"master_sunroom_window","type":"window","status":"measured_position_photo_context","room":"master_bedroom","between":[],"geometry":{"type":"polygon","points":[{"x":0.6921818181818166,"z":6.295909090909091},{"x":2.7687272727272747,"z":6.295909090909091},{"x":2.7687272727272747,"z":6.516818181818182},{"x":0.6921818181818166,"z":6.516818181818182}]},"material":"glazing","evidence_photo_paths":["OUTPUT/jpeg_photos/Inside-Master-Bedroom-Looking-NW.jpg","OUTPUT/jpeg_photos/Inside-Master-Bedroom-Looking-N.jpg","OUTPUT/jpeg_photos/Inside-Sunroom-Looking-NW.jpg"]},{"id":"master_rear_high_window","type":"window","status":"measured_position_photo_context","room":"master_bedroom","between":[],"geometry":{"type":"polygon","points":[{"x":1.3217727272727264,"z":10.677272727272728},{"x":1.9918636363636373,"z":10.677272727272728},{"x":1.9918636363636373,"z":10.898181818181818},{"x":1.3217727272727264,"z":10.898181818181818}]},"material":"glazing","evidence_photo_paths":["OUTPUT/jpeg_photos/Inside-Master-Bedroom-Looking-S.jpg","OUTPUT/jpeg_photos/Inside-Master-Bedroom-Looking-S-2.jpg"]},{"id":"office_se_window","type":"window","status":"photo_context_approx","room":"office","between":[],"geometry":{"type":"polygon","points":[{"x":3.9395454545454545,"z":10.677272727272728},{"x":5.780454545454545,"z":10.677272727272728},{"x":5.780454545454545,"z":10.898181818181818},{"x":3.9395454545454545,"z":10.898181818181818}]},"material":"glazing","evidence_photo_paths":["OUTPUT/jpeg_photos/Inside-Office-Looking-SE.jpg","OUTPUT/jpeg_photos/Inside-Office-looking-E.jpg","OUTPUT/jpeg_photos/From-Outside-Side-of-house-looking-SW-down-right-side-of-house.jpg"]},{"id":"bathroom_se_window","type":"window","status":"photo_context_approx","room":"bathroom","between":[],"geometry":{"type":"polygon","points":[{"x":6.848181818181819,"z":10.677272727272728},{"x":8.394545454545455,"z":10.677272727272728},{"x":8.394545454545455,"z":10.898181818181818},{"x":6.848181818181819,"z":10.898181818181818}]},"material":"glazing","evidence_photo_paths":["OUTPUT/jpeg_photos/Inside-Bathroom-Looking-SE-2.jpg","OUTPUT/jpeg_photos/Inside-Bathroom-Looking-SE-3.jpg","OUTPUT/jpeg_photos/From-Outside-Side-of-house-looking-SW-down-right-side-of-house.jpg"]},{"id":"bedroom2_se_window","type":"window","status":"photo_context_approx","room":"bedroom_2","between":[],"geometry":{"type":"polygon","points":[{"x":10.014545454545456,"z":10.677272727272728},{"x":12.665454545454546,"z":10.677272727272728},{"x":12.665454545454546,"z":10.898181818181818},{"x":10.014545454545456,"z":10.898181818181818}]},"material":"glazing","evidence_photo_paths":["OUTPUT/jpeg_photos/Inside-Bedroom-2-Looking-SE.jpg","OUTPUT/jpeg_photos/Inside-Bedroom-2-Looking-S.jpg","OUTPUT/jpeg_photos/From-Outside-back-looking-SE-towards-house.jpg"]},{"id":"bedroom2_entrance_internal_window","type":"window","status":"measured_position_photo_context","room":null,"between":["bedroom_2","entrance"],"geometry":{"type":"polygon","points":[{"x":11.778136363636364,"z":7.584545454545455},{"x":12.676499999999999,"z":7.584545454545455},{"x":12.676499999999999,"z":7.805454545454546},{"x":11.778136363636364,"z":7.805454545454546}]},"material":"glazing","evidence_photo_paths":["OUTPUT/jpeg_photos/Inside-Bedroom-2-Looking-NW.jpg","OUTPUT/jpeg_photos/Inside-Entrance-Looking-NE.jpg"]}],"site":[{"id":"property_boundary","type":"boundary","surface":null,"category":"boundary","geometry":{"type":"polygon","points":[{"x":-12.555,"z":-3.1663636363636365},{"x":35.971363636363634,"z":-3.1663636363636365},{"x":35.971363636363634,"z":12.15},{"x":-12.555,"z":12.15}]},"material":"lawn","height":0.08},{"id":"upper_side_driveway","type":"driveway","surface":null,"category":"hardscape","geometry":{"type":"polygon","points":[{"x":-12.15,"z":-0.25772727272727275},{"x":4.86,"z":-1.8777272727272727},{"x":18.99818181818182,"z":-1.7304545454545455},{"x":18.99818181818182,"z":0.8836363636363637},{"x":13.033636363636363,"z":0.81},{"x":11.92909090909091,"z":1.8777272727272727},{"x":0.0,"z":1.7304545454545455},{"x":-1.62,"z":2.2827272727272727},{"x":-11.92909090909091,"z":2.9086363636363637}]},"material":"paver_concrete","height":0.08},{"id":"front_diagonal_path","type":"footpath","surface":null,"category":"hardscape","geometry":{"type":"polygon","points":[{"x":-1.62,"z":2.2827272727272727},{"x":0.0,"z":1.7304545454545455},{"x":2.503636363636364,"z":5.559545454545455},{"x":1.656818181818182,"z":6.001363636363637}]},"material":"paver_concrete","height":0.08},{"id":"sunroom_front_steps","type":"timber_steps","surface":null,"category":"deck","geometry":{"type":"multi_polygon","polygons":[[{"x":2.9086363636363637,"z":3.460909090909091},{"x":1.251818181818182,"z":5.080909090909091},{"x":1.0677272727272729,"z":4.896818181818182},{"x":2.7245454545454546,"z":3.276818181818182}],[{"x":2.7245454545454546,"z":3.276818181818182},{"x":1.0677272727272729,"z":4.896818181818182},{"x":0.8836363636363637,"z":4.712727272727273},{"x":2.5404545454545455,"z":3.0927272727272728}],[{"x":2.5404545454545455,"z":3.0927272727272728},{"x":0.8836363636363637,"z":4.712727272727273},{"x":0.6995454545454546,"z":4.528636363636363},{"x":2.3563636363636364,"z":2.9086363636363637}]]},"material":"deck_timber","height":0.08},{"id":"rear_timber_deck","type":"timber_deck","surface":null,"category":"deck","geometry":{"type":"polygon","points":[{"x":11.192727272727273,"z":0.19881818181818098},{"x":14.94818181818182,"z":3.9137727272727276},{"x":15.316363636363636,"z":3.9137727272727276},{"x":16.052727272727275,"z":4.3555909090909095},{"x":16.052727272727275,"z":6.711954545454546},{"x":15.537272727272727,"z":6.711954545454546},{"x":11.192727272727273,"z":6.711954545454546}]},"material":"deck_timber","height":0.08},{"id":"cottage_end_deck","type":"small_timber_deck","surface":null,"category":"deck","geometry":{"type":"rect","x":32.10545454545455,"z":-1.62,"width":2.1354545454545457,"depth":2.650909090909091},"material":"deck_timber","height":0.08},{"id":"garage_shed","type":"outbuilding","surface":null,"category":"building","geometry":{"type":"rect","x":18.114545454545453,"z":-2.871818181818182,"width":6.995454545454546,"depth":4.344545454545455},"material":"painted_wall","height":2.7},{"id":"garage_concrete_pad","type":"concrete_pad","surface":null,"category":"hardscape","geometry":{"type":"polygon","points":[{"x":13.696363636363637,"z":1.3990909090909092},{"x":32.10545454545455,"z":1.4727272727272727},{"x":32.10545454545455,"z":5.375454545454546},{"x":17.37818181818182,"z":5.375454545454546},{"x":17.37818181818182,"z":6.848181818181819},{"x":15.537272727272727,"z":6.848181818181819}]},"material":"paver_concrete","height":0.08},{"id":"garage_cottage_side_path","type":"concrete_path","surface":null,"category":"hardscape","geometry":{"type":"polygon","points":[{"x":17.37818181818182,"z":1.4727272727272727},{"x":32.10545454545455,"z":1.4727272727272727},{"x":32.10545454545455,"z":2.503636363636364},{"x":17.37818181818182,"z":2.503636363636364}]},"material":"paver_concrete","height":0.08},{"id":"cottage","type":"accessory_cottage","surface":null,"category":"building","geometry":{"type":"rect","x":25.11,"z":-2.871818181818182,"width":6.995454545454546,"depth":4.344545454545455},"material":"painted_wall","height":2.7},{"id":"boundary_hedges_and_fences","type":"fence_hedge_group","surface":null,"category":"planting","geometry":{"type":"multi_polygon","polygons":[[{"x":-12.15,"z":-0.25772727272727275},{"x":4.86,"z":-1.8777272727272727},{"x":4.86,"z":-0.9572727272727273},{"x":-11.92909090909091,"z":2.9086363636363637}],[{"x":18.114545454545453,"z":-3.1663636363636365},{"x":35.971363636363634,"z":-3.1663636363636365},{"x":35.971363636363634,"z":-2.871818181818182},{"x":18.114545454545453,"z":-2.871818181818182}]]},"material":"lawn","height":0.08}],"materials":{"timber_floor":{"kind":"floor","color":"#d2b58d","roughness":0.78},"wet_tile":{"kind":"floor","color":"#d7dee0","roughness":0.62},"painted_wall":{"kind":"wall","color":"#eee9df","roughness":0.86},"glazing":{"kind":"transparent","color":"#b8d8e6","opacity":0.36},"deck_timber":{"kind":"site","color":"#9a6438","roughness":0.72},"paver_concrete":{"kind":"site","color":"#c9c4b8","roughness":0.9},"lawn":{"kind":"site","color":"#78a85f","roughness":1.0}},"warnings":[]}</script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+    import WebGL from 'three/addons/capabilities/WebGL.js';
+
+    const config = JSON.parse(document.getElementById('house-3d-config').textContent);
+    const stage = document.getElementById('house-3d-stage');
+    const status = document.getElementById('house-3d-status');
+    const resetButton = document.getElementById('reset-view');
+    const keysPressed = new Set();
+    const clock = new THREE.Clock();
+    let camera;
+    let controls;
+    let renderer;
+    let scene;
+
+    function showUnsupported(message) {
+      status.textContent = message;
+    }
+
+    function createRenderer() {
+      const nextRenderer = new THREE.WebGLRenderer({ antialias: true });
+      nextRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      nextRenderer.setSize(window.innerWidth, window.innerHeight);
+      nextRenderer.setClearColor(0xd8d4ca, 1);
+      stage.appendChild(nextRenderer.domElement);
+      return nextRenderer;
+    }
+
+    function createScene() {
+      const nextScene = new THREE.Scene();
+      nextScene.background = new THREE.Color(0xd8d4ca);
+      nextScene.add(new THREE.HemisphereLight(0xffffff, 0x8f8a7d, 1.8));
+      const sun = new THREE.DirectionalLight(0xffffff, 1.5);
+      sun.position.set(-8, 12, 6);
+      nextScene.add(sun);
+      const grid = new THREE.GridHelper(60, 60, 0x9c9689, 0xc8c1b4);
+      grid.position.y = -0.03;
+      nextScene.add(grid);
+      return nextScene;
+    }
+
+    function materialFor(id) {
+      const item = config.materials[id] || config.materials.painted_wall || {};
+      const options = {
+        color: new THREE.Color(item.color || '#eeeeee'),
+        roughness: item.roughness ?? 0.85,
+        metalness: 0
+      };
+      if (item.opacity !== undefined) {
+        options.transparent = true;
+        options.opacity = item.opacity;
+        options.depthWrite = false;
+      }
+      return new THREE.MeshStandardMaterial(options);
+    }
+
+    function buildPolygonFloor(scene, points, material, roomId) {
+      const shape = new THREE.Shape();
+      points.forEach((point, index) => {
+        if (index === 0) shape.moveTo(point.x, point.z);
+        else shape.lineTo(point.x, point.z);
+      });
+      shape.closePath();
+      const mesh = new THREE.Mesh(new THREE.ShapeGeometry(shape), material);
+      mesh.rotation.x = Math.PI / 2;
+      mesh.userData.roomId = roomId;
+      mesh.name = `floor:${roomId}`;
+      return mesh;
+    }
+
+    function buildFloor(scene, room) {
+      const material = materialFor(room.floor_material);
+      let mesh;
+      if (room.geometry.type === 'rect') {
+        const geo = new THREE.BoxGeometry(room.geometry.width, 0.04, room.geometry.depth);
+        mesh = new THREE.Mesh(geo, material);
+        mesh.position.set(
+          room.geometry.x + room.geometry.width / 2,
+          0,
+          room.geometry.z + room.geometry.depth / 2
+        );
+      } else {
+        mesh = buildPolygonFloor(scene, room.geometry.points, material, room.id);
+      }
+      mesh.userData.roomId = room.id;
+      mesh.name = `floor:${room.id}`;
+      scene.add(mesh);
+    }
+
+    function wallSegment(scene, x, z, width, depth, height, name) {
+      const mesh = new THREE.Mesh(
+        new THREE.BoxGeometry(width, height, depth),
+        materialFor('painted_wall')
+      );
+      mesh.position.set(x, height / 2, z);
+      mesh.name = name;
+      scene.add(mesh);
+    }
+
+    function buildRectRoomWalls(scene, room) {
+      if (room.geometry.type !== 'rect') return;
+      const wall = 0.12;
+      const height = room.height || 2.4;
+      const x = room.geometry.x;
+      const z = room.geometry.z;
+      const w = room.geometry.width;
+      const d = room.geometry.depth;
+      wallSegment(scene, x + w / 2, z, w, wall, height, `wall:${room.id}:north`);
+      wallSegment(scene, x + w / 2, z + d, w, wall, height, `wall:${room.id}:south`);
+      wallSegment(scene, x, z + d / 2, wall, d, height, `wall:${room.id}:west`);
+      wallSegment(scene, x + w, z + d / 2, wall, d, height, `wall:${room.id}:east`);
+    }
+
+    function boundsFromPoints(points) {
+      return points.reduce((bounds, point) => ({
+        minX: Math.min(bounds.minX, point.x),
+        maxX: Math.max(bounds.maxX, point.x),
+        minZ: Math.min(bounds.minZ, point.z),
+        maxZ: Math.max(bounds.maxZ, point.z)
+      }), { minX: Infinity, maxX: -Infinity, minZ: Infinity, maxZ: -Infinity });
+    }
+
+    function polygonMesh(points, material, height, name) {
+      const shape = new THREE.Shape();
+      points.forEach((point, index) => {
+        if (index === 0) shape.moveTo(point.x, point.z);
+        else shape.lineTo(point.x, point.z);
+      });
+      shape.closePath();
+      const mesh = new THREE.Mesh(new THREE.ShapeGeometry(shape), material);
+      mesh.rotation.x = Math.PI / 2;
+      mesh.position.y = height;
+      mesh.name = name;
+      return mesh;
+    }
+
+    function buildSiteElement(scene, element) {
+      const material = materialFor(element.material);
+      const height = element.height || 0.06;
+      if (element.geometry.type === 'rect') {
+        const geo = new THREE.BoxGeometry(element.geometry.width, height, element.geometry.depth);
+        const mesh = new THREE.Mesh(geo, material);
+        mesh.position.set(
+          element.geometry.x + element.geometry.width / 2,
+          height / 2,
+          element.geometry.z + element.geometry.depth / 2
+        );
+        mesh.name = `site:${element.id}`;
+        scene.add(mesh);
+      } else if (element.geometry.type === 'polygon') {
+        scene.add(polygonMesh(element.geometry.points, material, height, `site:${element.id}`));
+      } else if (element.geometry.type === 'multi_polygon') {
+        element.geometry.polygons.forEach((polygon, index) => {
+          scene.add(polygonMesh(polygon, material, height, `site:${element.id}:${index}`));
+        });
+      }
+    }
+
+    function featurePanel(feature) {
+      const points = feature.geometry.type === 'multi_polygon'
+        ? feature.geometry.polygons.flat()
+        : feature.geometry.points || [];
+      if (!points.length) return null;
+      const bounds = boundsFromPoints(points);
+      const width = Math.max(bounds.maxX - bounds.minX, 0.08);
+      const depth = Math.max(bounds.maxZ - bounds.minZ, 0.08);
+      const horizontal = width >= depth;
+      const geo = horizontal
+        ? new THREE.BoxGeometry(width, 1.55, 0.04)
+        : new THREE.BoxGeometry(0.04, 1.55, depth);
+      const mesh = new THREE.Mesh(geo, materialFor(feature.material));
+      mesh.position.set((bounds.minX + bounds.maxX) / 2, 1.15, (bounds.minZ + bounds.maxZ) / 2);
+      mesh.name = `feature:${feature.id}`;
+      mesh.userData.featureId = feature.id;
+      return mesh;
+    }
+
+    function resetCamera() {
+      camera.position.set(7.2, 1.65, 4.4);
+      camera.rotation.set(0, 0, 0);
+      controls.getObject().lookAt(9.5, 1.45, 5.4);
+    }
+
+    function moveCamera(delta) {
+      const speed = keysPressed.has('ShiftLeft') || keysPressed.has('ShiftRight') ? 5.2 : 2.7;
+      const step = speed * delta;
+      if (keysPressed.has('KeyW') || keysPressed.has('ArrowUp')) controls.moveForward(step);
+      if (keysPressed.has('KeyS') || keysPressed.has('ArrowDown')) controls.moveForward(-step);
+      if (keysPressed.has('KeyA') || keysPressed.has('ArrowLeft')) controls.moveRight(-step);
+      if (keysPressed.has('KeyD') || keysPressed.has('ArrowRight')) controls.moveRight(step);
+      if (keysPressed.has('KeyQ')) camera.position.y = Math.max(0.45, camera.position.y - step);
+      if (keysPressed.has('KeyE')) camera.position.y = Math.min(4.2, camera.position.y + step);
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      moveCamera(clock.getDelta());
+      renderer.render(scene, camera);
+    }
+
+    function startViewer() {
+      if (!WebGL.isWebGL2Available()) {
+        showUnsupported('WebGL is unavailable in this browser.');
+        return;
+      }
+      scene = createScene();
+      renderer = createRenderer();
+      camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.05, 120);
+      controls = new PointerLockControls(camera, renderer.domElement);
+      scene.add(controls.getObject());
+      resetCamera();
+
+      config.site.forEach((element) => buildSiteElement(scene, element));
+      config.rooms.forEach((room) => {
+        buildFloor(scene, room);
+        buildRectRoomWalls(scene, room);
+      });
+      config.features.map(featurePanel).filter(Boolean).forEach((mesh) => scene.add(mesh));
+
+      stage.addEventListener('click', () => controls.lock());
+      resetButton.addEventListener('click', resetCamera);
+      document.addEventListener('keydown', (event) => {
+        keysPressed.add(event.code);
+        if (event.code === 'KeyR') resetCamera();
+      });
+      document.addEventListener('keyup', (event) => keysPressed.delete(event.code));
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+
+      status.textContent = `${config.title}: ${config.rooms.length} rooms, ${config.features.length} openings/features.`;
+      animate();
+    }
+
+    startViewer();
+
+  </script>
+</body>
+</html>
