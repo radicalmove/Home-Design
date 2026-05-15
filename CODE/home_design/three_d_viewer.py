@@ -9,16 +9,80 @@ from .model import HouseModel
 
 THREE_VERSION = "0.160.0"
 
+MATERIALS = {
+    "timber_floor": {"kind": "floor", "color": "#d2b58d", "roughness": 0.78},
+    "wet_tile": {"kind": "floor", "color": "#d7dee0", "roughness": 0.62},
+    "painted_wall": {"kind": "wall", "color": "#eee9df", "roughness": 0.86},
+    "glazing": {"kind": "transparent", "color": "#b8d8e6", "opacity": 0.36},
+    "deck_timber": {"kind": "site", "color": "#9a6438", "roughness": 0.72},
+    "paver_concrete": {"kind": "site", "color": "#c9c4b8", "roughness": 0.9},
+    "lawn": {"kind": "site", "color": "#78a85f", "roughness": 1.0},
+}
+
+WET_ROOM_IDS = {"bathroom", "laundry", "toilet"}
+
+
+def _room_material(room_id: str, category: str) -> str:
+    if room_id in WET_ROOM_IDS:
+        return "wet_tile"
+    return "timber_floor"
+
+
+def _room_geometry(layout: dict[str, Any]) -> dict[str, Any] | None:
+    if layout.get("type") == "rect":
+        return {
+            "type": "rect",
+            "x": float(layout["x"]),
+            "z": float(layout["y"]),
+            "width": float(layout["width"]),
+            "depth": float(layout["depth"]),
+        }
+    if layout.get("type") == "polygon":
+        return {
+            "type": "polygon",
+            "points": [
+                {"x": float(point[0]), "z": float(point[1])}
+                for point in layout.get("points", [])
+            ],
+        }
+    return None
+
+
+def _room_config(model: HouseModel) -> tuple[list[dict[str, Any]], list[str]]:
+    rooms: list[dict[str, Any]] = []
+    warnings: list[str] = []
+    for room in model.rooms:
+        geometry = _room_geometry(room.layout)
+        if geometry is None:
+            warnings.append(f"Skipping room without 3D layout: {room.id}")
+            continue
+        rooms.append(
+            {
+                "id": room.id,
+                "name": room.name,
+                "category": room.category,
+                "confidence": room.confidence,
+                "geometry": geometry,
+                "height": float(room.dimensions_m.get("height") or 2.4),
+                "floor_material": _room_material(room.id, room.category),
+                "wall_material": "painted_wall",
+                "notes": room.notes,
+            }
+        )
+    return rooms, warnings
+
 
 def build_house_3d_config(model: HouseModel) -> dict[str, Any]:
+    rooms, warnings = _room_config(model)
     return {
         "title": "House 3D Viewer",
         "units": model.units,
-        "rooms": [],
+        "orientation": model.raw.get("orientation", {}),
+        "rooms": rooms,
         "features": [],
         "site": [],
-        "materials": {},
-        "warnings": [],
+        "materials": MATERIALS,
+        "warnings": warnings,
     }
 
 
