@@ -119,3 +119,27 @@ class House3DViewerHtmlTests(unittest.TestCase):
 
         deck = next(element for element in config["site"] if element["id"] == "rear_timber_deck")
         self.assertEqual(deck["material"], "deck_timber")
+
+    def test_house_3d_viewer_includes_scene_builders_and_controls(self):
+        model = load_model("DATA/house_model.json")
+
+        html = render_house_3d_html(model)
+
+        for function_name in [
+            "function createRenderer",
+            "function createScene",
+            "function buildFloor",
+            "function buildRectRoomWalls",
+            "function buildPolygonFloor",
+            "function buildSiteElement",
+            "function animate",
+            "function resetCamera",
+        ]:
+            self.assertIn(function_name, html)
+
+        self.assertIn("new PointerLockControls", html)
+        self.assertIn("keysPressed", html)
+        self.assertIn("keydown", html)
+        self.assertIn("keyup", html)
+        self.assertIn("requestAnimationFrame(animate)", html)
+        self.assertIn("userData.roomId", html)
