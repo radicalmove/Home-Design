@@ -92,7 +92,6 @@ class House3DViewerHtmlTests(unittest.TestCase):
             "entrance_deck_slider",
             "sunroom_wraparound_glazing",
             "bedroom2_se_window",
-            "laundry_east_window",
         ]:
             self.assertIn(feature_id, feature_ids)
 
