@@ -76,11 +76,19 @@ def render_calibration_report(model: HouseModel) -> str:
         legacy_layers = ", ".join(current_structure.get("legacy_layers", []))
         lines.append(f"- Legacy comparison layers: {legacy_layers or 'none'}")
         spaces = current_structure.get("spaces", [])
+        built_ins = current_structure.get("built_ins", [])
         features = current_structure.get("features", [])
         lines.append(f"- Spaces promoted: {len(spaces)}")
         for space in spaces:
             checks = ", ".join(space.get("evidence_check_ids", []))
             lines.append(f"  Space: {space['id']} ({space.get('confidence', 'unknown')}; evidence: {checks or 'none'})")
+        lines.append(f"- Built-ins recorded: {len(built_ins)}")
+        for item in built_ins:
+            checks = ", ".join(item.get("evidence_check_ids", []))
+            lines.append(
+                f"  Built-in: {item['id']} ({item.get('type', 'built_in')}; "
+                f"{item.get('status', 'unknown')}; evidence: {checks or 'none'})"
+            )
         lines.append(f"- Features promoted: {len(features)}")
         for feature in features:
             checks = ", ".join(feature.get("evidence_check_ids", []))
@@ -88,6 +96,9 @@ def render_calibration_report(model: HouseModel) -> str:
                 f"  Feature: {feature['id']} ({feature.get('type', 'feature')}; "
                 f"{feature.get('status', 'unknown')}; evidence: {checks or 'none'})"
             )
+            detail = _feature_detail(feature)
+            if detail:
+                lines.append(f"    Detail: {detail}")
 
     current_site = model.raw.get("current_site", {})
     if current_site:
@@ -157,6 +168,27 @@ def _m(value: object) -> str:
     if isinstance(value, int | float):
         return f"{value:g}m"
     return "unknown"
+
+
+def _feature_detail(feature: dict[str, object]) -> str:
+    parts: list[str] = []
+    if "width_m" in feature:
+        parts.append(f"width {_m(feature['width_m'])}")
+    offsets = feature.get("wall_offsets_m")
+    if isinstance(offsets, dict):
+        formatted_offsets = ", ".join(f"{key} {_m(value)}" for key, value in offsets.items())
+        if formatted_offsets:
+            parts.append(f"offsets {formatted_offsets}")
+    position_reference = feature.get("position_reference")
+    if isinstance(position_reference, str):
+        parts.append(f"position {position_reference}")
+    swing = feature.get("swing")
+    if isinstance(swing, str):
+        parts.append(f"swing {swing}")
+    projection = feature.get("right_corner_nub_projection_m")
+    if projection is not None:
+        parts.append(f"right corner nub projection {_m(projection)}")
+    return "; ".join(parts)
 
 
 def _daylight_value_count(room_daylight: dict[str, object]) -> int:

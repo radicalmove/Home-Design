@@ -57,7 +57,7 @@ def validate_model(model: HouseModel) -> ValidationResult:
     if current_structure:
         if current_structure.get("status") != "active_source_of_truth":
             errors.append("current_structure.status must be active_source_of_truth")
-        for item_type in ("spaces", "features"):
+        for item_type in ("spaces", "built_ins", "features"):
             for item in current_structure.get(item_type, []):
                 item_id = item.get("id", "unknown")
                 if not item.get("display_px"):
@@ -73,7 +73,7 @@ def validate_model(model: HouseModel) -> ValidationResult:
         site_element_ids = {item.get("id") for item in current_site.get("elements", [])}
         current_structure_ids = {
             item.get("id")
-            for item_type in ("spaces", "features")
+            for item_type in ("spaces", "built_ins", "features")
             for item in current_structure.get(item_type, [])
         }
         valid_site_affect_ids = site_element_ids | current_structure_ids | {room.id for room in model.rooms}

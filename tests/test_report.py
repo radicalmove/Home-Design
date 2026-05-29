@@ -73,6 +73,15 @@ class CalibrationReportTests(unittest.TestCase):
         self.assertIn("Feature: bedroom2_se_window", report)
         self.assertIn("photo_verified", report)
 
+    def test_report_lists_measured_feature_details(self):
+        model = load_model("DATA/house_model.json")
+        report = render_calibration_report(model)
+        self.assertIn("Feature: deck_door_group", report)
+        self.assertIn("Detail: width 1.62m", report)
+        self.assertIn("top_right_inside_corner 1.14m", report)
+        self.assertIn("Feature: entrance_deck_slider", report)
+        self.assertIn("left_side_from_entrance_narrowing_corner 0.28m", report)
+
     def test_report_lists_current_site_source_of_truth(self):
         model = load_model("DATA/house_model.json")
         report = render_calibration_report(model)

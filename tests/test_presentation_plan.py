@@ -59,7 +59,12 @@ class PresentationPlanRenderTests(unittest.TestCase):
         self.assertNotIn('data-furniture="garage_car"', svg)
         self.assertIn('class="opening window"', svg)
         self.assertIn('class="opening slider"', svg)
-        self.assertIn("photo_context_approx", svg)
+        self.assertIn("measured_position_photo_context", svg)
+        self.assertIn('data-plan-feature="laundry_north_window"', svg)
+        self.assertIn('data-plan-feature="laundry_east_window"', svg)
+        self.assertIn('data-plan-feature="toilet_frosted_window"', svg)
+        self.assertIn('data-plan-feature="bedroom2_se_window"', svg)
+        self.assertNotIn("photo_context_approx", svg)
         self.assertIn("approximate", svg.lower())
 
     def test_presentation_plan_furniture_is_evidence_linked_and_sparse(self):

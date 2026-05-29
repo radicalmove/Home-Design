@@ -32,22 +32,21 @@ def render_reference_plan_html(model: HouseModel) -> str:
       overflow: hidden;
       cursor: grab;
       background: #ded8cd;
+      touch-action: none;
     }}
     .viewport.is-panning {{ cursor: grabbing; }}
     .plan-stage {{
       position: absolute;
-      left: 0;
-      top: 0;
-      transform: translate(-660px, -310px) scale(1.28);
-      transform-origin: 0 0;
-      will-change: transform;
+      inset: 0;
     }}
     .plan-stage svg {{
       display: block;
-      width: 1600px;
-      height: 900px;
+      width: 100%;
+      height: 100%;
       background: #f6f4ef;
       box-shadow: 0 14px 36px rgba(42, 34, 24, 0.2);
+      shape-rendering: geometricPrecision;
+      text-rendering: geometricPrecision;
       user-select: none;
     }}
     .toolbar {{
@@ -105,7 +104,7 @@ def render_reference_plan_html(model: HouseModel) -> str:
     <section class="viewport" id="reference-plan-viewport" aria-label="Zoomable reference style plan">
       <div class="toolbar" aria-label="Plan zoom controls">
         <button id="zoom-out" type="button">-</button>
-        <span id="zoom-readout">100%</span>
+        <span id="zoom-readout" title="Zoom range: 28% to 500%">100%</span>
         <button id="zoom-in" type="button">+</button>
         <button id="zoom-reset" type="button">Reset</button>
         <button id="fit-house" type="button">Fit house</button>
@@ -116,31 +115,49 @@ def render_reference_plan_html(model: HouseModel) -> str:
     </section>
     <section class="review-panel" aria-label="Reference style plan status">
       <h1>Reference Style Plan</h1>
-      <p>Visual presentation renderer built from the measured/photo model. Build: reference-plan-v44</p>
+      <p>Visual presentation renderer built from the measured/photo model. Build: reference-plan-v46</p>
     </section>
   </main>
   <script>
     const viewport = document.getElementById('reference-plan-viewport');
     const stage = document.getElementById('reference-plan-stage');
+    const svg = stage.querySelector('svg');
     const readout = document.getElementById('zoom-readout');
+    const MAX_ZOOM = 5.0;
     let zoom = 1.28;
     let panX = -660;
     let panY = -310;
     let panState = null;
 
-    function applyTransform() {{
-      stage.style.transform = `translate(${{panX}}px, ${{panY}}px) scale(${{zoom}})`;
+    function applyViewBox() {{
+      const width = viewport.clientWidth / zoom;
+      const height = viewport.clientHeight / zoom;
+      const x = -panX / zoom;
+      const y = -panY / zoom;
+      svg.setAttribute('viewBox', `${{x.toFixed(3)}} ${{y.toFixed(3)}} ${{width.toFixed(3)}} ${{height.toFixed(3)}}`);
       readout.textContent = `${{Math.round(zoom * 100)}}%`;
     }}
 
-    function setZoom(nextZoom, anchorX = viewport.clientWidth / 2, anchorY = viewport.clientHeight / 2) {{
-      const clamped = Math.min(3.4, Math.max(0.28, nextZoom));
-      const worldX = (anchorX - panX) / zoom;
-      const worldY = (anchorY - panY) / zoom;
+    function screenToWorld(screenX, screenY) {{
+      const rect = viewport.getBoundingClientRect();
+      return {{
+        x: (screenX - rect.left - panX) / zoom,
+        y: (screenY - rect.top - panY) / zoom,
+      }};
+    }}
+
+    function setZoom(nextZoom, anchorX = null, anchorY = null) {{
+      const clamped = Math.min(MAX_ZOOM, Math.max(0.28, nextZoom));
+      const rect = viewport.getBoundingClientRect();
+      const clientX = anchorX ?? rect.left + rect.width / 2;
+      const clientY = anchorY ?? rect.top + rect.height / 2;
+      const screenX = clientX - rect.left;
+      const screenY = clientY - rect.top;
+      const world = screenToWorld(clientX, clientY);
       zoom = clamped;
-      panX = anchorX - worldX * zoom;
-      panY = anchorY - worldY * zoom;
-      applyTransform();
+      panX = screenX - world.x * zoom;
+      panY = screenY - world.y * zoom;
+      applyViewBox();
     }}
 
     function beginPan(event) {{
@@ -154,7 +171,7 @@ def render_reference_plan_html(model: HouseModel) -> str:
       if (!panState) return;
       panX = panState.startX + event.clientX - panState.x;
       panY = panState.startY + event.clientY - panState.y;
-      applyTransform();
+      applyViewBox();
     }}
 
     function endPan() {{
@@ -166,7 +183,7 @@ def render_reference_plan_html(model: HouseModel) -> str:
       zoom = 1.28;
       panX = -660;
       panY = -310;
-      applyTransform();
+      applyViewBox();
     }}
 
     document.getElementById('zoom-in').addEventListener('click', () => setZoom(zoom * 1.18));
@@ -181,8 +198,9 @@ def render_reference_plan_html(model: HouseModel) -> str:
       event.preventDefault();
       setZoom(zoom * (event.deltaY > 0 ? 1 / 1.12 : 1.12), event.clientX, event.clientY);
     }}, {{ passive: false }});
+    window.addEventListener('resize', applyViewBox);
 
-    applyTransform();
+    applyViewBox();
   </script>
 </body>
 </html>
