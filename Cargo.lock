@@ -1231,6 +1231,7 @@ version = "0.1.0"
 dependencies = [
  "home-design-core",
  "serde",
+ "serde_json",
 ]
 
 [[package]]
