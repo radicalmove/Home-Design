@@ -2,7 +2,7 @@
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Home Design",
   "version": "0.1.0",
-  "identifier": "nz.home-design.app",
+  "identifier": "nz.home-design.desktop",
   "build": {
     "beforeDevCommand": "npm run dev",
     "beforeBuildCommand": "npm run build",
