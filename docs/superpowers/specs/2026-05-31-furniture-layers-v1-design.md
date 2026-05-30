@@ -6,7 +6,9 @@ Add the first native editing milestone to the Rust desktop app: a 2D furniture e
 
 This milestone should make the app useful for trying furniture and fixture placements without starting structural redesign work yet. It should preserve the current/base house view as the architectural reference, add independently toggleable fixed and moveable furniture layers, and save the edited layout persistently through the Rust/Tauri app.
 
-The feature is deliberately scoped to furniture and fixture layout. Wall removal, extensions, future scenario switching, animated build transitions, cost estimates, movement heatmaps, lifestyle scoring, and garden design remain later milestones.
+This milestone should also add a small Base View companion feature: a dimensions overlay toggle showing key external house dimensions and internal wall/room spans in metres.
+
+The feature is deliberately scoped to furniture and fixture layout plus read-only dimensions on the current base plan. Wall removal, extensions, future scenario switching, animated build transitions, cost estimates, movement heatmaps, lifestyle scoring, and garden design remain later milestones.
 
 ## Context
 
@@ -17,18 +19,21 @@ The current Rust desktop app already has:
 - `crates/home-design-desktop` with Tauri-facing commands
 - `apps/desktop-ui` with the Svelte desktop shell
 - a packaged base/reference plan view with sunlight controls
+- a reference plan SVG with curated wall paths, wall metadata, and a metric scale layer
 - a packaged Three.js 3D navigation view
 - Rust model loading and validation against `DATA/house_model.json`
 
 The existing Python scenario editor proves the rough editing idea but should not be the long-term implementation surface. It is generated HTML and not integrated into the app state model. The new work should move editing into the native Svelte app and use Rust for typed persistence.
 
-The previous explorer design listed the next milestones as fixed/moveable furniture layers, object catalogs, and manual editing with live metre sizing. This spec covers that sequence as one focused v1.
+The previous explorer design listed the next milestones as fixed/moveable furniture layers, object catalogs, and manual editing with live metre sizing. This spec covers that sequence as one focused v1, with the Base View dimensions toggle included because it directly supports planning and furniture sizing decisions.
 
 ## Selected Approach
 
 Build a native Svelte/SVG furniture editor inside the desktop app, with typed Rust contracts and JSON persistence.
 
 The app should add a `Furniture Editor` view alongside `Base View` and `3D Navigation`. The editor shows the current plan as a locked background and renders editable furniture objects above it. Users can toggle fixed and moveable layers, select an object, move it, resize it, rotate it, recolour it, create a custom rectangular object, and add standard objects from a catalog.
+
+The existing `Base View` should gain a read-only `Dimensions` toggle. When enabled, the base plan displays architectural dimension lines for the main external envelope and selected internal spans. This belongs in Base View because it describes the current house itself, not furniture editing state.
 
 This is the right next step because it creates the state model needed for later scenario work while staying small enough to test well. It also avoids embedding another generated HTML editor that would become hard to connect to future cost, heatmap, and scenario systems.
 
@@ -47,6 +52,18 @@ This would replace the packaged base plan with a fully native Svelte renderer fo
 That is likely valuable later, but it is too broad for this step. The existing base/reference view is already useful and includes sunlight controls. V1 should layer editing over a locked reference rather than rewrite the whole plan renderer.
 
 ## User Workflow
+
+Base View dimension workflow:
+
+1. User opens `Base View`.
+2. User clicks `Dimensions`.
+3. The plan shows key external dimensions outside the house outline and key internal spans inside the plan.
+4. User can pan and zoom with the dimensions visible.
+5. User clicks `Dimensions` again to return to the clean base view.
+
+The dimension overlay should be off by default and independent from sunlight mode. If both sunlight and dimensions are enabled, the dimensions should remain readable without hiding the sunlight controls.
+
+Furniture editor workflow:
 
 1. User opens the desktop app.
 2. User selects `Furniture Editor`.
@@ -76,6 +93,7 @@ https://planner5d.com/blog/floor-plan-symbols-and-abbreviations/
 
 The relevant conventions for this app are:
 
+- floor-plan dimension lines use thin lines, tick marks, and metre labels between walls or envelope edges
 - beds, couches, chairs, tables, and desks are drawn from above
 - tables and desks use simple rectangular or circular forms
 - built-in shelving and cabinetry are drawn in or labelled
@@ -85,6 +103,51 @@ The relevant conventions for this app are:
 This app should not copy Planner 5D art assets. It should use the same general architectural-symbol approach: clean top-down silhouettes, restrained colours, clear outlines, and short abbreviations where a detailed icon would be noisy.
 
 Fixed furniture should read as part of the house fabric but remain editable. Moveable furniture should read as placed objects. A selected object should have a clear outline and handles without making the underlying plan hard to inspect.
+
+Dimension labels should follow the same practical architectural language: unobtrusive linework, clear metre labels, and enough spacing that room labels and wall outlines remain readable. External dimensions should sit outside the house where possible. Internal dimensions should be selective rather than exhaustive.
+
+## Base View Dimensions Overlay
+
+Add a generated dimensions layer to the existing Base View.
+
+Scope:
+
+- A `Dimensions` button or toggle in the Base View toolbar.
+- A hidden-by-default SVG group such as `reference-dimension-layer`.
+- External dimension lines for the main outside house envelope and important jogs.
+- Internal dimension lines for key wall-to-wall spans and room dimensions where labels can fit.
+- Metre labels rounded to sensible precision, usually one or two decimal places.
+- Approximate markers where the source span is photo/reference-positioned rather than measured.
+
+The first implementation should not try to label every wall segment. Too many dimensions would make the plan less useful. Prioritize dimensions that help the user reason about furniture, circulation, and future redesign:
+
+- overall current-house width/depth where available
+- kitchen/dining major spans
+- lounge major spans
+- master bedroom, office, bathroom, Bedroom 2, laundry, and toilet clear dimensions
+- fixed built-in or wardrobe bay widths where currently modelled
+- selected wall thicknesses only where already recorded and useful
+
+The overlay should be generated from existing measured model data and curated wall metadata. It should not become an editable measurement tool in v1.
+
+## Dimension Data Model
+
+Dimension annotations can start as renderer-level data in the existing reference-plan generator, but they should have a clear structure so they can later move into Rust or Svelte.
+
+Suggested annotation fields:
+
+- `id`: stable dimension id
+- `kind`: `external`, `internal`, `wall_thickness`, or `built_in`
+- `label`: rendered metre label
+- `metres`: numeric measurement
+- `x1`, `y1`, `x2`, `y2`: measured span line in SVG coordinates
+- `offset_x`, `offset_y`: label/dimension-line offset from the measured span
+- `confidence`: measured, estimated, or approximate
+- `source`: room id, wall id, feature id, or curated annotation id
+
+The canonical value should be metres. SVG coordinates are only for rendering the generated base view.
+
+Dimension annotations should reuse the existing scale calibration used by the reference plan. If a room already has measured metric dimensions in `DATA/house_model.json`, use those values directly for the label and use SVG geometry only for placement.
 
 ## Object Model
 
@@ -179,6 +242,13 @@ The editor should avoid nested card-heavy layout. It should feel like a working 
 
 For the locked background, prefer the generated `reference_plan.svg` or equivalent SVG content over an iframe. That allows the editable overlay to share one SVG coordinate system with the plan. If the implementation uses a packaged HTML view as a fallback, the furniture overlay must still have a tested coordinate transform and must not depend on DOM access inside an iframe.
 
+Base View dimensions should stay inside the generated reference-plan HTML/SVG for this milestone:
+
+- Add the `Dimensions` control next to existing zoom/fit controls.
+- Show/hide the generated dimension SVG group without reloading the view.
+- Keep dimensions compatible with pan, zoom, and fit-house controls because they live inside the same SVG.
+- Keep the sunlight controls and dimensions toggle independent.
+
 ## Data Flow
 
 Runtime load flow:
@@ -199,6 +269,8 @@ Runtime save flow:
 6. Svelte shows saved/error state.
 
 The first implementation can save one current-house layout for the built-in project. The schema should include `scenario_id` now, using `current`, so future design options do not require a breaking data migration.
+
+Base View dimensions have no persistence in v1. The toggle can reset to off on reload. The dimension geometry is generated from the checked-in model/rendered asset, so it should be covered by renderer tests rather than app-data save tests.
 
 ## Persistence
 
@@ -267,12 +339,23 @@ The editor should fail visibly and preserve data.
 - Missing catalog: keep existing layout visible but disable add-object controls.
 - Missing plan background: show the furniture overlay area with an unavailable-base warning.
 - Unsupported object type: render a generic labelled rectangle rather than dropping the object.
+- Dimension generation failure: omit the dimensions layer and keep the Base View usable.
+- Dimension toggle script failure: leave dimensions hidden by default rather than obscuring the base plan.
 
 Rust validation should reject invalid numeric values, invalid colours, duplicate ids, unknown layer kinds, and non-positive dimensions.
 
 ## Testing
 
 Add tests at the same layers as the existing Rust desktop work.
+
+Python reference-plan tests:
+
+- base view SVG includes a hidden dimensions layer.
+- dimensions layer contains external and internal annotation groups.
+- dimension labels render in metres.
+- known room dimensions match model values where measured.
+- Base View HTML exposes a `Dimensions` toggle independent from sunlight controls.
+- dimensions remain hidden by default.
 
 Core crate tests:
 
@@ -303,6 +386,8 @@ End-to-end/manual verification:
 
 - desktop app opens
 - base view still works
+- Base View dimensions toggle shows and hides dimension lines
+- sunlight controls still work with dimensions off and on
 - 3D navigation still works
 - furniture editor loads seeded objects
 - fixed and moveable layers toggle independently
@@ -315,6 +400,8 @@ Furniture Layers V1 is complete when:
 
 - `Furniture Editor` is available in the desktop app.
 - The current/base plan is visible as a locked background.
+- `Base View` has a `Dimensions` toggle for current-house external and internal dimensions.
+- Dimension annotations use metre labels and are hidden by default.
 - Fixed and moveable furniture layers can be toggled independently.
 - A seeded current-house layout appears on first run.
 - A grouped object catalog is available.
@@ -332,6 +419,8 @@ Furniture Layers V1 is complete when:
 - No multi-scenario switching.
 - No animated transitions between current and future builds.
 - No new sunlight simulation inside the furniture editor.
+- No editable dimension annotations.
+- No click-to-measure tool.
 - No cost estimation engine.
 - No movement heatmap or lifestyle scoring engine.
 - No garden designer.
