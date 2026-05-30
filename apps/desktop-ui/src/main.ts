@@ -1,5 +1,9 @@
-const app = document.querySelector<HTMLDivElement>("#app");
+import "./styles.css";
+import { mount } from "svelte";
+import App from "./App.svelte";
 
-if (app) {
-  app.textContent = "Home Design";
-}
+const app = mount(App, {
+  target: document.getElementById("app")!,
+});
+
+export default app;
