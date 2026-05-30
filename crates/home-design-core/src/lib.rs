@@ -1,8 +1,15 @@
 use serde::{Deserialize, Serialize};
 
+mod furniture;
 mod model;
 mod validation;
 
+pub use furniture::{
+    FurnitureCatalog, FurnitureCatalogGroup, FurnitureCatalogItem, FurnitureLayerKind,
+    FurnitureLayout, FurnitureObject, FurnitureValidationResult, PlanPoint, PlanTransform,
+    default_furniture_catalog, default_plan_transform, seed_current_furniture_layout,
+    validate_furniture_layout,
+};
 pub use model::{
     Anchor, Assumptions, CurrentSite, CurrentStructure, Daylight, GeometryKind, HouseModel,
     HouseModelSummary, ModelLoadError, ModeledItem, PhotoEvidence, PhotoEvidenceCheck, Room,
@@ -22,6 +29,7 @@ pub struct AppStatus {
 pub enum ViewMode {
     BasePlan,
     ThreeDNavigation,
+    FurnitureEditor,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -73,6 +81,13 @@ pub fn built_in_project_manifest() -> ProjectManifest {
                 label: "3D Navigation".to_string(),
                 mode: ViewMode::ThreeDNavigation,
                 asset_path: "/views/house_3d.html".to_string(),
+                available: true,
+            },
+            ViewDescriptor {
+                id: "furniture-editor".to_string(),
+                label: "Furniture Editor".to_string(),
+                mode: ViewMode::FurnitureEditor,
+                asset_path: "/views/reference_plan.svg".to_string(),
                 available: true,
             },
         ],
