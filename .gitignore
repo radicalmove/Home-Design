@@ -15,3 +15,9 @@ OUTPUT/jpeg_photos/_png/
 
 # Scratch renders and zoom crops generated during visual QA.
 OUTPUT/*.png
+
+# Rust, Node, Vite, and Tauri build outputs.
+target/
+node_modules/
+apps/desktop-ui/dist/
+apps/desktop-ui/src-tauri/gen/
