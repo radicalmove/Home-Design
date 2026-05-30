@@ -30,6 +30,7 @@ class House3DViewerHtmlTests(unittest.TestCase):
         self.assertTrue(html.startswith("<!doctype html>"))
         self.assertIn("<title>House 3D Viewer</title>", html)
         self.assertIn('id="house-3d-stage"', html)
+        self.assertIn('tabindex="0"', html)
         self.assertIn('id="house-3d-status"', html)
         self.assertIn('type="importmap"', html)
         self.assertIn("@media (max-width: 560px)", html)
@@ -285,6 +286,8 @@ class House3DViewerHtmlTests(unittest.TestCase):
             "function animate",
             "function adjustCameraHeight",
             "function rotateCamera",
+            "function focusNavigation",
+            "function handleNavigationMessage",
             "function beginDragLook",
             "function dragLook",
             "function endDragLook",
@@ -299,6 +302,10 @@ class House3DViewerHtmlTests(unittest.TestCase):
         self.assertIn("keyup", html)
         self.assertIn("stage.addEventListener('pointerdown', beginDragLook)", html)
         self.assertIn("stage.addEventListener('pointermove', dragLook)", html)
+        self.assertIn("stage.addEventListener('click', focusNavigation)", html)
+        self.assertIn("window.addEventListener('message', handleNavigationMessage)", html)
+        self.assertIn("home-design-3d-keydown", html)
+        self.assertIn("home-design-3d-keyup", html)
         self.assertIn("ArrowLeft') || keysPressed.has('KeyJ')", html)
         self.assertIn("ArrowRight') || keysPressed.has('KeyL')", html)
         self.assertIn("Drag to turn", html)

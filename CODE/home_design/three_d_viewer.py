@@ -613,7 +613,7 @@ def render_house_3d_html(model: HouseModel) -> str:
   </script>
 </head>
 <body>
-  <main id="house-3d-stage" aria-label="Interactive 3D house viewer"></main>
+  <main id="house-3d-stage" aria-label="Interactive 3D house viewer" tabindex="0"></main>
   <aside id="house-3d-status">Drag to turn. W/S move, A/D strafe, arrows or J/L turn, Mouse wheel or Q/E height.</aside>
   <button id="reset-view" type="button">Reset view</button>
   <script type="application/json" id="house-3d-config">{config_json}</script>
@@ -670,6 +670,7 @@ def _module_script() -> str:
       nextRenderer.outputColorSpace = THREE.SRGBColorSpace;
       nextRenderer.shadowMap.enabled = true;
       nextRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      nextRenderer.domElement.tabIndex = 0;
       stage.appendChild(nextRenderer.domElement);
       return nextRenderer;
     }
@@ -1101,6 +1102,11 @@ def _module_script() -> str:
       controls.getObject().lookAt(start.look_at.x, start.look_at.y, start.look_at.z);
     }
 
+    function focusNavigation() {
+      stage.focus({ preventScroll: true });
+      renderer.domElement.focus({ preventScroll: true });
+    }
+
     function rotateCamera(deltaYaw, deltaPitch) {
       lookEuler.setFromQuaternion(camera.quaternion);
       lookEuler.y += deltaYaw;
@@ -1115,6 +1121,7 @@ def _module_script() -> str:
     function beginDragLook(event) {
       if (event.button !== 0 || controls.isLocked) return;
       event.preventDefault();
+      focusNavigation();
       dragLookState = {
         pointerId: event.pointerId,
         x: event.clientX,
@@ -1166,6 +1173,24 @@ def _module_script() -> str:
       if (keysPressed.has('KeyE')) camera.position.y = THREE.MathUtils.clamp(camera.position.y + step, MIN_CAMERA_HEIGHT, MAX_CAMERA_HEIGHT);
     }
 
+    function handleNavigationKeyDown(code) {
+      keysPressed.add(code);
+      if (code === 'KeyR') resetCamera();
+    }
+
+    function handleNavigationKeyUp(code) {
+      keysPressed.delete(code);
+    }
+
+    function handleNavigationMessage(event) {
+      const message = event.data || {};
+      if (message.type === 'home-design-3d-keydown') {
+        handleNavigationKeyDown(message.code);
+      } else if (message.type === 'home-design-3d-keyup') {
+        handleNavigationKeyUp(message.code);
+      }
+    }
+
     function animate() {
       requestAnimationFrame(animate);
       moveCamera(clock.getDelta());
@@ -1196,7 +1221,11 @@ def _module_script() -> str:
       config.features.map(buildOpeningPanel).filter(Boolean).forEach((mesh) => scene.add(mesh));
       config.fixtures.forEach((fixture) => buildFixture(scene, fixture));
 
-      stage.addEventListener('dblclick', () => controls.lock());
+      stage.addEventListener('click', focusNavigation);
+      stage.addEventListener('dblclick', () => {
+        focusNavigation();
+        controls.lock();
+      });
       stage.addEventListener('pointerdown', beginDragLook);
       stage.addEventListener('pointermove', dragLook);
       stage.addEventListener('pointerup', endDragLook);
@@ -1208,13 +1237,13 @@ def _module_script() -> str:
       resetButton.addEventListener('click', resetCamera);
       document.addEventListener('keydown', (event) => {
         if (navigationKeys.has(event.code)) event.preventDefault();
-        keysPressed.add(event.code);
-        if (event.code === 'KeyR') resetCamera();
+        handleNavigationKeyDown(event.code);
       });
       document.addEventListener('keyup', (event) => {
         if (navigationKeys.has(event.code)) event.preventDefault();
-        keysPressed.delete(event.code);
+        handleNavigationKeyUp(event.code);
       });
+      window.addEventListener('message', handleNavigationMessage);
       window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();

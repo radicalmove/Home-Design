@@ -6,6 +6,10 @@
     loadBuiltinModelStatus,
     loadBuiltinProject,
   } from "./lib/homeDesignCommands";
+  import {
+    navigationMessageForKeyEvent,
+    type ThreeDNavigationKeyEventKind,
+  } from "./lib/keyboardForwarding";
   import { activeView, selectAvailableView } from "./lib/viewState";
   import type { AppStatus, BuiltInModelStatus, ProjectManifest } from "./types";
 
@@ -20,6 +24,7 @@
   let modelStatus = $state<BuiltInModelStatus | null>(null);
   let modelStatusError = $state<string | null>(null);
   let selectedViewId = $state<string | null>(null);
+  let activeFrame = $state<HTMLIFrameElement | null>(null);
   let loading = $state(true);
   let appError = $state<string | null>(null);
 
@@ -34,6 +39,25 @@
       return;
     }
     selectedViewId = selectAvailableView(project, viewId);
+  }
+
+  function isEditableTarget(target: EventTarget | null): boolean {
+    return target instanceof HTMLElement
+      && Boolean(target.closest("input, textarea, select, [contenteditable='true']"));
+  }
+
+  function forward3DNavigationKey(kind: ThreeDNavigationKeyEventKind, event: KeyboardEvent) {
+    if (selectedView?.mode !== "three_d_navigation" || isEditableTarget(event.target)) {
+      return;
+    }
+
+    const message = navigationMessageForKeyEvent(kind, event);
+    if (!message) {
+      return;
+    }
+
+    event.preventDefault();
+    activeFrame?.contentWindow?.postMessage(message, "*");
   }
 
   onMount(async () => {
@@ -55,6 +79,11 @@
     }
   });
 </script>
+
+<svelte:window
+  onkeydown={(event) => forward3DNavigationKey("keydown", event)}
+  onkeyup={(event) => forward3DNavigationKey("keyup", event)}
+/>
 
 <main class="app-shell">
   <aside class="sidebar" aria-label="Project navigation">
@@ -137,6 +166,7 @@
       </header>
       <div class="view-frame">
         <iframe
+          bind:this={activeFrame}
           title={selectedView.label}
           src={selectedView.asset_path}
           sandbox="allow-scripts allow-same-origin allow-pointer-lock allow-forms"
