@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import FurnitureEditorView from "./FurnitureEditorView.svelte";
   import { withCheckedViewAvailability } from "./lib/assetAvailability";
   import {
     getAppStatus,
@@ -164,14 +165,18 @@
         </div>
         <span class="asset-path">{selectedView.asset_path}</span>
       </header>
-      <div class="view-frame">
-        <iframe
-          bind:this={activeFrame}
-          title={selectedView.label}
-          src={selectedView.asset_path}
-          sandbox="allow-scripts allow-same-origin allow-pointer-lock allow-forms"
-        ></iframe>
-      </div>
+      {#if selectedView.mode === "furniture_editor" && project}
+        <FurnitureEditorView projectId={project.id} backgroundAssetPath={selectedView.asset_path} />
+      {:else}
+        <div class="view-frame">
+          <iframe
+            bind:this={activeFrame}
+            title={selectedView.label}
+            src={selectedView.asset_path}
+            sandbox="allow-scripts allow-same-origin allow-pointer-lock allow-forms"
+          ></iframe>
+        </div>
+      {/if}
     {:else}
       <div class="state-panel error">No packaged views are available.</div>
     {/if}
