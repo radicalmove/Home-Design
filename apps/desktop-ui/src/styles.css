@@ -96,6 +96,76 @@ button {
   line-height: 1.45;
 }
 
+.model-summary {
+  display: grid;
+  gap: 12px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+}
+
+.model-summary strong,
+.model-summary p {
+  margin: 0;
+}
+
+.model-summary p {
+  color: rgba(246, 248, 249, 0.7);
+  font-size: 0.78rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.model-summary.warning {
+  border-color: rgba(242, 165, 128, 0.58);
+}
+
+.model-state {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: #f6f8f9;
+  font-size: 0.85rem;
+}
+
+.model-state span {
+  color: rgba(246, 248, 249, 0.66);
+  font-size: 0.75rem;
+}
+
+.model-state .invalid {
+  color: #f2a580;
+}
+
+.model-summary dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.model-summary dl div {
+  min-width: 0;
+}
+
+.model-summary dt,
+.model-summary dd {
+  margin: 0;
+}
+
+.model-summary dt {
+  color: rgba(246, 248, 249, 0.62);
+  font-size: 0.68rem;
+}
+
+.model-summary dd {
+  color: #f6f8f9;
+  font-size: 1rem;
+  font-weight: 740;
+}
+
 .eyebrow {
   color: #3c7a6b;
   font-size: 0.72rem;

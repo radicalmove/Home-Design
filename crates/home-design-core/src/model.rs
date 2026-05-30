@@ -82,6 +82,29 @@ pub fn load_house_model_from_path(path: impl AsRef<Path>) -> Result<HouseModel, 
     HouseModel::from_json_str(&fs::read_to_string(path)?)
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct HouseModelSummary {
+    pub units: String,
+    pub room_count: usize,
+    pub current_space_count: usize,
+    pub current_built_in_count: usize,
+    pub current_feature_count: usize,
+    pub site_element_count: usize,
+    pub shadow_source_count: usize,
+}
+
+pub fn summarize_house_model(model: &HouseModel) -> HouseModelSummary {
+    HouseModelSummary {
+        units: model.units.clone(),
+        room_count: model.rooms.len(),
+        current_space_count: model.current_structure.spaces.len(),
+        current_built_in_count: model.current_structure.built_ins.len(),
+        current_feature_count: model.current_structure.features.len(),
+        site_element_count: model.current_site.elements.len(),
+        shadow_source_count: model.current_site.shadow_sources.len(),
+    }
+}
+
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct Assumptions {
     #[serde(default)]

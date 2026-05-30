@@ -1,9 +1,13 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { withCheckedViewAvailability } from "./lib/assetAvailability";
-  import { getAppStatus, loadBuiltinProject } from "./lib/homeDesignCommands";
+  import {
+    getAppStatus,
+    loadBuiltinModelStatus,
+    loadBuiltinProject,
+  } from "./lib/homeDesignCommands";
   import { activeView, selectAvailableView } from "./lib/viewState";
-  import type { AppStatus, ProjectManifest } from "./types";
+  import type { AppStatus, BuiltInModelStatus, ProjectManifest } from "./types";
 
   const fallbackStatus: AppStatus = {
     app_name: "Home Design",
@@ -13,6 +17,8 @@
 
   let status = $state<AppStatus>(fallbackStatus);
   let project = $state<ProjectManifest | null>(null);
+  let modelStatus = $state<BuiltInModelStatus | null>(null);
+  let modelStatusError = $state<string | null>(null);
   let selectedViewId = $state<string | null>(null);
   let loading = $state(true);
   let appError = $state<string | null>(null);
@@ -37,6 +43,11 @@
       status = await getAppStatus();
       project = await withCheckedViewAvailability(await loadBuiltinProject());
       selectedViewId = selectAvailableView(project, "base-view");
+      try {
+        modelStatus = await loadBuiltinModelStatus();
+      } catch (reason: unknown) {
+        modelStatusError = toErrorMessage(reason);
+      }
     } catch (reason: unknown) {
       appError = `Could not load Home Design: ${toErrorMessage(reason)}`;
     } finally {
@@ -58,6 +69,40 @@
         <h2>{project.name}</h2>
         <p>{project.model_source}</p>
       </section>
+
+      {#if modelStatus}
+        <section class="model-summary" aria-label="Model validation status">
+          <span class="eyebrow">Model</span>
+          <div class="model-state">
+            <strong class:invalid={!modelStatus.valid}>
+              {modelStatus.valid ? "Validated" : "Needs review"}
+            </strong>
+            <span>
+              {modelStatus.validation_error_count + modelStatus.validation_warning_count} issues
+            </span>
+          </div>
+          <dl>
+            <div>
+              <dt>Rooms</dt>
+              <dd>{modelStatus.summary.room_count}</dd>
+            </div>
+            <div>
+              <dt>Features</dt>
+              <dd>{modelStatus.summary.current_feature_count}</dd>
+            </div>
+            <div>
+              <dt>Site</dt>
+              <dd>{modelStatus.summary.site_element_count}</dd>
+            </div>
+          </dl>
+        </section>
+      {:else if modelStatusError}
+        <section class="model-summary warning" aria-label="Model validation status">
+          <span class="eyebrow">Model</span>
+          <strong>Unavailable</strong>
+          <p>{modelStatusError}</p>
+        </section>
+      {/if}
 
       <nav class="view-tabs" aria-label="View modes">
         {#each project.views as view}

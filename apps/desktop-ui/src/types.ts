@@ -25,3 +25,21 @@ export type ProjectManifest = {
   object_catalogs: string[];
   analysis_outputs: string[];
 };
+
+export type HouseModelSummary = {
+  units: string;
+  room_count: number;
+  current_space_count: number;
+  current_built_in_count: number;
+  current_feature_count: number;
+  site_element_count: number;
+  shadow_source_count: number;
+};
+
+export type BuiltInModelStatus = {
+  source_path: string;
+  summary: HouseModelSummary;
+  valid: boolean;
+  validation_error_count: number;
+  validation_warning_count: number;
+};

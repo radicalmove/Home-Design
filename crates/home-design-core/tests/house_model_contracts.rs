@@ -1,5 +1,6 @@
 use home_design_core::{
-    GeometryKind, HouseModel, load_house_model_from_path, validate_house_model,
+    GeometryKind, HouseModel, load_house_model_from_path, summarize_house_model,
+    validate_house_model,
 };
 use std::path::PathBuf;
 
@@ -127,4 +128,19 @@ fn rust_model_can_parse_from_json_string_for_future_commands() {
 
     assert_eq!(model.units, "metres");
     assert_eq!(model.room("sunroom").expect("sunroom").category, "living");
+}
+
+#[test]
+fn rust_model_summary_reports_counts_for_desktop_status() {
+    let model = load_house_model_from_path(model_path()).expect("load house model");
+
+    let summary = summarize_house_model(&model);
+
+    assert_eq!(summary.units, "metres");
+    assert_eq!(summary.room_count, 11);
+    assert_eq!(summary.current_space_count, 11);
+    assert_eq!(summary.current_built_in_count, 1);
+    assert_eq!(summary.current_feature_count, 30);
+    assert_eq!(summary.site_element_count, 11);
+    assert_eq!(summary.shadow_source_count, 3);
 }
