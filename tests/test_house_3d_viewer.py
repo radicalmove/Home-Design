@@ -284,6 +284,10 @@ class House3DViewerHtmlTests(unittest.TestCase):
             "function buildSiteElement",
             "function animate",
             "function adjustCameraHeight",
+            "function rotateCamera",
+            "function beginDragLook",
+            "function dragLook",
+            "function endDragLook",
             "function resetCamera",
         ]:
             self.assertIn(function_name, html)
@@ -293,6 +297,12 @@ class House3DViewerHtmlTests(unittest.TestCase):
         self.assertIn("keysPressed", html)
         self.assertIn("keydown", html)
         self.assertIn("keyup", html)
+        self.assertIn("stage.addEventListener('pointerdown', beginDragLook)", html)
+        self.assertIn("stage.addEventListener('pointermove', dragLook)", html)
+        self.assertIn("ArrowLeft') || keysPressed.has('KeyJ')", html)
+        self.assertIn("ArrowRight') || keysPressed.has('KeyL')", html)
+        self.assertIn("Drag to turn", html)
+        self.assertIn("A/D strafe", html)
         self.assertIn("addEventListener('wheel'", html)
         self.assertIn("Mouse wheel", html)
         self.assertIn("wall-surround", html)

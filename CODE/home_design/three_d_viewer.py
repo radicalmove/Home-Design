@@ -578,7 +578,8 @@ def render_house_3d_html(model: HouseModel) -> str:
   <style>
     * {{ box-sizing: border-box; }}
     body {{ margin: 0; overflow: hidden; background: #d8d4ca; font-family: Arial, sans-serif; }}
-    #house-3d-stage {{ position: fixed; inset: 0; }}
+    #house-3d-stage {{ position: fixed; inset: 0; cursor: grab; touch-action: none; }}
+    #house-3d-stage.look-dragging {{ cursor: grabbing; }}
     #house-3d-status {{
       position: fixed; left: 14px; top: 14px; z-index: 2; max-width: 360px;
       padding: 10px 12px; border: 1px solid rgba(40, 44, 42, 0.18);
@@ -613,7 +614,7 @@ def render_house_3d_html(model: HouseModel) -> str:
 </head>
 <body>
   <main id="house-3d-stage" aria-label="Interactive 3D house viewer"></main>
-  <aside id="house-3d-status">Click the scene to explore. Use W A S D, mouse look, and Mouse wheel height.</aside>
+  <aside id="house-3d-status">Drag to turn. W/S move, A/D strafe, arrows or J/L turn, Mouse wheel or Q/E height.</aside>
   <button id="reset-view" type="button">Reset view</button>
   <script type="application/json" id="house-3d-config">{config_json}</script>
   <script type="module">
@@ -636,15 +637,29 @@ def _module_script() -> str:
     const keysPressed = new Set();
     const clock = new THREE.Clock();
     const materialCache = new Map();
+    const navigationKeys = new Set([
+      'KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyQ', 'KeyE', 'KeyJ', 'KeyL', 'KeyR',
+      'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+      'ShiftLeft', 'ShiftRight'
+    ]);
+    const LOOK_SENSITIVITY = 0.004;
+    const TURN_SPEED = 1.75;
+    const PITCH_LIMIT = Math.PI / 2 - 0.08;
+    const lookEuler = new THREE.Euler(0, 0, 0, 'YXZ');
     let camera;
     let controls;
     let renderer;
     let scene;
+    let dragLookState = null;
     const MIN_CAMERA_HEIGHT = 0.45;
     const MAX_CAMERA_HEIGHT = 5.4;
 
     function showUnsupported(message) {
       status.textContent = message;
+    }
+
+    function navigationStatusText() {
+      return `${config.title}: ${config.rooms.length} rooms, ${config.features.length} openings/features, ${config.fixtures.length} photo cues. Drag to turn. W/S move, A/D strafe, arrows or J/L turn, Mouse wheel or Q/E height.`;
     }
 
     function createRenderer() {
@@ -1086,6 +1101,48 @@ def _module_script() -> str:
       controls.getObject().lookAt(start.look_at.x, start.look_at.y, start.look_at.z);
     }
 
+    function rotateCamera(deltaYaw, deltaPitch) {
+      lookEuler.setFromQuaternion(camera.quaternion);
+      lookEuler.y += deltaYaw;
+      lookEuler.x = THREE.MathUtils.clamp(
+        lookEuler.x + deltaPitch,
+        -PITCH_LIMIT,
+        PITCH_LIMIT
+      );
+      camera.quaternion.setFromEuler(lookEuler);
+    }
+
+    function beginDragLook(event) {
+      if (event.button !== 0 || controls.isLocked) return;
+      event.preventDefault();
+      dragLookState = {
+        pointerId: event.pointerId,
+        x: event.clientX,
+        y: event.clientY
+      };
+      stage.classList.add('look-dragging');
+      stage.setPointerCapture(event.pointerId);
+    }
+
+    function dragLook(event) {
+      if (!dragLookState || event.pointerId !== dragLookState.pointerId) return;
+      event.preventDefault();
+      const movementX = event.clientX - dragLookState.x;
+      const movementY = event.clientY - dragLookState.y;
+      dragLookState.x = event.clientX;
+      dragLookState.y = event.clientY;
+      rotateCamera(-movementX * LOOK_SENSITIVITY, -movementY * LOOK_SENSITIVITY);
+    }
+
+    function endDragLook(event) {
+      if (!dragLookState || event.pointerId !== dragLookState.pointerId) return;
+      if (stage.hasPointerCapture(event.pointerId)) {
+        stage.releasePointerCapture(event.pointerId);
+      }
+      dragLookState = null;
+      stage.classList.remove('look-dragging');
+    }
+
     function adjustCameraHeight(deltaY) {
       const step = keysPressed.has('ShiftLeft') || keysPressed.has('ShiftRight') ? 0.55 : 0.28;
       const direction = deltaY < 0 ? 1 : -1;
@@ -1101,8 +1158,10 @@ def _module_script() -> str:
       const step = speed * delta;
       if (keysPressed.has('KeyW') || keysPressed.has('ArrowUp')) controls.moveForward(step);
       if (keysPressed.has('KeyS') || keysPressed.has('ArrowDown')) controls.moveForward(-step);
-      if (keysPressed.has('KeyA') || keysPressed.has('ArrowLeft')) controls.moveRight(-step);
-      if (keysPressed.has('KeyD') || keysPressed.has('ArrowRight')) controls.moveRight(step);
+      if (keysPressed.has('KeyA')) controls.moveRight(-step);
+      if (keysPressed.has('KeyD')) controls.moveRight(step);
+      if (keysPressed.has('ArrowLeft') || keysPressed.has('KeyJ')) rotateCamera(TURN_SPEED * delta, 0);
+      if (keysPressed.has('ArrowRight') || keysPressed.has('KeyL')) rotateCamera(-TURN_SPEED * delta, 0);
       if (keysPressed.has('KeyQ')) camera.position.y = THREE.MathUtils.clamp(camera.position.y - step, MIN_CAMERA_HEIGHT, MAX_CAMERA_HEIGHT);
       if (keysPressed.has('KeyE')) camera.position.y = THREE.MathUtils.clamp(camera.position.y + step, MIN_CAMERA_HEIGHT, MAX_CAMERA_HEIGHT);
     }
@@ -1137,24 +1196,32 @@ def _module_script() -> str:
       config.features.map(buildOpeningPanel).filter(Boolean).forEach((mesh) => scene.add(mesh));
       config.fixtures.forEach((fixture) => buildFixture(scene, fixture));
 
-      stage.addEventListener('click', () => controls.lock());
+      stage.addEventListener('dblclick', () => controls.lock());
+      stage.addEventListener('pointerdown', beginDragLook);
+      stage.addEventListener('pointermove', dragLook);
+      stage.addEventListener('pointerup', endDragLook);
+      stage.addEventListener('pointercancel', endDragLook);
       renderer.domElement.addEventListener('wheel', (event) => {
         event.preventDefault();
         adjustCameraHeight(event.deltaY);
       }, { passive: false });
       resetButton.addEventListener('click', resetCamera);
       document.addEventListener('keydown', (event) => {
+        if (navigationKeys.has(event.code)) event.preventDefault();
         keysPressed.add(event.code);
         if (event.code === 'KeyR') resetCamera();
       });
-      document.addEventListener('keyup', (event) => keysPressed.delete(event.code));
+      document.addEventListener('keyup', (event) => {
+        if (navigationKeys.has(event.code)) event.preventDefault();
+        keysPressed.delete(event.code);
+      });
       window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
       });
 
-      status.textContent = `${config.title}: ${config.rooms.length} rooms, ${config.features.length} openings/features, ${config.fixtures.length} photo cues. Mouse wheel raises/lowers the view.`;
+      status.textContent = navigationStatusText();
       animate();
     }
 
