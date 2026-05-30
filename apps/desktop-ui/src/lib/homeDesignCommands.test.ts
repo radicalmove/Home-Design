@@ -4,6 +4,9 @@ import {
   getAppStatus,
   loadBuiltinModelStatus,
   loadBuiltinProject,
+  loadFurnitureCatalog,
+  loadFurnitureLayout,
+  saveFurnitureLayout,
 } from "./homeDesignCommands";
 
 vi.mock("@tauri-apps/api/core", () => ({
@@ -71,5 +74,60 @@ describe("home design Tauri commands", () => {
     expect(invokeMock).toHaveBeenCalledWith("load_builtin_model_status");
     expect(status.summary.room_count).toBe(11);
     expect(status.validation_error_count).toBe(0);
+  });
+
+  it("loads the furniture catalog from the Rust command", async () => {
+    invokeMock.mockResolvedValueOnce({ groups: [] });
+
+    const catalog = await loadFurnitureCatalog();
+
+    expect(invokeMock).toHaveBeenCalledWith("load_furniture_catalog");
+    expect(catalog.groups).toEqual([]);
+  });
+
+  it("loads a furniture layout for the current scenario", async () => {
+    invokeMock.mockResolvedValueOnce({
+      source: "seed",
+      layout: {
+        project_id: "current-house",
+        scenario_id: "current",
+        plan_transform: {
+          units: "metres",
+          svg_width_px: 1600,
+          svg_height_px: 900,
+          origin_svg_px: { x: 518, y: 314 },
+          px_per_m: 27.16,
+        },
+        objects: [],
+      },
+    });
+
+    const result = await loadFurnitureLayout("current-house", "current");
+
+    expect(invokeMock).toHaveBeenCalledWith("load_furniture_layout", {
+      projectId: "current-house",
+      scenarioId: "current",
+    });
+    expect(result.source).toBe("seed");
+  });
+
+  it("saves a furniture layout through the Rust command", async () => {
+    const layout = {
+      project_id: "current-house",
+      scenario_id: "current",
+      plan_transform: {
+        units: "metres" as const,
+        svg_width_px: 1600,
+        svg_height_px: 900,
+        origin_svg_px: { x: 518, y: 314 },
+        px_per_m: 27.16,
+      },
+      objects: [],
+    };
+    invokeMock.mockResolvedValueOnce(undefined);
+
+    await saveFurnitureLayout(layout);
+
+    expect(invokeMock).toHaveBeenCalledWith("save_furniture_layout", { layout });
   });
 });

@@ -22,6 +22,13 @@ const project: ProjectManifest = {
       asset_path: "/views/house_3d.html",
       available: true,
     },
+    {
+      id: "furniture-editor",
+      label: "Furniture Editor",
+      mode: "furniture_editor",
+      asset_path: "/views/reference_plan.svg",
+      available: true,
+    },
   ],
   scenarios: [],
   layers: [],
@@ -51,5 +58,10 @@ describe("view state helpers", () => {
 
   it("returns the active descriptor for the selected view", () => {
     expect(activeView(project, "three-d-navigation")?.asset_path).toBe("/views/house_3d.html");
+  });
+
+  it("selects the furniture editor native view when available", () => {
+    expect(selectAvailableView(project, "furniture-editor")).toBe("furniture-editor");
+    expect(activeView(project, "furniture-editor")?.mode).toBe("furniture_editor");
   });
 });

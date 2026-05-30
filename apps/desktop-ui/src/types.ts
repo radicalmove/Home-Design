@@ -4,7 +4,7 @@ export type AppStatus = {
   built_in_project_count: number;
 };
 
-export type ViewMode = "base_plan" | "three_d_navigation";
+export type ViewMode = "base_plan" | "three_d_navigation" | "furniture_editor";
 
 export type ViewDescriptor = {
   id: string;
@@ -42,4 +42,71 @@ export type BuiltInModelStatus = {
   valid: boolean;
   validation_error_count: number;
   validation_warning_count: number;
+};
+
+export type FurnitureLayerKind = "fixed" | "moveable";
+
+export type PlanPoint = {
+  x: number;
+  y: number;
+};
+
+export type PlanTransform = {
+  units: "metres";
+  svg_width_px: number;
+  svg_height_px: number;
+  origin_svg_px: PlanPoint;
+  px_per_m: number;
+};
+
+export type FurnitureObject = {
+  id: string;
+  catalog_id: string | null;
+  layer: FurnitureLayerKind;
+  type: string;
+  label: string;
+  abbreviation: string | null;
+  x_m: number;
+  y_m: number;
+  width_m: number;
+  depth_m: number;
+  rotation_deg: number;
+  colour: string;
+  locked: boolean;
+  notes: string | null;
+  evidence: string | null;
+};
+
+export type FurnitureLayout = {
+  project_id: string;
+  scenario_id: string;
+  plan_transform: PlanTransform;
+  objects: FurnitureObject[];
+};
+
+export type FurnitureLayoutLoadResult = {
+  source: "seed" | "saved";
+  layout: FurnitureLayout;
+};
+
+export type FurnitureCatalogItem = {
+  id: string;
+  label: string;
+  layer: FurnitureLayerKind;
+  type: string;
+  abbreviation: string | null;
+  default_width_m: number;
+  default_depth_m: number;
+  colour: string;
+  symbol: string;
+};
+
+export type FurnitureCatalogGroup = {
+  id: string;
+  name: string;
+  items: FurnitureCatalogItem[];
+};
+
+export type FurnitureCatalog = {
+  groups: FurnitureCatalogGroup[];
 };
