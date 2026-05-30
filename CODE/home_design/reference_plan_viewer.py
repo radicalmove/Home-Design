@@ -192,6 +192,7 @@ def render_reference_plan_html(model: HouseModel) -> str:
         <button id="zoom-in" type="button">+</button>
         <button id="zoom-reset" type="button">Reset</button>
         <button id="fit-house" type="button">Fit house</button>
+        <button id="toggle-dimensions" type="button" aria-pressed="false">Dimensions</button>
       </div>
       <div class="plan-stage" id="reference-plan-stage">
         {svg}
@@ -220,11 +221,14 @@ def render_reference_plan_html(model: HouseModel) -> str:
     const stage = document.getElementById('reference-plan-stage');
     const svg = stage.querySelector('svg');
     const readout = document.getElementById('zoom-readout');
+    const toggleDimensions = document.getElementById('toggle-dimensions');
+    const dimensionsLayer = document.getElementById('reference-dimension-layer');
     const MAX_ZOOM = 5.0;
     let zoom = 1.28;
     let panX = -660;
     let panY = -310;
     let panState = null;
+    let dimensionsVisible = false;
 
     function applyViewBox() {{
       const width = viewport.clientWidth / zoom;
@@ -283,10 +287,20 @@ def render_reference_plan_html(model: HouseModel) -> str:
       applyViewBox();
     }}
 
+    function setDimensionsVisible(visible) {{
+      dimensionsVisible = visible;
+      if (dimensionsLayer) {{
+        dimensionsLayer.style.display = visible ? '' : 'none';
+        dimensionsLayer.setAttribute('aria-hidden', visible ? 'false' : 'true');
+      }}
+      toggleDimensions?.setAttribute('aria-pressed', visible ? 'true' : 'false');
+    }}
+
     document.getElementById('zoom-in').addEventListener('click', () => setZoom(zoom * 1.18));
     document.getElementById('zoom-out').addEventListener('click', () => setZoom(zoom / 1.18));
     document.getElementById('zoom-reset').addEventListener('click', fitHouse);
     document.getElementById('fit-house').addEventListener('click', fitHouse);
+    toggleDimensions?.addEventListener('click', () => setDimensionsVisible(!dimensionsVisible));
     viewport.addEventListener('pointerdown', beginPan);
     viewport.addEventListener('pointermove', movePan);
     viewport.addEventListener('pointerup', endPan);
@@ -298,6 +312,7 @@ def render_reference_plan_html(model: HouseModel) -> str:
     window.addEventListener('resize', applyViewBox);
 
     applyViewBox();
+    setDimensionsVisible(false);
   </script>
   {sunlight_script}
 </body>

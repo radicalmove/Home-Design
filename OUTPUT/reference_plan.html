@@ -178,6 +178,7 @@
         <button id="zoom-in" type="button">+</button>
         <button id="zoom-reset" type="button">Reset</button>
         <button id="fit-house" type="button">Fit house</button>
+        <button id="toggle-dimensions" type="button" aria-pressed="false">Dimensions</button>
       </div>
       <div class="plan-stage" id="reference-plan-stage">
         <svg id="presentation-plan" data-render-style="reference-plan" xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
@@ -262,6 +263,11 @@ text { font-family: Arial, sans-serif; fill: #1d2522; }
 .ref-site-label { font-size: 8px; fill: #243029; }
 .ref-scale-line, .ref-scale-tick { stroke: #2f3134; stroke-width: 1.1; stroke-linecap: butt; }
 .ref-scale-label { font-size: 7px; text-anchor: middle; dominant-baseline: auto; fill: #2f3134; }
+.ref-dimension-line, .ref-dimension-extension, .ref-dimension-tick { stroke: #263238; stroke-width: 0.85; stroke-linecap: butt; fill: none; }
+.ref-dimension-extension { opacity: 0.58; }
+.ref-dimension-label { font-size: 7px; font-weight: 700; text-anchor: middle; dominant-baseline: middle; fill: #263238; }
+.ref-dimension-label.approximate { fill: #7a5a1f; }
+.ref-dimension-group.approximate .ref-dimension-line, .ref-dimension-group.approximate .ref-dimension-tick { stroke-dasharray: 3 2; stroke: #7a5a1f; }
 .ref-compass-axis { stroke: #2f3134; stroke-width: 1.1; stroke-linecap: round; }
 .ref-compass-secondary { stroke: #2f3134; stroke-width: 0.7; stroke-linecap: round; opacity: 0.58; }
 .ref-compass-arrow { fill: #2f3134; stroke: none; }
@@ -521,6 +527,72 @@ text { font-family: Arial, sans-serif; fill: #1d2522; }
 <text class="ref-compass-label" x="1049.8" y="597.8">S</text>
 <text class="ref-compass-label" x="1045.2" y="562.8">W</text>
 </g>
+<g id="reference-dimension-layer" style="display:none" aria-hidden="true">
+<g class="ref-dimension-group measured" data-ref-dimension="overall-master-to-laundry" data-ref-dimension-kind="external" data-ref-dimension-confidence="measured" data-ref-dimension-source="anchor:long_side_master_to_laundry">
+<line class="ref-dimension-extension" x1="533.9" y1="617.8" x2="533.9" y2="643.8"/>
+<line class="ref-dimension-extension" x1="960.4" y1="617.8" x2="960.4" y2="643.8"/>
+<line class="ref-dimension-line" x1="533.9" y1="643.8" x2="960.4" y2="643.8"/>
+<line class="ref-dimension-tick" x1="533.9" y1="639.3" x2="533.9" y2="648.3"/>
+<line class="ref-dimension-tick" x1="960.4" y1="639.3" x2="960.4" y2="648.3"/>
+<text class="ref-dimension-label measured" x="747.1" y="643.8">16.10 m</text>
+</g>
+<g class="ref-dimension-group measured" data-ref-dimension="overall-external-depth" data-ref-dimension-kind="external" data-ref-dimension-confidence="measured" data-ref-dimension-source="anchor:combined_external_depth">
+<line class="ref-dimension-extension" x1="984.4" y1="302.3" x2="1012.4" y2="302.3"/>
+<line class="ref-dimension-extension" x1="984.4" y1="602.2" x2="1012.4" y2="602.2"/>
+<line class="ref-dimension-line" x1="1012.4" y1="302.3" x2="1012.4" y2="602.2"/>
+<line class="ref-dimension-tick" x1="1007.9" y1="302.3" x2="1016.9" y2="302.3"/>
+<line class="ref-dimension-tick" x1="1007.9" y1="602.2" x2="1016.9" y2="602.2"/>
+<text class="ref-dimension-label measured" x="1012.4" y="452.2">11.58 m</text>
+</g>
+<g class="ref-dimension-group measured" data-ref-dimension="kitchen-dining-clear-length" data-ref-dimension-kind="internal" data-ref-dimension-confidence="measured" data-ref-dimension-source="room:kitchen_dining.length">
+<line class="ref-dimension-extension" x1="758.8" y1="331.0" x2="758.8" y2="313.0"/>
+<line class="ref-dimension-extension" x1="833.0" y1="331.0" x2="833.0" y2="313.0"/>
+<line class="ref-dimension-line" x1="758.8" y1="313.0" x2="833.0" y2="313.0"/>
+<line class="ref-dimension-tick" x1="758.8" y1="308.5" x2="758.8" y2="317.5"/>
+<line class="ref-dimension-tick" x1="833.0" y1="308.5" x2="833.0" y2="317.5"/>
+<text class="ref-dimension-label measured" x="795.9" y="313.0">8.12 m</text>
+</g>
+<g class="ref-dimension-group measured" data-ref-dimension="lounge-clear-depth" data-ref-dimension-kind="internal" data-ref-dimension-confidence="measured" data-ref-dimension-source="room:lounge.depth">
+<line class="ref-dimension-extension" x1="679.0" y1="348.8" x2="661.0" y2="348.8"/>
+<line class="ref-dimension-extension" x1="679.0" y1="484.6" x2="661.0" y2="484.6"/>
+<line class="ref-dimension-line" x1="661.0" y1="348.8" x2="661.0" y2="484.6"/>
+<line class="ref-dimension-tick" x1="656.5" y1="348.8" x2="665.5" y2="348.8"/>
+<line class="ref-dimension-tick" x1="656.5" y1="484.6" x2="665.5" y2="484.6"/>
+<text class="ref-dimension-label measured" x="661.0" y="416.7">4.90 m</text>
+</g>
+<g class="ref-dimension-group measured" data-ref-dimension="master-bedroom-clear-width" data-ref-dimension-kind="internal" data-ref-dimension-confidence="measured" data-ref-dimension-source="room:master_bedroom.width">
+<line class="ref-dimension-extension" x1="533.9" y1="541.0" x2="533.9" y2="525.0"/>
+<line class="ref-dimension-extension" x1="627.1" y1="541.0" x2="627.1" y2="525.0"/>
+<line class="ref-dimension-line" x1="533.9" y1="525.0" x2="627.1" y2="525.0"/>
+<line class="ref-dimension-tick" x1="533.9" y1="520.5" x2="533.9" y2="529.5"/>
+<line class="ref-dimension-tick" x1="627.1" y1="520.5" x2="627.1" y2="529.5"/>
+<text class="ref-dimension-label measured" x="580.5" y="525.0">3.30 m</text>
+</g>
+<g class="ref-dimension-group measured" data-ref-dimension="wardrobe-bay-depth" data-ref-dimension-kind="built_in" data-ref-dimension-confidence="measured" data-ref-dimension-source="built_in:master_bedroom_wardrobe">
+<line class="ref-dimension-extension" x1="627.1" y1="609.5" x2="627.1" y2="625.5"/>
+<line class="ref-dimension-extension" x1="646.8" y1="609.5" x2="646.8" y2="625.5"/>
+<line class="ref-dimension-line" x1="627.1" y1="625.5" x2="646.8" y2="625.5"/>
+<line class="ref-dimension-tick" x1="627.1" y1="621.0" x2="627.1" y2="630.0"/>
+<line class="ref-dimension-tick" x1="646.8" y1="621.0" x2="646.8" y2="630.0"/>
+<text class="ref-dimension-label measured" x="637.0" y="625.5">0.62 m</text>
+</g>
+<g class="ref-dimension-group measured" data-ref-dimension="bedroom-2-clear-length" data-ref-dimension-kind="internal" data-ref-dimension-confidence="measured" data-ref-dimension-source="room:bedroom_2.length">
+<line class="ref-dimension-extension" x1="773.9" y1="546.0" x2="773.9" y2="530.0"/>
+<line class="ref-dimension-extension" x1="902.8" y1="546.0" x2="902.8" y2="530.0"/>
+<line class="ref-dimension-line" x1="773.9" y1="530.0" x2="902.8" y2="530.0"/>
+<line class="ref-dimension-tick" x1="773.9" y1="525.5" x2="773.9" y2="534.5"/>
+<line class="ref-dimension-tick" x1="902.8" y1="525.5" x2="902.8" y2="534.5"/>
+<text class="ref-dimension-label measured" x="838.3" y="530.0">4.73 m</text>
+</g>
+<g class="ref-dimension-group approximate" data-ref-dimension="sunroom-approx-span" data-ref-dimension-kind="external" data-ref-dimension-confidence="approximate" data-ref-dimension-source="room:sunroom.reference_position">
+<line class="ref-dimension-extension" x1="533.9" y1="326.0" x2="533.9" y2="308.0"/>
+<line class="ref-dimension-extension" x1="663.1" y1="326.0" x2="663.1" y2="308.0"/>
+<line class="ref-dimension-line" x1="533.9" y1="308.0" x2="663.1" y2="308.0"/>
+<line class="ref-dimension-tick" x1="533.9" y1="303.5" x2="533.9" y2="312.5"/>
+<line class="ref-dimension-tick" x1="663.1" y1="303.5" x2="663.1" y2="312.5"/>
+<text class="ref-dimension-label approximate" x="598.5" y="308.0">~4.87 m</text>
+</g>
+</g>
 <g id="reference-label-layer">
 <text class="ref-site-label" x="611.0" y="325.4">Upper Side Driveway</text>
 <text class="ref-site-label" x="530.0" y="416.4">Front Path</text>
@@ -570,11 +642,14 @@ text { font-family: Arial, sans-serif; fill: #1d2522; }
     const stage = document.getElementById('reference-plan-stage');
     const svg = stage.querySelector('svg');
     const readout = document.getElementById('zoom-readout');
+    const toggleDimensions = document.getElementById('toggle-dimensions');
+    const dimensionsLayer = document.getElementById('reference-dimension-layer');
     const MAX_ZOOM = 5.0;
     let zoom = 1.28;
     let panX = -660;
     let panY = -310;
     let panState = null;
+    let dimensionsVisible = false;
 
     function applyViewBox() {
       const width = viewport.clientWidth / zoom;
@@ -633,10 +708,20 @@ text { font-family: Arial, sans-serif; fill: #1d2522; }
       applyViewBox();
     }
 
+    function setDimensionsVisible(visible) {
+      dimensionsVisible = visible;
+      if (dimensionsLayer) {
+        dimensionsLayer.style.display = visible ? '' : 'none';
+        dimensionsLayer.setAttribute('aria-hidden', visible ? 'false' : 'true');
+      }
+      toggleDimensions?.setAttribute('aria-pressed', visible ? 'true' : 'false');
+    }
+
     document.getElementById('zoom-in').addEventListener('click', () => setZoom(zoom * 1.18));
     document.getElementById('zoom-out').addEventListener('click', () => setZoom(zoom / 1.18));
     document.getElementById('zoom-reset').addEventListener('click', fitHouse);
     document.getElementById('fit-house').addEventListener('click', fitHouse);
+    toggleDimensions?.addEventListener('click', () => setDimensionsVisible(!dimensionsVisible));
     viewport.addEventListener('pointerdown', beginPan);
     viewport.addEventListener('pointermove', movePan);
     viewport.addEventListener('pointerup', endPan);
@@ -648,6 +733,7 @@ text { font-family: Arial, sans-serif; fill: #1d2522; }
     window.addEventListener('resize', applyViewBox);
 
     applyViewBox();
+    setDimensionsVisible(false);
   </script>
   <script>
     const sunlightConfig = JSON.parse(document.getElementById('sunlight-config').textContent);

@@ -130,6 +130,24 @@ class ReferencePlanSunlightTests(unittest.TestCase):
         self.assertIn('id="sunlight-clip-defs"', html)
         self.assertIn("Sunlight", html)
 
+    def test_reference_plan_html_exposes_dimensions_toggle(self):
+        model = load_model("DATA/house_model.json")
+        html = render_reference_plan_html(model)
+
+        self.assertIn('id="toggle-dimensions"', html)
+        self.assertIn("Dimensions", html)
+        self.assertIn("const dimensionsLayer = document.getElementById('reference-dimension-layer');", html)
+        self.assertIn("dimensionsVisible = false", html)
+
+    def test_reference_plan_dimensions_toggle_is_independent_from_sunlight(self):
+        model = load_model("DATA/house_model.json")
+        html = render_reference_plan_html(model)
+
+        self.assertIn('id="toggle-sunlight"', html)
+        self.assertIn('id="toggle-dimensions"', html)
+        self.assertIn("function setDimensionsVisible", html)
+        self.assertNotIn("toggleDimensions.disabled = sunlightActive", html)
+
     def test_reference_plan_sunlight_script_updates_overlay_and_handles_darkness(self):
         model = load_model("DATA/house_model.json")
         html = render_reference_plan_html(model)

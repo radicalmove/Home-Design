@@ -1254,6 +1254,33 @@ class ReferencePlanRenderTests(unittest.TestCase):
         self.assertIn('<line class="ref-scale-tick" x1="1091.5" y1="624.0" x2="1091.5" y2="632.0"/>', svg)
         self.assertNotIn('<line class="ref-scale-line" x1="958.0" y1="628.0" x2="1011.0" y2="628.0"/>', svg)
 
+    def test_reference_plan_includes_hidden_dimension_layer(self):
+        model = load_model("DATA/house_model.json")
+        svg = render_reference_plan_svg(model)
+
+        self.assertIn('id="reference-dimension-layer"', svg)
+        self.assertIn('style="display:none"', svg)
+        self.assertLess(svg.index('id="reference-dimension-layer"'), svg.index('id="reference-label-layer"'))
+
+    def test_reference_plan_dimension_layer_contains_external_and_internal_metres(self):
+        model = load_model("DATA/house_model.json")
+        svg = render_reference_plan_svg(model)
+
+        self.assertIn('data-ref-dimension-kind="external"', svg)
+        self.assertIn('data-ref-dimension-kind="internal"', svg)
+        self.assertIn('data-ref-dimension="overall-master-to-laundry"', svg)
+        self.assertIn('data-ref-dimension="master-bedroom-clear-width"', svg)
+        self.assertIn(">16.10 m<", svg)
+        self.assertIn(">3.30 m<", svg)
+
+    def test_reference_plan_dimension_layer_marks_approximate_dimensions(self):
+        model = load_model("DATA/house_model.json")
+        svg = render_reference_plan_svg(model)
+
+        self.assertIn('data-ref-dimension-confidence="measured"', svg)
+        self.assertIn('data-ref-dimension-confidence="approximate"', svg)
+        self.assertIn('class="ref-dimension-label approximate"', svg)
+
     def test_reference_plan_includes_orientation_compass_near_scale(self):
         model = load_model("DATA/house_model.json")
         svg = render_reference_plan_svg(model)

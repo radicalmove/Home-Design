@@ -193,6 +193,113 @@ OPENING_CENTERLINE_OVERRIDES = {
 
 WINDOW_GUIDE_OFFSET_PX = 2.0
 
+DIMENSION_ANNOTATIONS = [
+    {
+        "id": "overall-master-to-laundry",
+        "kind": "external",
+        "label": "16.10 m",
+        "x1": 533.9,
+        "y1": 617.8,
+        "x2": 960.4,
+        "y2": 617.8,
+        "offset_x": 0.0,
+        "offset_y": 26.0,
+        "confidence": "measured",
+        "source": "anchor:long_side_master_to_laundry",
+    },
+    {
+        "id": "overall-external-depth",
+        "kind": "external",
+        "label": "11.58 m",
+        "x1": 984.4,
+        "y1": 302.3,
+        "x2": 984.4,
+        "y2": 602.2,
+        "offset_x": 28.0,
+        "offset_y": 0.0,
+        "confidence": "measured",
+        "source": "anchor:combined_external_depth",
+    },
+    {
+        "id": "kitchen-dining-clear-length",
+        "kind": "internal",
+        "label": "8.12 m",
+        "x1": 758.8,
+        "y1": 331.0,
+        "x2": 833.0,
+        "y2": 331.0,
+        "offset_x": 0.0,
+        "offset_y": -18.0,
+        "confidence": "measured",
+        "source": "room:kitchen_dining.length",
+    },
+    {
+        "id": "lounge-clear-depth",
+        "kind": "internal",
+        "label": "4.90 m",
+        "x1": 679.0,
+        "y1": 348.8,
+        "x2": 679.0,
+        "y2": 484.6,
+        "offset_x": -18.0,
+        "offset_y": 0.0,
+        "confidence": "measured",
+        "source": "room:lounge.depth",
+    },
+    {
+        "id": "master-bedroom-clear-width",
+        "kind": "internal",
+        "label": "3.30 m",
+        "x1": 533.9,
+        "y1": 541.0,
+        "x2": 627.1,
+        "y2": 541.0,
+        "offset_x": 0.0,
+        "offset_y": -16.0,
+        "confidence": "measured",
+        "source": "room:master_bedroom.width",
+    },
+    {
+        "id": "wardrobe-bay-depth",
+        "kind": "built_in",
+        "label": "0.62 m",
+        "x1": 627.1,
+        "y1": 609.5,
+        "x2": 646.8,
+        "y2": 609.5,
+        "offset_x": 0.0,
+        "offset_y": 16.0,
+        "confidence": "measured",
+        "source": "built_in:master_bedroom_wardrobe",
+    },
+    {
+        "id": "bedroom-2-clear-length",
+        "kind": "internal",
+        "label": "4.73 m",
+        "x1": 773.9,
+        "y1": 546.0,
+        "x2": 902.8,
+        "y2": 546.0,
+        "offset_x": 0.0,
+        "offset_y": -16.0,
+        "confidence": "measured",
+        "source": "room:bedroom_2.length",
+    },
+    {
+        "id": "sunroom-approx-span",
+        "kind": "external",
+        "label": "~4.87 m",
+        "x1": 533.9,
+        "y1": 326.0,
+        "x2": 663.1,
+        "y2": 326.0,
+        "offset_x": 0.0,
+        "offset_y": -18.0,
+        "confidence": "approximate",
+        "source": "room:sunroom.reference_position",
+    },
+]
+
 def render_reference_plan_svg(model: HouseModel) -> str:
     current_structure = model.raw.get("current_structure", {})
     current_site = model.raw.get("current_site", {})
@@ -218,6 +325,7 @@ def render_reference_plan_svg(model: HouseModel) -> str:
         _render_opening_layer(features),
         _render_scale_layer(),
         _render_orientation_layer(model.raw.get("orientation", {})),
+        _render_dimension_layer(),
         _render_label_layer(spaces, site_elements),
         "</svg>",
     ]
@@ -309,6 +417,11 @@ text { font-family: Arial, sans-serif; fill: #1d2522; }
 .ref-site-label { font-size: 8px; fill: #243029; }
 .ref-scale-line, .ref-scale-tick { stroke: #2f3134; stroke-width: 1.1; stroke-linecap: butt; }
 .ref-scale-label { font-size: 7px; text-anchor: middle; dominant-baseline: auto; fill: #2f3134; }
+.ref-dimension-line, .ref-dimension-extension, .ref-dimension-tick { stroke: #263238; stroke-width: 0.85; stroke-linecap: butt; fill: none; }
+.ref-dimension-extension { opacity: 0.58; }
+.ref-dimension-label { font-size: 7px; font-weight: 700; text-anchor: middle; dominant-baseline: middle; fill: #263238; }
+.ref-dimension-label.approximate { fill: #7a5a1f; }
+.ref-dimension-group.approximate .ref-dimension-line, .ref-dimension-group.approximate .ref-dimension-tick { stroke-dasharray: 3 2; stroke: #7a5a1f; }
 .ref-compass-axis { stroke: #2f3134; stroke-width: 1.1; stroke-linecap: round; }
 .ref-compass-secondary { stroke: #2f3134; stroke-width: 0.7; stroke-linecap: round; opacity: 0.58; }
 .ref-compass-arrow { fill: #2f3134; stroke: none; }
@@ -931,6 +1044,56 @@ def _render_scale_layer() -> str:
             f'<text class="ref-scale-label" x="{x1:.1f}" y="{y + 12:.1f}">0</text>',
             f'<text class="ref-scale-label" x="{x_mid:.1f}" y="{y + 12:.1f}">1 m</text>',
             f'<text class="ref-scale-label" x="{x2:.1f}" y="{y + 12:.1f}">2 m</text>',
+            "</g>",
+        ]
+    )
+
+
+def _render_dimension_layer() -> str:
+    parts = ['<g id="reference-dimension-layer" style="display:none" aria-hidden="true">']
+    for annotation in DIMENSION_ANNOTATIONS:
+        parts.append(_render_dimension_annotation(annotation))
+    parts.append("</g>")
+    return "\n".join(parts)
+
+
+def _render_dimension_annotation(annotation: dict[str, Any]) -> str:
+    dimension_id = escape(str(annotation["id"]))
+    kind = escape(str(annotation["kind"]))
+    confidence = escape(str(annotation["confidence"]))
+    label = escape(str(annotation["label"]))
+    source = escape(str(annotation["source"]))
+    x1 = float(annotation["x1"])
+    y1 = float(annotation["y1"])
+    x2 = float(annotation["x2"])
+    y2 = float(annotation["y2"])
+    offset_x = float(annotation["offset_x"])
+    offset_y = float(annotation["offset_y"])
+    line_x1 = x1 + offset_x
+    line_y1 = y1 + offset_y
+    line_x2 = x2 + offset_x
+    line_y2 = y2 + offset_y
+    label_x = (line_x1 + line_x2) / 2
+    label_y = (line_y1 + line_y2) / 2
+    tick = 4.5
+    if abs(line_x2 - line_x1) >= abs(line_y2 - line_y1):
+        tick_one = (line_x1, line_y1 - tick, line_x1, line_y1 + tick)
+        tick_two = (line_x2, line_y2 - tick, line_x2, line_y2 + tick)
+    else:
+        tick_one = (line_x1 - tick, line_y1, line_x1 + tick, line_y1)
+        tick_two = (line_x2 - tick, line_y2, line_x2 + tick, line_y2)
+
+    return "\n".join(
+        [
+            f'<g class="ref-dimension-group {confidence}" data-ref-dimension="{dimension_id}" '
+            f'data-ref-dimension-kind="{kind}" data-ref-dimension-confidence="{confidence}" '
+            f'data-ref-dimension-source="{source}">',
+            f'<line class="ref-dimension-extension" x1="{x1:.1f}" y1="{y1:.1f}" x2="{line_x1:.1f}" y2="{line_y1:.1f}"/>',
+            f'<line class="ref-dimension-extension" x1="{x2:.1f}" y1="{y2:.1f}" x2="{line_x2:.1f}" y2="{line_y2:.1f}"/>',
+            f'<line class="ref-dimension-line" x1="{line_x1:.1f}" y1="{line_y1:.1f}" x2="{line_x2:.1f}" y2="{line_y2:.1f}"/>',
+            f'<line class="ref-dimension-tick" x1="{tick_one[0]:.1f}" y1="{tick_one[1]:.1f}" x2="{tick_one[2]:.1f}" y2="{tick_one[3]:.1f}"/>',
+            f'<line class="ref-dimension-tick" x1="{tick_two[0]:.1f}" y1="{tick_two[1]:.1f}" x2="{tick_two[2]:.1f}" y2="{tick_two[3]:.1f}"/>',
+            f'<text class="ref-dimension-label {confidence}" x="{label_x:.1f}" y="{label_y:.1f}">{label}</text>',
             "</g>",
         ]
     )
