@@ -7,10 +7,11 @@ __pycache__/
 
 ~$*
 
+.worktrees/
+
 # Large intermediate HEIC conversion artifacts. Keep the compact JPG evidence set,
 # but do not commit the temporary PNG frames used during conversion.
 OUTPUT/jpeg_photos/_png/
 
 # Scratch renders and zoom crops generated during visual QA.
 OUTPUT/*.png
-
