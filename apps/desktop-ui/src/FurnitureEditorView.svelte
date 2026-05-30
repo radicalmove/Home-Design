@@ -11,6 +11,7 @@
     deleteObject,
     duplicateObject,
     moveObject,
+    normaliseFurnitureLayout,
     recolourObject,
     resizeObject,
     rotateObject,
@@ -145,8 +146,12 @@
           return;
         }
         catalog = data.catalog;
-        layout = data.layoutResult.layout;
+        const normalisedLayout = normaliseFurnitureLayout(data.layoutResult.layout);
+        layout = normalisedLayout;
         saveState = data.layoutResult.source === "saved" ? "saved" : "idle";
+        if (JSON.stringify(normalisedLayout) !== JSON.stringify(data.layoutResult.layout)) {
+          scheduleSave(normalisedLayout);
+        }
       } catch (reason: unknown) {
         if (!cancelled) {
           loadError = toErrorMessage(reason);

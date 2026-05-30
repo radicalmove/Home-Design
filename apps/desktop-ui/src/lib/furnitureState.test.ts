@@ -4,6 +4,7 @@ import {
   deleteObject,
   duplicateObject,
   moveObject,
+  normaliseFurnitureLayout,
   recolourObject,
   resizeObject,
   rotateObject,
@@ -77,6 +78,49 @@ describe("furniture state reducers", () => {
       colour: "#ffffff",
     });
     expect(layout.objects[0].x_m).toBe(1);
+  });
+
+  it("rounds manual geometry edits to centimetre precision", () => {
+    const moved = moveObject(layout, "sofa", {
+      x: 6.276969728639951,
+      y: 7.471349780045722,
+    });
+    const resized = resizeObject(moved, "sofa", {
+      width_m: 1.704,
+      depth_m: 0.666,
+    });
+
+    expect(resized.objects[0]).toMatchObject({
+      x_m: 6.28,
+      y_m: 7.47,
+      width_m: 1.7,
+      depth_m: 0.67,
+    });
+  });
+
+  it("normalises loaded layouts without mutating the original", () => {
+    const loaded = {
+      ...layout,
+      objects: [
+        {
+          ...layout.objects[0],
+          x_m: 6.276969728639951,
+          y_m: 7.471349780045722,
+          width_m: 1.704,
+          depth_m: 0.666,
+        },
+      ],
+    };
+
+    const normalised = normaliseFurnitureLayout(loaded);
+
+    expect(normalised.objects[0]).toMatchObject({
+      x_m: 6.28,
+      y_m: 7.47,
+      width_m: 1.7,
+      depth_m: 0.67,
+    });
+    expect(loaded.objects[0].x_m).toBe(6.276969728639951);
   });
 
   it("duplicates and deletes objects", () => {

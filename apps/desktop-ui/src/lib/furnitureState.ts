@@ -5,6 +5,10 @@ type FurnitureSize = {
   depth_m: number;
 };
 
+function roundMetres(value: number): number {
+  return Math.round(value * 100) / 100;
+}
+
 function nextObjectId(existingIds: Set<string>, baseId: string): string {
   let index = 1;
   let candidate = `${baseId}-${index}`;
@@ -23,6 +27,23 @@ function updateObject(
   return {
     ...layout,
     objects: layout.objects.map((object) => (object.id === objectId ? updater(object) : object)),
+  };
+}
+
+function normaliseFurnitureObject(object: FurnitureObject): FurnitureObject {
+  return {
+    ...object,
+    x_m: roundMetres(object.x_m),
+    y_m: roundMetres(object.y_m),
+    width_m: roundMetres(Math.max(0.2, object.width_m)),
+    depth_m: roundMetres(Math.max(0.2, object.depth_m)),
+  };
+}
+
+export function normaliseFurnitureLayout(layout: FurnitureLayout): FurnitureLayout {
+  return {
+    ...layout,
+    objects: layout.objects.map(normaliseFurnitureObject),
   };
 }
 
@@ -58,8 +79,8 @@ export function addCatalogItem(
 export function moveObject(layout: FurnitureLayout, objectId: string, point: PlanPoint): FurnitureLayout {
   return updateObject(layout, objectId, (object) => ({
     ...object,
-    x_m: point.x,
-    y_m: point.y,
+    x_m: roundMetres(point.x),
+    y_m: roundMetres(point.y),
   }));
 }
 
@@ -70,8 +91,8 @@ export function resizeObject(
 ): FurnitureLayout {
   return updateObject(layout, objectId, (object) => ({
     ...object,
-    width_m: Math.max(0.2, size.width_m),
-    depth_m: Math.max(0.2, size.depth_m),
+    width_m: roundMetres(Math.max(0.2, size.width_m)),
+    depth_m: roundMetres(Math.max(0.2, size.depth_m)),
   }));
 }
 
