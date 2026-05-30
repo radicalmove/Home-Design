@@ -2,6 +2,7 @@
 resolver = "2"
 members = [
   "crates/home-design-core",
+  "crates/home-design-desktop",
 ]
 
 [workspace.package]
