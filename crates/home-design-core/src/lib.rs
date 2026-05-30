@@ -1,5 +1,15 @@
 use serde::{Deserialize, Serialize};
 
+mod model;
+mod validation;
+
+pub use model::{
+    Anchor, Assumptions, CurrentSite, CurrentStructure, Daylight, GeometryKind, HouseModel,
+    ModelLoadError, ModeledItem, PhotoEvidence, PhotoEvidenceCheck, Room,
+    load_house_model_from_path,
+};
+pub use validation::{ModelValidationResult, validate_house_model};
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct AppStatus {
     pub app_name: String,
