@@ -71,10 +71,10 @@
       text-align: center;
     }
     .review-panel {
-      display: flex;
-      gap: 18px;
+      display: grid;
+      grid-template-columns: minmax(220px, 0.8fr) minmax(360px, 1.6fr);
+      gap: 22px;
       align-items: center;
-      justify-content: space-between;
       padding: 10px 16px;
       border-top: 1px solid #cec4b4;
       background: #fffdf8;
@@ -88,6 +88,84 @@
       color: #5f6b63;
       font-size: 13px;
       line-height: 1.35;
+    }
+    .sunlight-panel {
+      display: grid;
+      grid-template-columns: auto minmax(160px, 1fr) auto;
+      gap: 8px 12px;
+      align-items: center;
+    }
+    .sunlight-toggle {
+      grid-column: 1 / -1;
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      color: #1d2522;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .sunlight-panel label:not(.sunlight-toggle) {
+      color: #5f6b63;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .sunlight-panel input[type="range"] {
+      width: 100%;
+      accent-color: #d79222;
+    }
+    .sunlight-panel input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: #d79222;
+    }
+    #sunlight-year-label,
+    #sunlight-time-label {
+      min-width: 86px;
+      color: #1d2522;
+      font-size: 13px;
+      text-align: right;
+    }
+    #sunlight-status {
+      grid-column: 1 / -1;
+      margin: 0;
+      color: #5f6b63;
+      font-size: 12px;
+    }
+    .sunlight-ray {
+      fill: rgba(255, 198, 76, 0.46);
+      stroke: rgba(227, 156, 32, 0.35);
+      stroke-width: 1;
+      stroke-linejoin: round;
+      pointer-events: none;
+    }
+    .sunlight-ray.borrowed {
+      fill: rgba(255, 213, 102, 0.28);
+      stroke: rgba(227, 156, 32, 0.22);
+    }
+    .sunlight-sun-path {
+      fill: none;
+      stroke: rgba(215, 146, 34, 0.22);
+      stroke-width: 1.5;
+      stroke-dasharray: 6 7;
+      pointer-events: none;
+    }
+    .sunlight-sun-marker circle {
+      fill: #ffc447;
+      stroke: #b06f09;
+      stroke-width: 2;
+      filter: drop-shadow(0 2px 3px rgba(61, 39, 9, 0.28));
+      pointer-events: none;
+    }
+    .sunlight-sun-marker line {
+      stroke: #b06f09;
+      stroke-width: 2;
+      stroke-linecap: round;
+      pointer-events: none;
+    }
+    @media (max-width: 760px) {
+      .review-panel {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -460,14 +538,33 @@ text { font-family: Arial, sans-serif; fill: #1d2522; }
 <text class="ref-room-label" x="750.5" y="562.4">Bathroom</text>
 <text class="ref-room-label" x="838.4" y="592.0">Bedroom 2</text>
 </g>
+<g id="sunlight-overlay-layer" aria-hidden="true" style="display:none">
+  <defs id="sunlight-clip-defs"></defs>
+  <rect id="sunlight-dark-layer" x="0" y="0" width="1600" height="900" fill="#12100c" opacity="0.48"/>
+  <g id="sunlight-ray-layer"></g>
+  <g id="sunlight-direction-marker"></g>
+</g>
 </svg>
       </div>
     </section>
     <section class="review-panel" aria-label="Reference style plan status">
-      <h1>Reference Style Plan</h1>
-      <p>Visual presentation renderer built from the measured/photo model. Build: reference-plan-v46</p>
+      <div>
+        <h1>Reference Style Plan</h1>
+        <p>Visual presentation renderer built from the measured/photo model. Build: reference-plan-v46</p>
+      </div>
+      <div class="sunlight-panel" aria-label="Sunlight controls">
+        <label class="sunlight-toggle"><input id="toggle-sunlight" type="checkbox"> Sunlight</label>
+        <label for="sunlight-year-slider">Year</label>
+        <input id="sunlight-year-slider" type="range" min="0" max="15" step="1" value="0" disabled>
+        <span id="sunlight-year-label">Winter Jun</span>
+        <label for="sunlight-time-slider">Time</label>
+        <input id="sunlight-time-slider" type="range" min="240" max="1320" step="30" value="720" disabled>
+        <span id="sunlight-time-label">12:00</span>
+        <p id="sunlight-status">Sunlight mode off</p>
+      </div>
     </section>
   </main>
+  <script type="application/json" id="sunlight-config">{"location":{"name":"Christchurch, New Zealand","latitude":-43.53333,"longitude":172.63333,"timezone":"Pacific/Auckland"},"orientation":{"plan_right_bearing_degrees":52.5,"north_arrow_degrees_clockwise_from_plan_up":37.5,"confidence":"estimated_from_cadastral_map"},"year_points":[{"index":0,"month":6,"day":21,"label":"Winter Jun"},{"index":1,"month":7,"day":14,"label":"Winter Jul"},{"index":2,"month":8,"day":6,"label":"Winter Aug"},{"index":3,"month":8,"day":29,"label":"Late Winter Aug"},{"index":4,"month":9,"day":21,"label":"Spring Sep"},{"index":5,"month":10,"day":14,"label":"Spring Oct"},{"index":6,"month":11,"day":6,"label":"Spring Nov"},{"index":7,"month":11,"day":29,"label":"Late Spring Nov"},{"index":8,"month":12,"day":21,"label":"Summer Dec"},{"index":9,"month":1,"day":14,"label":"Summer Jan"},{"index":10,"month":2,"day":6,"label":"Summer Feb"},{"index":11,"month":2,"day":28,"label":"Late Summer Feb"},{"index":12,"month":3,"day":21,"label":"Autumn Mar"},{"index":13,"month":4,"day":14,"label":"Autumn Apr"},{"index":14,"month":5,"day":7,"label":"Autumn May"},{"index":15,"month":5,"day":30,"label":"Late Autumn May"}],"time_slider":{"start_minutes":240,"end_minutes":1320,"step_minutes":30},"light_entries":[{"id":"sunroom_lounge_slider","kind":"internal","type":"slider","room":null,"between":["sunroom","lounge"],"centerlines":[{"x1":664.6,"y1":377.8,"x2":664.6,"y2":460.0,"room_directions":[{"room":"sunroom","x":-1.0,"y":0.0},{"room":"lounge","x":1.0,"y":-0.0}]}]},{"id":"sunroom_wraparound_glazing","kind":"external","type":"window_group","room":"sunroom","between":null,"centerlines":[{"x1":655.2,"y1":346.7,"x2":610.0,"y2":346.7,"admit_direction":{"x":0.0,"y":1.0}},{"x1":606.0,"y1":354.7,"x2":606.0,"y2":393.6,"admit_direction":{"x":-1.0,"y":0.0}},{"x1":568.0,"y1":442.3,"x2":549.2,"y2":442.3,"admit_direction":{"x":-0.0,"y":-1.0}},{"x1":549.2,"y1":446.3,"x2":549.2,"y2":477.9,"admit_direction":{"x":1.0,"y":-0.0}}]},{"id":"sunroom_front_double_doors","kind":"external","type":"door_group","room":"sunroom","between":["sunroom","front_path"],"centerlines":[{"x1":606.0,"y1":401.6,"x2":568.0,"y2":442.3,"admit_direction":{"x":0.7309,"y":0.6824},"room_directions":[{"room":"sunroom","x":0.7309,"y":0.6824}]}]},{"id":"lounge_north_left_window","kind":"external","type":"window","room":"lounge","between":null,"centerlines":[{"x1":687.2,"y1":351.8,"x2":675.8,"y2":351.8,"admit_direction":{"x":0.0,"y":1.0}}]},{"id":"lounge_north_right_window","kind":"external","type":"window","room":"lounge","between":null,"centerlines":[{"x1":742.7,"y1":351.8,"x2":731.3,"y2":351.8,"admit_direction":{"x":0.0,"y":1.0}}]},{"id":"deck_door_group","kind":"external","type":"door_group","room":"kitchen_dining","between":null,"centerlines":[{"x1":837.0,"y1":350.8,"x2":837.0,"y2":393.8,"admit_direction":{"x":-1.0,"y":0.0}}]},{"id":"deck_side_dining_window","kind":"external","type":"window","room":"kitchen_dining","between":null,"centerlines":[{"x1":836.0,"y1":332.5,"x2":836.0,"y2":347.7,"admit_direction":{"x":-1.0,"y":0.0}}]},{"id":"dining_west_window","kind":"external","type":"window","room":"kitchen_dining","between":null,"centerlines":[{"x1":761.8,"y1":316.8,"x2":761.8,"y2":334.3,"admit_direction":{"x":1.0,"y":-0.0}}]},{"id":"entrance_deck_slider","kind":"external","type":"slider","room":"entrance","between":null,"centerlines":[{"x1":881.8,"y1":492.1,"x2":841.9,"y2":492.1,"admit_direction":{"x":0.0,"y":1.0}}]},{"id":"laundry_north_window","kind":"external","type":"window","room":"laundry","between":null,"centerlines":[{"x1":914.0,"y1":489.1,"x2":950.6,"y2":489.1,"admit_direction":{"x":-0.0,"y":1.0}}]},{"id":"laundry_east_window","kind":"external","type":"window","room":"laundry","between":null,"centerlines":[{"x1":954.4,"y1":514.3,"x2":954.4,"y2":543.5,"admit_direction":{"x":-1.0,"y":0.0}}]},{"id":"toilet_frosted_window","kind":"external","type":"window","room":"toilet","between":null,"centerlines":[{"x1":954.4,"y1":580.7,"x2":954.4,"y2":594.4,"admit_direction":{"x":-1.0,"y":0.0}}]},{"id":"master_street_window","kind":"external","type":"window","room":"master_bedroom","between":null,"centerlines":[{"x1":537.9,"y1":514.0,"x2":537.9,"y2":571.0,"admit_direction":{"x":1.0,"y":-0.0}}]},{"id":"master_sunroom_window","kind":"internal","type":"window","room":null,"between":["sunroom","master_bedroom"],"centerlines":[{"x1":608.9,"y1":485.4,"x2":552.1,"y2":485.4,"room_directions":[{"room":"sunroom","x":-0.0,"y":-1.0},{"room":"master_bedroom","x":0.0,"y":1.0}]}]},{"id":"master_rear_high_window","kind":"external","type":"window","room":"master_bedroom","between":null,"centerlines":[{"x1":589.6,"y1":598.8,"x2":571.4,"y2":598.8,"admit_direction":{"x":-0.0,"y":-1.0}}]},{"id":"office_se_window","kind":"external","type":"window","room":"office","between":null,"centerlines":[{"x1":701.1,"y1":598.8,"x2":672.8,"y2":598.8,"admit_direction":{"x":-0.0,"y":-1.0}}]},{"id":"bathroom_se_window","kind":"external","type":"window","room":"bathroom","between":null,"centerlines":[{"x1":765.1,"y1":598.8,"x2":735.9,"y2":598.8,"admit_direction":{"x":-0.0,"y":-1.0}}]},{"id":"bedroom2_se_window","kind":"external","type":"window","room":"bedroom_2","between":null,"centerlines":[{"x1":864.8,"y1":598.8,"x2":811.7,"y2":598.8,"admit_direction":{"x":-0.0,"y":-1.0}}]},{"id":"bedroom2_entrance_internal_window","kind":"internal","type":"window","room":null,"between":["bedroom_2","entrance"],"centerlines":[{"x1":878.7,"y1":523.3,"x2":854.4,"y2":523.3,"room_directions":[{"room":"bedroom_2","x":0.0,"y":1.0},{"room":"entrance","x":-0.0,"y":-1.0}]}]}],"rooms":[{"id":"sunroom","category":"living","geometry":{"type":"polygon","points":[[549.2,483.4],[667.1,483.4],[667.1,346.7],[606,346.7],[606,401.6],[568,442.3],[549.2,442.3],[549.2,483.4]]},"center":[595.225,428.725]},{"id":"lounge","category":"living","geometry":{"type":"rect","x":659.1,"y":348.8,"width":101.8,"height":133.6},"center":[710.0,415.6]},{"id":"kitchen_dining","category":"living","geometry":{"type":"polygon","points":[[758.8,302.3],[833,302.3],[833,489.1],[834.3,489.1],[834.3,495.9],[803.7,495.9],[803.7,523.3],[760.9,523],[760.9,348.8],[758.8,348.8]]},"center":[798.14,431.85]},{"id":"entrance","category":"circulation","geometry":{"type":"polygon","points":[[803.7,495.9],[834.3,495.9],[834.3,489.1],[902.8,489.1],[902.8,523.3],[803.7,523.3]]},"center":[846.9333333333334,502.76666666666665]},{"id":"laundry","category":"wet","geometry":{"type":"rect","x":902.8,"y":489.1,"width":53.6,"height":83.8},"center":[929.5999999999999,531.0]},{"id":"toilet","category":"wet","geometry":{"type":"rect","x":902.8,"y":572.9,"width":53.6,"height":29.3},"center":[929.5999999999999,587.55]},{"id":"hallway","category":"circulation","geometry":{"type":"polygon","points":[[627.1,482.4],[760.9,482.4],[760.9,523],[627.1,523]]},"center":[694.0,502.7]},{"id":"master_bedroom","category":"bedroom","geometry":{"type":"rect","x":533.9,"y":482.4,"width":93.2,"height":119.4},"center":[580.5,542.1]},{"id":"office","category":"bedroom","geometry":{"type":"rect","x":646.8,"y":523,"width":80.3,"height":78.8},"center":[686.9499999999999,562.4]},{"id":"bathroom","category":"wet","geometry":{"type":"rect","x":727.1,"y":523,"width":46.8,"height":78.8},"center":[750.5,562.4]},{"id":"bedroom_2","category":"bedroom","geometry":{"type":"rect","x":773.9,"y":523,"width":128.9,"height":78.8},"center":[838.35,562.4]}]}</script>
   <script>
     const viewport = document.getElementById('reference-plan-viewport');
     const stage = document.getElementById('reference-plan-stage');
@@ -551,6 +648,305 @@ text { font-family: Arial, sans-serif; fill: #1d2522; }
     window.addEventListener('resize', applyViewBox);
 
     applyViewBox();
+  </script>
+  <script>
+    const sunlightConfig = JSON.parse(document.getElementById('sunlight-config').textContent);
+    const sunlightOverlay = document.getElementById('sunlight-overlay-layer');
+    const sunlightClipDefs = document.getElementById('sunlight-clip-defs');
+    const sunlightDarkLayer = document.getElementById('sunlight-dark-layer');
+    const sunlightRayLayer = document.getElementById('sunlight-ray-layer');
+    const sunlightMarker = document.getElementById('sunlight-direction-marker');
+    const sunlightToggle = document.getElementById('toggle-sunlight');
+    const sunlightYearSlider = document.getElementById('sunlight-year-slider');
+    const sunlightTimeSlider = document.getElementById('sunlight-time-slider');
+    const sunlightYearLabel = document.getElementById('sunlight-year-label');
+    const sunlightTimeLabel = document.getElementById('sunlight-time-label');
+    const sunlightStatus = document.getElementById('sunlight-status');
+
+    function solarPosition(date, latitude, longitude) {
+      const rad = Math.PI / 180;
+      const dayStart = Date.UTC(date.getUTCFullYear(), 0, 0);
+      const dayOfYear = Math.floor((date.getTime() - dayStart) / 86400000);
+      const minutes = date.getUTCHours() * 60 + date.getUTCMinutes();
+      const gamma = 2 * Math.PI / 365 * (dayOfYear - 1 + (minutes - 720) / 1440);
+      const equationOfTime = 229.18 * (
+        0.000075 + 0.001868 * Math.cos(gamma) - 0.032077 * Math.sin(gamma)
+        - 0.014615 * Math.cos(2 * gamma) - 0.040849 * Math.sin(2 * gamma)
+      );
+      const declination = (
+        0.006918 - 0.399912 * Math.cos(gamma) + 0.070257 * Math.sin(gamma)
+        - 0.006758 * Math.cos(2 * gamma) + 0.000907 * Math.sin(2 * gamma)
+        - 0.002697 * Math.cos(3 * gamma) + 0.00148 * Math.sin(3 * gamma)
+      );
+      const trueSolarTime = (minutes + equationOfTime + 4 * longitude) % 1440;
+      const hourAngle = (trueSolarTime / 4 < 0 ? trueSolarTime / 4 + 180 : trueSolarTime / 4 - 180) * rad;
+      const latRad = latitude * rad;
+      const cosZenith = Math.sin(latRad) * Math.sin(declination)
+        + Math.cos(latRad) * Math.cos(declination) * Math.cos(hourAngle);
+      const zenith = Math.acos(Math.min(1, Math.max(-1, cosZenith)));
+      const elevation = 90 - zenith / rad;
+      const azimuth = (Math.atan2(
+        Math.sin(hourAngle),
+        Math.cos(hourAngle) * Math.sin(latRad) - Math.tan(declination) * Math.cos(latRad)
+      ) / rad + 180) % 360;
+      return { azimuth, elevation };
+    }
+
+    function azimuthToPlanVector(azimuthDegrees, planRightBearingDegrees) {
+      const planAngle = (azimuthDegrees - planRightBearingDegrees) * Math.PI / 180;
+      return { x: Math.cos(planAngle), y: Math.sin(planAngle) };
+    }
+
+    function svgElement(tagName) {
+      return document.createElementNS('http://www.w3.org/2000/svg', tagName);
+    }
+
+    function dot(a, b) {
+      return a.x * b.x + a.y * b.y;
+    }
+
+    function normalize(vector) {
+      const length = Math.hypot(vector.x, vector.y);
+      if (!length) return { x: 0, y: 0 };
+      return { x: vector.x / length, y: vector.y / length };
+    }
+
+    function roomClipId(roomId) {
+      return `sunlight-room-clip-${roomId}`;
+    }
+
+    function ensureSunlightClipPaths() {
+      if (sunlightClipDefs.children.length) return;
+      sunlightConfig.rooms.forEach((room) => {
+        const clipPath = svgElement('clipPath');
+        clipPath.setAttribute('id', roomClipId(room.id));
+        clipPath.setAttribute('clipPathUnits', 'userSpaceOnUse');
+        appendGeometryShape(clipPath, room.geometry);
+        sunlightClipDefs.appendChild(clipPath);
+      });
+    }
+
+    function appendGeometryShape(parent, geometry) {
+      if (geometry.type === 'rect') {
+        const rect = svgElement('rect');
+        rect.setAttribute('x', geometry.x);
+        rect.setAttribute('y', geometry.y);
+        rect.setAttribute('width', geometry.width);
+        rect.setAttribute('height', geometry.height);
+        parent.appendChild(rect);
+      } else if (geometry.type === 'polygon') {
+        parent.appendChild(polygonFromPoints(geometry.points));
+      } else if (geometry.type === 'multi_polygon') {
+        geometry.polygons.forEach((points) => parent.appendChild(polygonFromPoints(points)));
+      }
+    }
+
+    function polygonFromPoints(points) {
+      const polygon = svgElement('polygon');
+      polygon.setAttribute('points', points.map(([x, y]) => `${x},${y}`).join(' '));
+      return polygon;
+    }
+
+    function selectedSunlightDate() {
+      const yearPoint = sunlightConfig.year_points[Number(sunlightYearSlider.value)];
+      const localYear = yearPoint.month < 6 ? 2027 : 2026;
+      const minutes = Number(sunlightTimeSlider.value);
+      return new Date(localYear, yearPoint.month - 1, yearPoint.day, Math.floor(minutes / 60), minutes % 60);
+    }
+
+    function formatMinutes(minutes) {
+      const hours = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+      return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+    }
+
+    function updateSunlightOverlay() {
+      const active = sunlightToggle.checked;
+      sunlightOverlay.style.display = active ? 'block' : 'none';
+      sunlightYearSlider.disabled = !active;
+      sunlightTimeSlider.disabled = !active;
+      if (!active) {
+        sunlightStatus.textContent = 'Sunlight mode off';
+        return;
+      }
+      ensureSunlightClipPaths();
+      const yearPoint = sunlightConfig.year_points[Number(sunlightYearSlider.value)];
+      sunlightYearLabel.textContent = yearPoint.label;
+      sunlightTimeLabel.textContent = formatMinutes(Number(sunlightTimeSlider.value));
+      const date = selectedSunlightDate();
+      const position = solarPosition(date, sunlightConfig.location.latitude, sunlightConfig.location.longitude);
+      if (position.elevation <= 0) {
+        sunlightDarkLayer.setAttribute('opacity', '0.68');
+        sunlightRayLayer.replaceChildren();
+        sunlightMarker.replaceChildren();
+        sunlightStatus.textContent = 'No direct natural light';
+        return;
+      }
+      sunlightDarkLayer.setAttribute('opacity', '0.42');
+      const sunVector = azimuthToPlanVector(
+        position.azimuth,
+        sunlightConfig.orientation.plan_right_bearing_degrees
+      );
+      renderSunPositionMarker(sunVector, position);
+      renderSunlightRays({ x: -sunVector.x, y: -sunVector.y }, position);
+      sunlightStatus.textContent = `Az ${Math.round(position.azimuth)} deg / El ${Math.round(position.elevation)} deg`;
+    }
+
+    function renderSunPositionMarker(sunVector, position) {
+      sunlightMarker.replaceChildren();
+      const bounds = sunlightPlanBounds();
+      const centerX = (bounds.minX + bounds.maxX) / 2;
+      const centerY = (bounds.minY + bounds.maxY) / 2;
+      const radiusX = (bounds.maxX - bounds.minX) / 2 + 78;
+      const radiusY = (bounds.maxY - bounds.minY) / 2 + 78;
+
+      const path = svgElement('ellipse');
+      path.setAttribute('class', 'sunlight-sun-path');
+      path.setAttribute('cx', centerX);
+      path.setAttribute('cy', centerY);
+      path.setAttribute('rx', radiusX);
+      path.setAttribute('ry', radiusY);
+      sunlightMarker.appendChild(path);
+
+      const sunX = centerX + sunVector.x * radiusX;
+      const sunY = centerY + sunVector.y * radiusY;
+      const marker = svgElement('g');
+      marker.setAttribute('class', 'sunlight-sun-marker');
+      marker.setAttribute('transform', `translate(${sunX} ${sunY})`);
+      const sunRadius = Math.max(10, Math.min(16, 8 + position.elevation / 5));
+      const circle = svgElement('circle');
+      circle.setAttribute('r', sunRadius);
+      marker.appendChild(circle);
+      for (let angle = 0; angle < 360; angle += 45) {
+        const radians = angle * Math.PI / 180;
+        const ray = svgElement('line');
+        ray.setAttribute('x1', Math.cos(radians) * (sunRadius + 4));
+        ray.setAttribute('y1', Math.sin(radians) * (sunRadius + 4));
+        ray.setAttribute('x2', Math.cos(radians) * (sunRadius + 11));
+        ray.setAttribute('y2', Math.sin(radians) * (sunRadius + 11));
+        marker.appendChild(ray);
+      }
+      sunlightMarker.appendChild(marker);
+    }
+
+    function sunlightPlanBounds() {
+      const points = [];
+      sunlightConfig.rooms.forEach((room) => {
+        collectGeometryPoints(room.geometry, points);
+      });
+      return {
+        minX: Math.min(...points.map((point) => point.x)),
+        minY: Math.min(...points.map((point) => point.y)),
+        maxX: Math.max(...points.map((point) => point.x)),
+        maxY: Math.max(...points.map((point) => point.y)),
+      };
+    }
+
+    function collectGeometryPoints(geometry, points) {
+      if (geometry.type === 'rect') {
+        points.push(
+          { x: geometry.x, y: geometry.y },
+          { x: geometry.x + geometry.width, y: geometry.y + geometry.height }
+        );
+      } else if (geometry.type === 'polygon') {
+        geometry.points.forEach(([x, y]) => points.push({ x, y }));
+      } else if (geometry.type === 'multi_polygon') {
+        geometry.polygons.forEach((polygon) => polygon.forEach(([x, y]) => points.push({ x, y })));
+      }
+    }
+
+    function renderSunlightRays(lightVector, position) {
+      sunlightRayLayer.replaceChildren();
+      const litRooms = new Set();
+      sunlightConfig.light_entries.filter((entry) => entry.kind === 'external').forEach((lightEntry) => {
+        lightEntry.centerlines.forEach((line) => {
+          if (!isOpeningSunlit(line, lightVector)) return;
+          const direction = blendedLightDirection(line, lightVector);
+          const length = Math.max(70, Math.min(260, position.elevation * 3.6));
+          sunlightRayLayer.appendChild(renderSunlightRay(line, direction, length, 'sunlight-ray', lightEntry.room));
+          if (lightEntry.room) litRooms.add(lightEntry.room);
+        });
+      });
+      sunlightConfig.light_entries.filter((entry) => entry.kind === 'internal').forEach((lightEntry) => {
+        lightEntry.centerlines.forEach((line) => {
+          const borrowedLight = borrowedLightTarget(line, lightVector, litRooms);
+          if (!borrowedLight) return;
+          sunlightRayLayer.appendChild(renderBorrowedSunlightRay(line, lightVector, borrowedLight.room, position));
+        });
+      });
+    }
+
+    function isOpeningSunlit(line, lightVector) {
+      if (!line.admit_direction) return false;
+      return dot(lightVector, line.admit_direction) > 0.12;
+    }
+
+    function blendedLightDirection(line, lightVector) {
+      const admit = line.admit_direction || lightVector;
+      return normalize({
+        x: lightVector.x * 0.72 + admit.x * 0.28,
+        y: lightVector.y * 0.72 + admit.y * 0.28,
+      });
+    }
+
+    function borrowedLightTarget(line, lightVector, litRooms) {
+      if (!line.room_directions) return null;
+      const target = line.room_directions
+        .map((direction) => ({ ...direction, score: dot(lightVector, direction) }))
+        .sort((a, b) => b.score - a.score)[0];
+      const source = line.room_directions
+        .filter((direction) => direction.room !== target.room)
+        .map((direction) => ({ ...direction, score: dot({ x: -lightVector.x, y: -lightVector.y }, direction) }))
+        .sort((a, b) => b.score - a.score)[0];
+      if (!target || !source || target.score <= 0.18 || !litRooms.has(source.room)) return null;
+      return target;
+    }
+
+    function renderBorrowedSunlightRay(line, lightVector, roomId, position) {
+      const roomDirection = line.room_directions.find((direction) => direction.room === roomId);
+      const direction = normalize({
+        x: lightVector.x * 0.55 + roomDirection.x * 0.45,
+        y: lightVector.y * 0.55 + roomDirection.y * 0.45,
+      });
+      const length = Math.max(34, Math.min(82, position.elevation * 1.35));
+      return renderSunlightRay(line, direction, length, 'sunlight-ray borrowed', roomId);
+    }
+
+    function renderSunlightRay(line, direction, length, cssClass, roomId) {
+      const path = svgElement('path');
+      const tangent = normalize({ x: line.x2 - line.x1, y: line.y2 - line.y1 });
+      const taper = Math.max(5, Math.min(16, length * 0.1));
+      const startA = { x: line.x1, y: line.y1 };
+      const startB = { x: line.x2, y: line.y2 };
+      const endB = {
+        x: line.x2 + direction.x * length + tangent.x * taper,
+        y: line.y2 + direction.y * length + tangent.y * taper,
+      };
+      const endA = {
+        x: line.x1 + direction.x * length - tangent.x * taper,
+        y: line.y1 + direction.y * length - tangent.y * taper,
+      };
+      const controlB = {
+        x: line.x2 + direction.x * length * 0.52 + tangent.x * taper * 0.7,
+        y: line.y2 + direction.y * length * 0.52 + tangent.y * taper * 0.7,
+      };
+      const controlA = {
+        x: line.x1 + direction.x * length * 0.52 - tangent.x * taper * 0.7,
+        y: line.y1 + direction.y * length * 0.52 - tangent.y * taper * 0.7,
+      };
+      path.setAttribute('class', cssClass);
+      path.setAttribute(
+        'd',
+        `M ${startA.x} ${startA.y} L ${startB.x} ${startB.y} Q ${controlB.x} ${controlB.y} ${endB.x} ${endB.y} L ${endA.x} ${endA.y} Q ${controlA.x} ${controlA.y} ${startA.x} ${startA.y} Z`
+      );
+      if (roomId) path.setAttribute('clip-path', `url(#${roomClipId(roomId)})`);
+      return path;
+    }
+
+    sunlightToggle.addEventListener('change', updateSunlightOverlay);
+    sunlightYearSlider.addEventListener('input', updateSunlightOverlay);
+    sunlightTimeSlider.addEventListener('input', updateSunlightOverlay);
+    updateSunlightOverlay();
   </script>
 </body>
 </html>
