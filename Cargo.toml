@@ -3,6 +3,7 @@ resolver = "2"
 members = [
   "crates/home-design-core",
   "crates/home-design-desktop",
+  "apps/desktop-ui/src-tauri",
 ]
 
 [workspace.package]
@@ -12,3 +13,5 @@ rust-version = "1.88"
 
 [workspace.dependencies]
 serde = { version = "1", features = ["derive"] }
+tauri = "2"
+tauri-build = "2"

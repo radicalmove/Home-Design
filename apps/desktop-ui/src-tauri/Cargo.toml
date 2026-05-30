@@ -1,0 +1,14 @@
+[package]
+name = "home-design-tauri"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[build-dependencies]
+tauri-build.workspace = true
+
+[dependencies]
+home-design-core = { path = "../../../crates/home-design-core" }
+home-design-desktop = { path = "../../../crates/home-design-desktop" }
+tauri.workspace = true
