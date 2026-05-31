@@ -468,6 +468,10 @@
           {#if symbol.shape === "sofa"}
             <line x1={bounds.x} y1={bounds.y + bounds.height * 0.35} x2={bounds.x + bounds.width} y2={bounds.y + bounds.height * 0.35} />
             <line x1={bounds.x + bounds.width * 0.5} y1={bounds.y} x2={bounds.x + bounds.width * 0.5} y2={bounds.y + bounds.height * 0.35} />
+          {:else if symbol.shape === "fireplace"}
+            <rect x={bounds.x + bounds.width * 0.18} y={bounds.y + bounds.height * 0.2} width={bounds.width * 0.64} height={bounds.height * 0.52} rx="1.5" />
+            <line x1={bounds.x + bounds.width * 0.28} y1={bounds.y + bounds.height * 0.72} x2={bounds.x + bounds.width * 0.72} y2={bounds.y + bounds.height * 0.72} />
+            <line x1={bounds.cx} y1={bounds.y + bounds.height * 0.28} x2={bounds.cx} y2={bounds.y + bounds.height * 0.62} />
           {:else if symbol.shape === "bed"}
             <rect x={bounds.x + 4} y={bounds.y + 4} width={Math.max(5, bounds.width - 8)} height={Math.max(5, bounds.height * 0.22)} rx="2" />
           {:else if symbol.shape === "bedside-table"}
@@ -486,6 +490,15 @@
             <circle cx={bounds.cx} cy={bounds.y + bounds.height * 0.16} r={Math.max(1.4, Math.min(bounds.width, bounds.height) * 0.04)} />
             <circle cx={bounds.cx} cy={bounds.y + bounds.height * 0.5} r={Math.max(1.4, Math.min(bounds.width, bounds.height) * 0.04)} />
             <circle cx={bounds.cx} cy={bounds.y + bounds.height * 0.83} r={Math.max(1.4, Math.min(bounds.width, bounds.height) * 0.04)} />
+          {:else if symbol.shape === "tv"}
+            <rect x={bounds.x + bounds.width * 0.08} y={bounds.y + bounds.height * 0.2} width={bounds.width * 0.84} height={bounds.height * 0.58} rx="1.5" />
+            <line x1={bounds.cx} y1={bounds.y + bounds.height * 0.78} x2={bounds.cx} y2={bounds.y + bounds.height} />
+            <line x1={bounds.x + bounds.width * 0.36} y1={bounds.y + bounds.height} x2={bounds.x + bounds.width * 0.64} y2={bounds.y + bounds.height} />
+          {:else if symbol.shape === "heat-pump"}
+            <line x1={bounds.x + bounds.width * 0.12} y1={bounds.y + bounds.height * 0.32} x2={bounds.x + bounds.width * 0.88} y2={bounds.y + bounds.height * 0.32} />
+            <line x1={bounds.x + bounds.width * 0.12} y1={bounds.y + bounds.height * 0.5} x2={bounds.x + bounds.width * 0.88} y2={bounds.y + bounds.height * 0.5} />
+            <line x1={bounds.x + bounds.width * 0.12} y1={bounds.y + bounds.height * 0.68} x2={bounds.x + bounds.width * 0.88} y2={bounds.y + bounds.height * 0.68} />
+            <circle cx={bounds.x + bounds.width * 0.88} cy={bounds.y + bounds.height * 0.18} r={Math.max(1.5, Math.min(bounds.width, bounds.height) * 0.06)} />
           {:else if symbol.shape === "partition-wall"}
             <line x1={bounds.x} y1={bounds.cy} x2={bounds.x + bounds.width} y2={bounds.cy} />
           {:else if symbol.shape === "sliding-door"}

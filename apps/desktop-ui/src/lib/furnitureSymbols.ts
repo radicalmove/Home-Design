@@ -3,6 +3,7 @@ export type FurnitureSymbol = {
     | "rectangle"
     | "appliance"
     | "fixture"
+    | "fireplace"
     | "sofa"
     | "l-shape"
     | "bed"
@@ -12,6 +13,8 @@ export type FurnitureSymbol = {
     | "chair"
     | "storage"
     | "drawers"
+    | "tv"
+    | "heat-pump"
     | "partition-wall"
     | "sliding-door";
   abbreviation: string | null;
@@ -28,6 +31,8 @@ export function symbolForFurnitureObject(type: string, abbreviation: string | nu
     case "shower":
     case "vanity":
       return { shape: "fixture", abbreviation };
+    case "fireplace":
+      return { shape: "fireplace", abbreviation };
     case "sofa":
       return { shape: "sofa", abbreviation };
     case "l_sofa":
@@ -39,6 +44,10 @@ export function symbolForFurnitureObject(type: string, abbreviation: string | nu
       return { shape: "bedside-table", abbreviation };
     case "dresser_drawers":
       return { shape: "drawers", abbreviation };
+    case "tv":
+      return { shape: "tv", abbreviation };
+    case "heat_pump":
+      return { shape: "heat-pump", abbreviation };
     case "partition_wall":
       return { shape: "partition-wall", abbreviation };
     case "wardrobe_doors":

@@ -16,6 +16,7 @@ describe("furniture symbols", () => {
   it("uses top-down furniture silhouettes for moveable furniture", () => {
     expect(symbolForFurnitureObject("sofa", null).shape).toBe("sofa");
     expect(symbolForFurnitureObject("l_sofa", null).shape).toBe("l-shape");
+    expect(symbolForFurnitureObject("tv", null).shape).toBe("tv");
     expect(symbolForFurnitureObject("desk", null).shape).toBe("desk");
     expect(symbolForFurnitureObject("l_desk", null).shape).toBe("l-shape");
     expect(symbolForFurnitureObject("bedside_table", null).shape).toBe("bedside-table");
@@ -25,5 +26,7 @@ describe("furniture symbols", () => {
   it("uses fixed structural symbols for walls and wardrobe doors", () => {
     expect(symbolForFurnitureObject("partition_wall", null).shape).toBe("partition-wall");
     expect(symbolForFurnitureObject("wardrobe_doors", null).shape).toBe("sliding-door");
+    expect(symbolForFurnitureObject("fireplace", null).shape).toBe("fireplace");
+    expect(symbolForFurnitureObject("heat_pump", null).shape).toBe("heat-pump");
   });
 });

@@ -28,13 +28,28 @@ fn default_catalog_groups_current_house_first_objects() {
     assert!(item_ids.contains("refrigerator"));
     assert!(item_ids.contains("sofa"));
     assert!(item_ids.contains("l_sofa"));
+    assert!(item_ids.contains("fireplace"));
+    assert!(item_ids.contains("tv"));
     assert!(item_ids.contains("queen_bed"));
     assert!(item_ids.contains("l_desk"));
     assert!(item_ids.contains("bedside_table"));
     assert!(item_ids.contains("dresser_drawers"));
     assert!(item_ids.contains("wardrobe_doors"));
     assert!(item_ids.contains("partition_wall"));
+    assert!(item_ids.contains("heat_pump"));
     assert!(item_ids.contains("custom_rectangle"));
+
+    let lounge_items: BTreeSet<_> = catalog
+        .groups
+        .iter()
+        .find(|group| group.id == "lounge-dining")
+        .expect("lounge and dining group")
+        .items
+        .iter()
+        .map(|item| item.id.as_str())
+        .collect();
+    assert!(lounge_items.contains("fireplace"));
+    assert!(lounge_items.contains("tv"));
 
     let bedroom_items: BTreeSet<_> = catalog
         .groups
@@ -57,6 +72,33 @@ fn default_catalog_groups_current_house_first_objects() {
         .expect("partition wall catalog item");
     assert_eq!(partition_wall.layer, FurnitureLayerKind::Fixed);
     assert_eq!(partition_wall.default_depth_m, 0.03);
+
+    let heat_pump = catalog
+        .groups
+        .iter()
+        .flat_map(|group| group.items.iter())
+        .find(|item| item.id == "heat_pump")
+        .expect("heat pump catalog item");
+    assert_eq!(heat_pump.layer, FurnitureLayerKind::Fixed);
+    assert_eq!(heat_pump.symbol, "heat-pump");
+
+    let fireplace = catalog
+        .groups
+        .iter()
+        .flat_map(|group| group.items.iter())
+        .find(|item| item.id == "fireplace")
+        .expect("fireplace catalog item");
+    assert_eq!(fireplace.layer, FurnitureLayerKind::Fixed);
+    assert_eq!(fireplace.symbol, "fireplace");
+
+    let tv = catalog
+        .groups
+        .iter()
+        .flat_map(|group| group.items.iter())
+        .find(|item| item.id == "tv")
+        .expect("tv catalog item");
+    assert_eq!(tv.layer, FurnitureLayerKind::Moveable);
+    assert_eq!(tv.symbol, "tv");
 
     let wardrobe_doors = catalog
         .groups

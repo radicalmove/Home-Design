@@ -73,6 +73,12 @@ describe("furniture canvas interaction layout", () => {
     expect(planCanvasSource).toContain('symbol.shape === "sliding-door"');
   });
 
+  it("renders fireplace, TV, and heat-pump furniture symbols", () => {
+    expect(planCanvasSource).toContain('symbol.shape === "fireplace"');
+    expect(planCanvasSource).toContain('symbol.shape === "tv"');
+    expect(planCanvasSource).toContain('symbol.shape === "heat-pump"');
+  });
+
   it("sizes edit handles from screen pixels instead of fixed SVG units", () => {
     expect(planCanvasSource).toContain("screenPixelsToSvgUnits");
     expect(planCanvasSource).toContain("resizeHandleSize");

@@ -327,6 +327,17 @@ pub fn default_furniture_catalog() -> FurnitureCatalog {
                         "#33312e",
                     ),
                     catalog_item(
+                        "fireplace",
+                        "Fireplace",
+                        FurnitureLayerKind::Fixed,
+                        "fireplace",
+                        Some("FP"),
+                        1.1,
+                        0.35,
+                        "#5a4a3d",
+                        "fireplace",
+                    ),
+                    catalog_item(
                         "armchair",
                         "Armchair",
                         FurnitureLayerKind::Moveable,
@@ -358,6 +369,17 @@ pub fn default_furniture_catalog() -> FurnitureCatalog {
                         0.4,
                         "#24282c",
                         "storage",
+                    ),
+                    catalog_item(
+                        "tv",
+                        "TV",
+                        FurnitureLayerKind::Moveable,
+                        "tv",
+                        None,
+                        1.2,
+                        0.08,
+                        "#24282c",
+                        "tv",
                     ),
                     catalog_item(
                         "dining_table",
@@ -515,6 +537,17 @@ pub fn default_furniture_catalog() -> FurnitureCatalog {
                 id: "custom".to_string(),
                 name: "Custom objects".to_string(),
                 items: vec![
+                    catalog_item(
+                        "heat_pump",
+                        "Heat pump",
+                        FurnitureLayerKind::Fixed,
+                        "heat_pump",
+                        Some("HP"),
+                        0.85,
+                        0.22,
+                        "#f7f8f6",
+                        "heat-pump",
+                    ),
                     catalog_item(
                         "partition_wall",
                         "Partition wall",
