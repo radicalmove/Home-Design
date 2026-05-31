@@ -193,111 +193,59 @@ OPENING_CENTERLINE_OVERRIDES = {
 
 WINDOW_GUIDE_OFFSET_PX = 2.0
 
+def _dimension_annotation(
+    dimension_id: str,
+    kind: str,
+    label: str,
+    x1: float,
+    y1: float,
+    x2: float,
+    y2: float,
+    offset_x: float,
+    offset_y: float,
+    confidence: str,
+    source: str,
+) -> dict[str, Any]:
+    return {
+        "id": dimension_id,
+        "kind": kind,
+        "label": label,
+        "x1": x1,
+        "y1": y1,
+        "x2": x2,
+        "y2": y2,
+        "offset_x": offset_x,
+        "offset_y": offset_y,
+        "confidence": confidence,
+        "source": source,
+    }
+
+
 DIMENSION_ANNOTATIONS = [
-    {
-        "id": "overall-master-to-laundry",
-        "kind": "external",
-        "label": "16.10 m",
-        "x1": 533.9,
-        "y1": 617.8,
-        "x2": 960.4,
-        "y2": 617.8,
-        "offset_x": 0.0,
-        "offset_y": 26.0,
-        "confidence": "measured",
-        "source": "anchor:long_side_master_to_laundry",
-    },
-    {
-        "id": "overall-external-depth",
-        "kind": "external",
-        "label": "11.58 m",
-        "x1": 984.4,
-        "y1": 302.3,
-        "x2": 984.4,
-        "y2": 602.2,
-        "offset_x": 28.0,
-        "offset_y": 0.0,
-        "confidence": "measured",
-        "source": "anchor:combined_external_depth",
-    },
-    {
-        "id": "kitchen-dining-clear-length",
-        "kind": "internal",
-        "label": "8.12 m",
-        "x1": 833.0,
-        "y1": 302.3,
-        "x2": 833.0,
-        "y2": 523.3,
-        "offset_x": 22.0,
-        "offset_y": 0.0,
-        "confidence": "measured",
-        "source": "room:kitchen_dining.length",
-    },
-    {
-        "id": "lounge-clear-depth",
-        "kind": "internal",
-        "label": "4.90 m",
-        "x1": 679.0,
-        "y1": 348.8,
-        "x2": 679.0,
-        "y2": 484.6,
-        "offset_x": -18.0,
-        "offset_y": 0.0,
-        "confidence": "measured",
-        "source": "room:lounge.depth",
-    },
-    {
-        "id": "master-bedroom-clear-width",
-        "kind": "internal",
-        "label": "3.30 m",
-        "x1": 533.9,
-        "y1": 541.0,
-        "x2": 627.1,
-        "y2": 541.0,
-        "offset_x": 0.0,
-        "offset_y": -16.0,
-        "confidence": "measured",
-        "source": "room:master_bedroom.width",
-    },
-    {
-        "id": "wardrobe-bay-depth",
-        "kind": "built_in",
-        "label": "0.62 m",
-        "x1": 627.1,
-        "y1": 609.5,
-        "x2": 646.8,
-        "y2": 609.5,
-        "offset_x": 0.0,
-        "offset_y": 16.0,
-        "confidence": "measured",
-        "source": "built_in:master_bedroom_wardrobe",
-    },
-    {
-        "id": "bedroom-2-clear-length",
-        "kind": "internal",
-        "label": "4.73 m",
-        "x1": 773.9,
-        "y1": 546.0,
-        "x2": 902.8,
-        "y2": 546.0,
-        "offset_x": 0.0,
-        "offset_y": -16.0,
-        "confidence": "measured",
-        "source": "room:bedroom_2.length",
-    },
-    {
-        "id": "sunroom-approx-span",
-        "kind": "external",
-        "label": "~4.87 m",
-        "x1": 533.9,
-        "y1": 326.0,
-        "x2": 663.1,
-        "y2": 326.0,
-        "offset_x": 0.0,
-        "offset_y": -18.0,
-        "confidence": "approximate",
-        "source": "room:sunroom.reference_position",
-    },
+    _dimension_annotation("overall-master-to-laundry", "external", "16.10 m", 533.9, 617.8, 960.4, 617.8, 0.0, 44.0, "measured", "anchor:long_side_master_to_laundry"),
+    _dimension_annotation("overall-external-depth", "external", "11.58 m", 984.4, 302.3, 984.4, 602.2, 44.0, 0.0, "measured", "anchor:combined_external_depth"),
+    _dimension_annotation("sunroom-approx-span", "external", "~4.87 m", 533.9, 326.0, 663.1, 326.0, 0.0, -24.0, "approximate", "room:sunroom.reference_position"),
+    _dimension_annotation("kitchen-dining-clear-length", "internal", "8.12 m", 833.0, 302.3, 833.0, 523.3, 30.0, 0.0, "measured", "room:kitchen_dining.length"),
+    _dimension_annotation("kitchen-dining-clear-width", "internal", "2.50 m", 758.8, 302.3, 833.0, 302.3, 0.0, -28.0, "measured", "room:kitchen_dining.width"),
+    _dimension_annotation("lounge-clear-length", "internal", "4.90 m", 679.0, 348.8, 679.0, 484.6, -18.0, 0.0, "measured", "room:lounge.length"),
+    _dimension_annotation("lounge-clear-width", "internal", "3.70 m", 659.1, 348.8, 760.9, 348.8, 0.0, -20.0, "measured", "room:lounge.width"),
+    _dimension_annotation("hallway-clear-length", "internal", "4.80 m", 627.1, 482.4, 760.9, 482.4, 0.0, -18.0, "measured", "room:hallway.length"),
+    _dimension_annotation("hallway-clear-width", "internal", "1.30 m", 627.1, 482.4, 627.1, 523.0, -16.0, 0.0, "measured", "room:hallway.width"),
+    _dimension_annotation("master-bedroom-clear-length", "internal", "3.30 m", 533.9, 601.8, 627.1, 601.8, 0.0, 18.0, "measured", "room:master_bedroom.length"),
+    _dimension_annotation("master-bedroom-clear-width", "internal", "4.20 m", 533.9, 482.4, 533.9, 601.8, -24.0, 0.0, "measured", "room:master_bedroom.width"),
+    _dimension_annotation("wardrobe-bay-depth", "built_in", "0.62 m", 627.1, 609.5, 646.8, 609.5, 0.0, 16.0, "measured", "built_in:master_bedroom_wardrobe"),
+    _dimension_annotation("office-clear-length", "internal", "2.90 m", 646.8, 601.8, 727.1, 601.8, 0.0, 18.0, "measured", "room:office.length"),
+    _dimension_annotation("office-clear-width", "internal", "2.75 m", 646.8, 523.0, 646.8, 601.8, -14.0, 0.0, "measured", "room:office.width"),
+    _dimension_annotation("bathroom-clear-length", "internal", "1.64 m", 727.1, 601.8, 773.9, 601.8, 0.0, 18.0, "measured", "room:bathroom.length"),
+    _dimension_annotation("bathroom-clear-width", "internal", "2.75 m", 773.9, 523.0, 773.9, 601.8, 14.0, 0.0, "measured", "room:bathroom.width"),
+    _dimension_annotation("bedroom-2-clear-length", "internal", "4.73 m", 773.9, 546.0, 902.8, 546.0, 0.0, -16.0, "measured", "room:bedroom_2.length"),
+    _dimension_annotation("bedroom-2-clear-width", "internal", "2.75 m", 902.8, 523.0, 902.8, 601.8, -18.0, 0.0, "measured", "room:bedroom_2.width"),
+    _dimension_annotation("entrance-clear-length", "internal", "3.70 m", 803.7, 489.1, 902.8, 489.1, 0.0, -18.0, "measured", "room:entrance.length"),
+    _dimension_annotation("entrance-clear-width", "internal", "1.16 m", 902.8, 489.1, 902.8, 523.3, 16.0, 0.0, "measured", "room:entrance.width"),
+    _dimension_annotation("laundry-clear-length", "internal", "3.03 m", 956.4, 489.1, 956.4, 572.9, 24.0, 0.0, "measured", "room:laundry.length"),
+    _dimension_annotation("laundry-clear-width", "internal", "1.80 m", 902.8, 489.1, 956.4, 489.1, 0.0, -28.0, "measured", "room:laundry.width"),
+    _dimension_annotation("toilet-clear-length", "internal", "0.91 m", 956.4, 572.9, 956.4, 602.2, 24.0, 0.0, "measured", "room:toilet.length"),
+    _dimension_annotation("toilet-clear-width", "internal", "1.80 m", 902.8, 602.2, 956.4, 602.2, 0.0, 20.0, "measured", "room:toilet.width"),
 ]
 
 def render_reference_plan_svg(model: HouseModel) -> str:
@@ -419,6 +367,8 @@ text { font-family: Arial, sans-serif; fill: #1d2522; }
 .ref-scale-label { font-size: 7px; text-anchor: middle; dominant-baseline: auto; fill: #2f3134; }
 .ref-dimension-line, .ref-dimension-extension, .ref-dimension-tick { stroke: #263238; stroke-width: 0.85; stroke-linecap: butt; fill: none; }
 .ref-dimension-extension { opacity: 0.58; }
+.ref-dimension-label-bg { fill: #fffdf8; stroke: #d3cabd; stroke-width: 0.55; opacity: 0.96; }
+.ref-dimension-label-bg.approximate { fill: #fff8e4; stroke: #b3893c; }
 .ref-dimension-label { font-size: 7px; font-weight: 700; text-anchor: middle; dominant-baseline: middle; fill: #263238; paint-order: stroke; stroke: #fffdf8; stroke-width: 3px; stroke-linejoin: round; }
 .ref-dimension-label.approximate { fill: #7a5a1f; }
 .ref-dimension-group.approximate .ref-dimension-line, .ref-dimension-group.approximate .ref-dimension-tick { stroke-dasharray: 3 2; stroke: #7a5a1f; }
@@ -1075,6 +1025,8 @@ def _render_dimension_annotation(annotation: dict[str, Any]) -> str:
     line_y2 = y2 + offset_y
     label_x = (line_x1 + line_x2) / 2
     label_y = (line_y1 + line_y2) / 2
+    label_width = max(26.0, len(label) * 3.8 + 8.0)
+    label_height = 11.0
     tick = 4.5
     if abs(line_x2 - line_x1) >= abs(line_y2 - line_y1):
         tick_one = (line_x1, line_y1 - tick, line_x1, line_y1 + tick)
@@ -1093,6 +1045,7 @@ def _render_dimension_annotation(annotation: dict[str, Any]) -> str:
             f'<line class="ref-dimension-line" x1="{line_x1:.1f}" y1="{line_y1:.1f}" x2="{line_x2:.1f}" y2="{line_y2:.1f}"/>',
             f'<line class="ref-dimension-tick" x1="{tick_one[0]:.1f}" y1="{tick_one[1]:.1f}" x2="{tick_one[2]:.1f}" y2="{tick_one[3]:.1f}"/>',
             f'<line class="ref-dimension-tick" x1="{tick_two[0]:.1f}" y1="{tick_two[1]:.1f}" x2="{tick_two[2]:.1f}" y2="{tick_two[3]:.1f}"/>',
+            f'<rect class="ref-dimension-label-bg {confidence}" x="{label_x - label_width / 2:.1f}" y="{label_y - label_height / 2:.1f}" width="{label_width:.1f}" height="{label_height:.1f}" rx="2.0" ry="2.0"/>',
             f'<text class="ref-dimension-label {confidence}" x="{label_x:.1f}" y="{label_y:.1f}">{label}</text>',
             "</g>",
         ]
