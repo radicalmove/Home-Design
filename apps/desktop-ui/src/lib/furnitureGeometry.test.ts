@@ -1,15 +1,18 @@
 import { describe, expect, it } from "vitest";
 import {
-  anchoredPanAfterZoom,
+  anchoredViewOriginAfterZoom,
   angleDegFromCenter,
+  centeredViewOrigin,
   clampPlanZoom,
   dimensionLabel,
   metresToSvg,
   nextWheelPlanZoom,
   objectBoundsSvg,
+  planViewBoxSize,
   planZoomLabel,
   resizeObjectFromCorner,
   rotateDeltaIntoObjectSpace,
+  viewOriginAfterPan,
   svgToMetres,
 } from "./furnitureGeometry";
 import type { FurnitureObject, PlanTransform } from "../types";
@@ -69,22 +72,43 @@ describe("furniture geometry", () => {
 
   it("clamps and labels furniture plan zoom", () => {
     expect(clampPlanZoom(0.2)).toBe(0.5);
-    expect(clampPlanZoom(3)).toBe(2.5);
+    expect(clampPlanZoom(8)).toBe(5);
     expect(planZoomLabel(1.25)).toBe("125%");
   });
 
-  it("computes wheel zoom and keeps the cursor anchor stable", () => {
+  it("computes wheel zoom up to 500 percent", () => {
     expect(nextWheelPlanZoom(1, -1)).toBe(1.1);
     expect(nextWheelPlanZoom(1, 1)).toBe(0.9);
+    expect(nextWheelPlanZoom(4.9, -1)).toBe(5);
+  });
 
+  it("uses viewBox maths for a portrait furniture field of view", () => {
+    const canvasSize = { width: 300, height: 600 };
+    const fullView = planViewBoxSize(canvasSize, 1);
+    const zoomedView = planViewBoxSize(canvasSize, 5);
+
+    expect(fullView).toEqual({ width: 1600, height: 3200 });
+    expect(zoomedView).toEqual({ width: 320, height: 640 });
+    expect(zoomedView.height).toBe(zoomedView.width * 2);
+    expect(centeredViewOrigin(fullView, { width: 1600, height: 900 })).toEqual({ x: 0, y: -1150 });
     expect(
-      anchoredPanAfterZoom(
-        { x: 20, y: -30 },
-        { x: 200, y: 100 },
-        1,
-        1.5,
+      anchoredViewOriginAfterZoom(
+        { x: 0, y: 0 },
+        { x: 150, y: 300 },
+        canvasSize,
+        fullView,
+        zoomedView,
       ),
-    ).toEqual({ x: -70, y: -95 });
+    ).toEqual({ x: 640, y: 1280 });
+    expect(
+      viewOriginAfterPan(
+        { x: 0, y: 0 },
+        { x: 150, y: 300 },
+        { x: 150, y: 450 },
+        canvasSize,
+        fullView,
+      ).y,
+    ).toBeCloseTo(-800);
   });
 
   it("measures rotation from object centre in SVG space", () => {

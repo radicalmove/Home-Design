@@ -9,9 +9,15 @@ export type SvgBounds = {
   cy: number;
 };
 
+export type PlanViewportSize = {
+  width: number;
+  height: number;
+};
+
 export const MIN_PLAN_ZOOM = 0.5;
-export const MAX_PLAN_ZOOM = 2.5;
+export const MAX_PLAN_ZOOM = 5;
 export const PLAN_WHEEL_ZOOM_FACTOR = 1.1;
+export const DEFAULT_PLAN_VIEWBOX_WIDTH = 1600;
 
 export function metresToSvg(point: PlanPoint, transform: PlanTransform): PlanPoint {
   return {
@@ -63,20 +69,76 @@ export function nextWheelPlanZoom(currentZoom: number, deltaY: number): number {
   return clampPlanZoom(currentZoom * zoomFactor);
 }
 
-export function anchoredPanAfterZoom(
-  currentPan: PlanPoint,
-  pointerOffset: PlanPoint,
-  currentZoom: number,
-  nextZoom: number,
-): PlanPoint {
-  if (currentZoom <= 0) {
-    return currentPan;
-  }
+export function planViewBoxSize(
+  canvasSize: PlanViewportSize,
+  zoom: number,
+  sourceWidth = DEFAULT_PLAN_VIEWBOX_WIDTH,
+): PlanViewportSize {
+  const safeCanvasWidth = Math.max(1, canvasSize.width);
+  const safeCanvasHeight = Math.max(1, canvasSize.height);
+  const width = sourceWidth / clampPlanZoom(zoom);
 
-  const zoomRatio = nextZoom / currentZoom;
   return {
-    x: currentPan.x * zoomRatio + pointerOffset.x * (1 - zoomRatio),
-    y: currentPan.y * zoomRatio + pointerOffset.y * (1 - zoomRatio),
+    width,
+    height: width * (safeCanvasHeight / safeCanvasWidth),
+  };
+}
+
+export function centeredViewOrigin(
+  viewBoxSize: PlanViewportSize,
+  sourceSize: PlanViewportSize,
+): PlanPoint {
+  return {
+    x: (sourceSize.width - viewBoxSize.width) / 2,
+    y: (sourceSize.height - viewBoxSize.height) / 2,
+  };
+}
+
+export function svgPointInViewBox(
+  viewOrigin: PlanPoint,
+  pointerOffset: PlanPoint,
+  canvasSize: PlanViewportSize,
+  viewBoxSize: PlanViewportSize,
+): PlanPoint {
+  const safeCanvasWidth = Math.max(1, canvasSize.width);
+  const safeCanvasHeight = Math.max(1, canvasSize.height);
+
+  return {
+    x: viewOrigin.x + (pointerOffset.x / safeCanvasWidth) * viewBoxSize.width,
+    y: viewOrigin.y + (pointerOffset.y / safeCanvasHeight) * viewBoxSize.height,
+  };
+}
+
+export function anchoredViewOriginAfterZoom(
+  currentOrigin: PlanPoint,
+  pointerOffset: PlanPoint,
+  canvasSize: PlanViewportSize,
+  currentViewBoxSize: PlanViewportSize,
+  nextViewBoxSize: PlanViewportSize,
+): PlanPoint {
+  const safeCanvasWidth = Math.max(1, canvasSize.width);
+  const safeCanvasHeight = Math.max(1, canvasSize.height);
+  const anchor = svgPointInViewBox(currentOrigin, pointerOffset, canvasSize, currentViewBoxSize);
+
+  return {
+    x: anchor.x - (pointerOffset.x / safeCanvasWidth) * nextViewBoxSize.width,
+    y: anchor.y - (pointerOffset.y / safeCanvasHeight) * nextViewBoxSize.height,
+  };
+}
+
+export function viewOriginAfterPan(
+  startOrigin: PlanPoint,
+  startClient: PlanPoint,
+  currentClient: PlanPoint,
+  canvasSize: PlanViewportSize,
+  viewBoxSize: PlanViewportSize,
+): PlanPoint {
+  const safeCanvasWidth = Math.max(1, canvasSize.width);
+  const safeCanvasHeight = Math.max(1, canvasSize.height);
+
+  return {
+    x: startOrigin.x - ((currentClient.x - startClient.x) / safeCanvasWidth) * viewBoxSize.width,
+    y: startOrigin.y - ((currentClient.y - startClient.y) / safeCanvasHeight) * viewBoxSize.height,
   };
 }
 
