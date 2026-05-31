@@ -5,6 +5,7 @@
     centeredViewOrigin,
     dimensionLabel,
     lShapePath,
+    nearestWallDistanceGuides,
     nextWheelPlanZoom,
     normaliseDegrees,
     objectBoundsSvg,
@@ -16,7 +17,7 @@
     viewOriginAfterPan,
   } from "./lib/furnitureGeometry";
   import { symbolForFurnitureObject } from "./lib/furnitureSymbols";
-  import type { ResizeHandleName } from "./lib/furnitureGeometry";
+  import type { ResizeHandleName, WallDistanceGuide, WallSegment } from "./lib/furnitureGeometry";
   import type { FurnitureLShapeDimensions, FurnitureLayout, FurnitureObject, PlanPoint } from "./types";
 
   type FurnitureSize = {
@@ -95,6 +96,53 @@
     { id: "bedroom-2", x: 838.4, y: 592.0, lines: ["Bedroom 2"] },
   ];
 
+  const REFERENCE_WALL_SEGMENTS: WallSegment[] = [
+    { id: "sunroom-west-frame", x1: 549.2, y1: 483.4, x2: 549.2, y2: 442.3 },
+    { id: "sunroom-front-frame", x1: 549.2, y1: 442.3, x2: 568, y2: 442.3 },
+    { id: "sunroom-east-frame", x1: 606, y1: 401.6, x2: 606, y2: 346.7 },
+    { id: "sunroom-north-frame", x1: 606, y1: 346.7, x2: 663.1, y2: 346.7 },
+    { id: "lounge-exterior", x1: 659.1, y1: 348.8, x2: 762.8, y2: 348.8 },
+    { id: "lounge-sunroom-wall", x1: 663.1, y1: 348.8, x2: 663.1, y2: 377.8 },
+    { id: "lounge-sunroom-lower-wall", x1: 663.1, y1: 460, x2: 663.1, y2: 484.6 },
+    { id: "master-sunroom-old-external-wall", x1: 533.9, y1: 482.4, x2: 627.1, y2: 482.4 },
+    { id: "hallway-north-wall", x1: 627.1, y1: 482.4, x2: 635.2, y2: 482.4 },
+    { id: "hallway-sunroom-right-jamb", x1: 655.4, y1: 482.4, x2: 663.1, y2: 482.4 },
+    { id: "lounge-hallway-wall-west", x1: 663.1, y1: 484.6, x2: 701.5, y2: 484.6 },
+    { id: "lounge-hallway-wall-east", x1: 723.5, y1: 484.6, x2: 760.9, y2: 484.6 },
+    { id: "kitchen-dining-west-wall", x1: 758.8, y1: 348.8, x2: 758.8, y2: 302.3 },
+    { id: "kitchen-dining-north-wall", x1: 758.8, y1: 302.3, x2: 833, y2: 302.3 },
+    { id: "kitchen-dining-east-wall", x1: 833, y1: 302.3, x2: 833, y2: 491.9 },
+    { id: "entrance-deck-wall-west", x1: 834.3, y1: 489.1, x2: 841.9, y2: 489.1 },
+    { id: "entrance-deck-wall-east", x1: 881.8, y1: 489.1, x2: 956.4, y2: 489.1 },
+    { id: "kitchen-entrance-return-wall", x1: 834.3, y1: 489.1, x2: 834.3, y2: 495.9 },
+    { id: "entrance-north-return-wall", x1: 834.3, y1: 495.9, x2: 803.7, y2: 495.9 },
+    { id: "private-rooms-south-wall", x1: 533.9, y1: 601.8, x2: 902.8, y2: 601.8 },
+    { id: "toilet-south-external-wall", x1: 900.6, y1: 602.2, x2: 960.4, y2: 602.2 },
+    { id: "bedroom2-east-wall", x1: 902.8, y1: 516.1, x2: 902.8, y2: 602.2 },
+    { id: "master-west-wall", x1: 533.9, y1: 482.4, x2: 533.9, y2: 601.8 },
+    { id: "kitchen-lounge-nub", x1: 760.9, y1: 348.8, x2: 760.9, y2: 361.3 },
+    { id: "lounge-kitchen-divider", x1: 760.9, y1: 392.4, x2: 760.9, y2: 493 },
+    { id: "hallway-south-wall-west", x1: 627.1, y1: 523, x2: 695.5, y2: 523 },
+    { id: "hallway-south-wall-centre", x1: 717.3, y1: 523, x2: 727.1, y2: 523 },
+    { id: "hallway-south-wall-east", x1: 743.4, y1: 523, x2: 773.9, y2: 523 },
+    { id: "hallway-kitchen-door-wall", x1: 760.9, y1: 515, x2: 760.9, y2: 523 },
+    { id: "bedroom2-north-wall-west", x1: 773.9, y1: 523.3, x2: 778.6, y2: 523.3 },
+    { id: "bedroom2-north-wall-east", x1: 800.6, y1: 523.3, x2: 902.8, y2: 523.3 },
+    { id: "master-office-wall-upper", x1: 627.1, y1: 482.4, x2: 627.1, y2: 494 },
+    { id: "master-office-wall-mid-upper", x1: 627.1, y1: 516, x2: 627.1, y2: 527 },
+    { id: "master-office-wall-mid-lower", x1: 627.1, y1: 558, x2: 627.1, y2: 567 },
+    { id: "master-office-wall-lower", x1: 627.1, y1: 598, x2: 627.1, y2: 601.8 },
+    { id: "wardrobe-office-wall", x1: 646.8, y1: 523, x2: 646.8, y2: 601.8 },
+    { id: "office-bathroom-wall", x1: 727.1, y1: 521.2, x2: 727.1, y2: 601.8 },
+    { id: "bathroom-bedroom2-wall", x1: 773.9, y1: 523, x2: 773.9, y2: 601.8 },
+    { id: "entrance-laundry-wall", x1: 902.8, y1: 489.1, x2: 902.8, y2: 496.5 },
+    { id: "laundry-toilet-wall-west", x1: 902.8, y1: 572.9, x2: 908.8, y2: 572.9 },
+    { id: "laundry-toilet-wall-east", x1: 924.8, y1: 572.9, x2: 956.4, y2: 572.9 },
+    { id: "kitchen-entrance-door-wall-upper", x1: 803.7, y1: 495.9, x2: 803.7, y2: 499.7 },
+    { id: "kitchen-entrance-door-wall-lower", x1: 803.7, y1: 519.5, x2: 803.7, y2: 523.3 },
+    { id: "laundry-toilet-exterior", x1: 956.4, y1: 487.3, x2: 956.4, y2: 602.2 },
+  ];
+
   let {
     layout,
     backgroundAssetPath,
@@ -122,6 +170,7 @@
   let viewOriginInitialised = $state(false);
   let previousZoom = $state(1);
   let internallyAnchoredZoom = $state<number | null>(null);
+  let wallDistanceGuides = $state<WallDistanceGuide[]>([]);
 
   let visibleObjects = $derived(
     layout.objects.filter(
@@ -213,6 +262,18 @@
     event.preventDefault();
   }
 
+  function updateWallDistanceGuides(object: FurnitureObject) {
+    wallDistanceGuides = nearestWallDistanceGuides(
+      objectBoundsSvg(object, layout.plan_transform),
+      REFERENCE_WALL_SEGMENTS,
+      layout.plan_transform,
+    );
+  }
+
+  function clearWallDistanceGuides() {
+    wallDistanceGuides = [];
+  }
+
   function startBackgroundPan(event: PointerEvent) {
     event.preventDefault();
     if (event.button !== 0 || dragState || !canvasElement) {
@@ -220,6 +281,7 @@
     }
 
     onSelectObject(null);
+    clearWallDistanceGuides();
     panState = {
       pointerId: event.pointerId,
       startClient: { x: event.clientX, y: event.clientY },
@@ -290,6 +352,7 @@
       object,
       startSvg: svgPointFromEvent(event),
     };
+    updateWallDistanceGuides(object);
     svgElement?.setPointerCapture(event.pointerId);
   }
 
@@ -297,6 +360,7 @@
     event.preventDefault();
     event.stopPropagation();
     onSelectObject(object.id);
+    clearWallDistanceGuides();
     dragState = {
       kind: "resize",
       pointerId: event.pointerId,
@@ -323,6 +387,7 @@
       startRotationDeg: object.rotation_deg,
     };
     onSelectObject(object.id);
+    clearWallDistanceGuides();
     svgElement?.setPointerCapture(event.pointerId);
     const local = localPointFromEvent(event);
     onResizePreview(`${normaliseDegrees(object.rotation_deg)} deg`, local.x, local.y);
@@ -340,10 +405,16 @@
     };
 
     if (dragState.kind === "move") {
-      onMoveObject(dragState.object.id, {
+      const nextPoint = {
         x: dragState.object.x_m + deltaSvg.x / layout.plan_transform.px_per_m,
         y: dragState.object.y_m + deltaSvg.y / layout.plan_transform.px_per_m,
+      };
+      updateWallDistanceGuides({
+        ...dragState.object,
+        x_m: nextPoint.x,
+        y_m: nextPoint.y,
       });
+      onMoveObject(dragState.object.id, nextPoint);
       return;
     }
 
@@ -386,6 +457,7 @@
     }
     svgElement?.releasePointerCapture(event.pointerId);
     dragState = null;
+    clearWallDistanceGuides();
     onResizePreview(null, 0, 0);
   }
 </script>
@@ -460,7 +532,7 @@
               y={bounds.y}
               width={bounds.width}
               height={bounds.height}
-              rx="2"
+              rx={symbol.shape === "partition-wall" ? 0 : 2}
               fill={object.colour}
             />
           {/if}
@@ -552,6 +624,24 @@
         </g>
       {/each}
     </g>
+
+    {#if wallDistanceGuides.length > 0}
+      <g class="wall-distance-guides" aria-hidden="true">
+        {#each wallDistanceGuides as guide (`${guide.side}-${guide.wallId}`)}
+          <line
+            class="wall-distance-guide"
+            data-wall-distance-guide={guide.side}
+            x1={guide.x1}
+            y1={guide.y1}
+            x2={guide.x2}
+            y2={guide.y2}
+          />
+          <text class="wall-distance-label" x={guide.labelX} y={guide.labelY}>
+            {guide.label}
+          </text>
+        {/each}
+      </g>
+    {/if}
   </svg>
 </div>
 
@@ -660,6 +750,29 @@
     dominant-baseline: middle;
     fill: #1d2522;
     pointer-events: none;
+  }
+
+  .wall-distance-guides {
+    pointer-events: none;
+  }
+
+  .wall-distance-guide {
+    stroke: #0f766e;
+    stroke-width: 1.3;
+    stroke-dasharray: 4 3;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .wall-distance-label {
+    font-size: 8px;
+    font-weight: 800;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    fill: #0b514c;
+    paint-order: stroke;
+    stroke: #ffffff;
+    stroke-width: 3px;
+    stroke-linejoin: round;
   }
 
   .resize-handle {

@@ -14,6 +14,29 @@ export type PlanViewportSize = {
   height: number;
 };
 
+export type WallSegment = {
+  id: string;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+};
+
+export type WallDistanceGuideSide = "top" | "right" | "bottom" | "left";
+
+export type WallDistanceGuide = {
+  side: WallDistanceGuideSide;
+  wallId: string;
+  distance_m: number;
+  label: string;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  labelX: number;
+  labelY: number;
+};
+
 export type ResizeHandleName = "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "nw";
 
 type ResizeHandleDirection = {
@@ -33,7 +56,7 @@ const RESIZE_HANDLE_DIRECTIONS: Record<ResizeHandleName, ResizeHandleDirection> 
 };
 
 export const MIN_PLAN_ZOOM = 0.5;
-export const MAX_PLAN_ZOOM = 5;
+export const MAX_PLAN_ZOOM = 7;
 export const PLAN_WHEEL_ZOOM_FACTOR = 1.1;
 export const DEFAULT_PLAN_VIEWBOX_WIDTH = 1600;
 
@@ -104,6 +127,134 @@ export function lShapePath(
 
 export function dimensionLabel(object: Pick<FurnitureObject, "width_m" | "depth_m">): string {
   return `${object.width_m.toFixed(2)} m x ${object.depth_m.toFixed(2)} m`;
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+
+function intervalsOverlap(aMin: number, aMax: number, bMin: number, bMax: number): boolean {
+  return Math.min(aMax, bMax) >= Math.max(aMin, bMin);
+}
+
+function addNearestGuide(
+  guides: Partial<Record<WallDistanceGuideSide, WallDistanceGuide>>,
+  guide: WallDistanceGuide,
+) {
+  const current = guides[guide.side];
+  if (!current || guide.distance_m < current.distance_m) {
+    guides[guide.side] = guide;
+  }
+}
+
+function distanceLabel(distanceM: number): string {
+  return `${distanceM.toFixed(2)} m`;
+}
+
+export function nearestWallDistanceGuides(
+  bounds: Pick<SvgBounds, "x" | "y" | "width" | "height">,
+  wallSegments: WallSegment[],
+  transform: Pick<PlanTransform, "px_per_m">,
+): WallDistanceGuide[] {
+  const objectLeft = bounds.x;
+  const objectRight = bounds.x + bounds.width;
+  const objectTop = bounds.y;
+  const objectBottom = bounds.y + bounds.height;
+  const objectCenterX = bounds.x + bounds.width / 2;
+  const objectCenterY = bounds.y + bounds.height / 2;
+  const nearest: Partial<Record<WallDistanceGuideSide, WallDistanceGuide>> = {};
+
+  for (const wall of wallSegments) {
+    const isHorizontal = wall.y1 === wall.y2;
+    const isVertical = wall.x1 === wall.x2;
+
+    if (isHorizontal) {
+      const wallY = wall.y1;
+      const wallLeft = Math.min(wall.x1, wall.x2);
+      const wallRight = Math.max(wall.x1, wall.x2);
+      if (!intervalsOverlap(objectLeft, objectRight, wallLeft, wallRight)) {
+        continue;
+      }
+
+      const x = clamp(objectCenterX, Math.max(objectLeft, wallLeft), Math.min(objectRight, wallRight));
+      if (wallY <= objectTop) {
+        const distanceM = (objectTop - wallY) / transform.px_per_m;
+        addNearestGuide(nearest, {
+          side: "top",
+          wallId: wall.id,
+          distance_m: distanceM,
+          label: distanceLabel(distanceM),
+          x1: x,
+          y1: objectTop,
+          x2: x,
+          y2: wallY,
+          labelX: x,
+          labelY: (objectTop + wallY) / 2,
+        });
+      }
+      if (wallY >= objectBottom) {
+        const distanceM = (wallY - objectBottom) / transform.px_per_m;
+        addNearestGuide(nearest, {
+          side: "bottom",
+          wallId: wall.id,
+          distance_m: distanceM,
+          label: distanceLabel(distanceM),
+          x1: x,
+          y1: objectBottom,
+          x2: x,
+          y2: wallY,
+          labelX: x,
+          labelY: (objectBottom + wallY) / 2,
+        });
+      }
+    }
+
+    if (isVertical) {
+      const wallX = wall.x1;
+      const wallTop = Math.min(wall.y1, wall.y2);
+      const wallBottom = Math.max(wall.y1, wall.y2);
+      if (!intervalsOverlap(objectTop, objectBottom, wallTop, wallBottom)) {
+        continue;
+      }
+
+      const y = clamp(objectCenterY, Math.max(objectTop, wallTop), Math.min(objectBottom, wallBottom));
+      if (wallX <= objectLeft) {
+        const distanceM = (objectLeft - wallX) / transform.px_per_m;
+        addNearestGuide(nearest, {
+          side: "left",
+          wallId: wall.id,
+          distance_m: distanceM,
+          label: distanceLabel(distanceM),
+          x1: objectLeft,
+          y1: y,
+          x2: wallX,
+          y2: y,
+          labelX: (objectLeft + wallX) / 2,
+          labelY: y,
+        });
+      }
+      if (wallX >= objectRight) {
+        const distanceM = (wallX - objectRight) / transform.px_per_m;
+        addNearestGuide(nearest, {
+          side: "right",
+          wallId: wall.id,
+          distance_m: distanceM,
+          label: distanceLabel(distanceM),
+          x1: objectRight,
+          y1: y,
+          x2: wallX,
+          y2: y,
+          labelX: (objectRight + wallX) / 2,
+          labelY: y,
+        });
+      }
+    }
+  }
+
+  return ["top", "right", "bottom", "left"].flatMap((side) => {
+    const guide = nearest[side as WallDistanceGuideSide];
+    return guide ? [guide] : [];
+  });
 }
 
 export function clampPlanZoom(zoom: number): number {

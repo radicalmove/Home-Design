@@ -7,6 +7,7 @@ import {
   dimensionLabel,
   lShapePath,
   metresToSvg,
+  nearestWallDistanceGuides,
   nextWheelPlanZoom,
   objectBoundsSvg,
   planViewBoxSize,
@@ -124,14 +125,47 @@ describe("furniture geometry", () => {
 
   it("clamps and labels furniture plan zoom", () => {
     expect(clampPlanZoom(0.2)).toBe(0.5);
-    expect(clampPlanZoom(8)).toBe(5);
+    expect(clampPlanZoom(8)).toBe(7);
     expect(planZoomLabel(1.25)).toBe("125%");
+    expect(planZoomLabel(7)).toBe("700%");
   });
 
-  it("computes wheel zoom up to 500 percent", () => {
+  it("computes wheel zoom up to 700 percent", () => {
     expect(nextWheelPlanZoom(1, -1)).toBe(1.1);
     expect(nextWheelPlanZoom(1, 1)).toBe(0.9);
-    expect(nextWheelPlanZoom(4.9, -1)).toBe(5);
+    expect(nextWheelPlanZoom(6.9, -1)).toBe(7);
+  });
+
+  it("finds nearest wall distances around an object footprint", () => {
+    const guides = nearestWallDistanceGuides(
+      { x: 10, y: 10, width: 20, height: 10 },
+      [
+        { id: "top", x1: 0, y1: 0, x2: 40, y2: 0 },
+        { id: "bottom", x1: 0, y1: 30, x2: 40, y2: 30 },
+        { id: "left", x1: 0, y1: 0, x2: 0, y2: 40 },
+        { id: "right", x1: 40, y1: 0, x2: 40, y2: 40 },
+        { id: "non-overlapping", x1: 50, y1: 5, x2: 60, y2: 5 },
+      ],
+      { px_per_m: 10 },
+    );
+
+    expect(guides.map((guide) => guide.side).sort()).toEqual(["bottom", "left", "right", "top"]);
+    expect(guides.find((guide) => guide.side === "top")).toMatchObject({
+      distance_m: 1,
+      label: "1.00 m",
+      x1: 20,
+      y1: 10,
+      x2: 20,
+      y2: 0,
+    });
+    expect(guides.find((guide) => guide.side === "right")).toMatchObject({
+      distance_m: 1,
+      label: "1.00 m",
+      x1: 30,
+      y1: 15,
+      x2: 40,
+      y2: 15,
+    });
   });
 
   it("uses viewBox maths for a portrait furniture field of view", () => {

@@ -70,7 +70,15 @@ describe("furniture canvas interaction layout", () => {
     expect(planCanvasSource).toContain('symbol.shape === "bedside-table"');
     expect(planCanvasSource).toContain('symbol.shape === "drawers"');
     expect(planCanvasSource).toContain('symbol.shape === "partition-wall"');
+    expect(planCanvasSource).toContain('rx={symbol.shape === "partition-wall" ? 0 : 2}');
     expect(planCanvasSource).toContain('symbol.shape === "sliding-door"');
+  });
+
+  it("renders live wall-distance guides while furniture is moving", () => {
+    expect(planCanvasSource).toContain("nearestWallDistanceGuides");
+    expect(planCanvasSource).toContain("wallDistanceGuides");
+    expect(planCanvasSource).toContain("wall-distance-guide");
+    expect(planCanvasSource).toContain("REFERENCE_WALL_SEGMENTS");
   });
 
   it("renders fireplace, TV, and heat-pump furniture symbols", () => {
