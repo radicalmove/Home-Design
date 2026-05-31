@@ -63,20 +63,20 @@ export function nextWheelPlanZoom(currentZoom: number, deltaY: number): number {
   return clampPlanZoom(currentZoom * zoomFactor);
 }
 
-export function anchoredScrollAfterZoom(
-  currentScroll: PlanPoint,
+export function anchoredPanAfterZoom(
+  currentPan: PlanPoint,
   pointerOffset: PlanPoint,
   currentZoom: number,
   nextZoom: number,
 ): PlanPoint {
   if (currentZoom <= 0) {
-    return currentScroll;
+    return currentPan;
   }
 
   const zoomRatio = nextZoom / currentZoom;
   return {
-    x: (currentScroll.x + pointerOffset.x) * zoomRatio - pointerOffset.x,
-    y: (currentScroll.y + pointerOffset.y) * zoomRatio - pointerOffset.y,
+    x: currentPan.x * zoomRatio + pointerOffset.x * (1 - zoomRatio),
+    y: currentPan.y * zoomRatio + pointerOffset.y * (1 - zoomRatio),
   };
 }
 

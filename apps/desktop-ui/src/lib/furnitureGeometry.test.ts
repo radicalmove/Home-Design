@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  anchoredScrollAfterZoom,
+  anchoredPanAfterZoom,
   angleDegFromCenter,
   clampPlanZoom,
   dimensionLabel,
@@ -78,13 +78,13 @@ describe("furniture geometry", () => {
     expect(nextWheelPlanZoom(1, 1)).toBe(0.9);
 
     expect(
-      anchoredScrollAfterZoom(
-        { x: 100, y: 50 },
+      anchoredPanAfterZoom(
+        { x: 20, y: -30 },
         { x: 200, y: 100 },
         1,
         1.5,
       ),
-    ).toEqual({ x: 250, y: 125 });
+    ).toEqual({ x: -70, y: -95 });
   });
 
   it("measures rotation from object centre in SVG space", () => {

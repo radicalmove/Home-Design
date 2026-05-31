@@ -1,7 +1,6 @@
 <script lang="ts">
-  import { tick } from "svelte";
   import {
-    anchoredScrollAfterZoom,
+    anchoredPanAfterZoom,
     angleDegFromCenter,
     dimensionLabel,
     nextWheelPlanZoom,
@@ -29,7 +28,7 @@
   type PanState = {
     pointerId: number;
     startClient: PlanPoint;
-    startScroll: PlanPoint;
+    startPan: PlanPoint;
   };
 
   type Props = {
@@ -66,6 +65,7 @@
   let svgElement = $state<SVGSVGElement | null>(null);
   let dragState = $state<DragState | null>(null);
   let panState = $state<PanState | null>(null);
+  let panOffset = $state<PlanPoint>({ x: 0, y: 0 });
 
   let visibleObjects = $derived(
     layout.objects.filter(
@@ -87,7 +87,7 @@
   }
 
   function localPointFromEvent(event: PointerEvent): PlanPoint {
-    const rect = svgElement?.getBoundingClientRect();
+    const rect = canvasElement?.getBoundingClientRect();
     if (!rect) {
       return { x: 0, y: 0 };
     }
@@ -112,7 +112,7 @@
     panState = {
       pointerId: event.pointerId,
       startClient: { x: event.clientX, y: event.clientY },
-      startScroll: { x: canvasElement.scrollLeft, y: canvasElement.scrollTop },
+      startPan: panOffset,
     };
     canvasElement.setPointerCapture(event.pointerId);
   }
@@ -123,8 +123,10 @@
     }
 
     event.preventDefault();
-    canvasElement.scrollLeft = panState.startScroll.x - (event.clientX - panState.startClient.x);
-    canvasElement.scrollTop = panState.startScroll.y - (event.clientY - panState.startClient.y);
+    panOffset = {
+      x: panState.startPan.x + event.clientX - panState.startClient.x,
+      y: panState.startPan.y + event.clientY - panState.startClient.y,
+    };
   }
 
   function finishPan(event: PointerEvent) {
@@ -136,7 +138,7 @@
     panState = null;
   }
 
-  async function handleWheel(event: WheelEvent) {
+  function handleWheel(event: WheelEvent) {
     if (!canvasElement || event.deltaY === 0) {
       return;
     }
@@ -148,16 +150,13 @@
     }
 
     const canvasBounds = canvasElement.getBoundingClientRect();
-    const nextScroll = anchoredScrollAfterZoom(
-      { x: canvasElement.scrollLeft, y: canvasElement.scrollTop },
+    panOffset = anchoredPanAfterZoom(
+      panOffset,
       { x: event.clientX - canvasBounds.left, y: event.clientY - canvasBounds.top },
       zoom,
       nextZoom,
     );
     onZoomChange(nextZoom);
-    await tick();
-    canvasElement.scrollLeft = nextScroll.x;
-    canvasElement.scrollTop = nextScroll.y;
   }
 
   function startMove(event: PointerEvent, object: FurnitureObject) {
@@ -270,7 +269,6 @@
   class:is-panning={Boolean(panState)}
   role="group"
   aria-label="Furniture plan editor"
-  style={`--plan-zoom: ${zoom};`}
   ondragstart={preventDragDefaults}
   onselectstart={preventDragDefaults}
   onwheel={handleWheel}
@@ -278,106 +276,112 @@
   onpointerup={finishPan}
   onpointercancel={finishPan}
 >
-  <svg
-    bind:this={svgElement}
-    viewBox="0 0 1600 900"
-    role="img"
-    aria-label="Reference plan with editable furniture overlay"
-    onpointermove={handlePointerMove}
-    onpointerup={finishPointer}
-    onpointercancel={finishPointer}
-    onpointerdown={startBackgroundPan}
+  <div
+    class="plan-stage"
+    style={`transform: translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom});`}
   >
-    <image href={backgroundAssetPath} width="1600" height="900" preserveAspectRatio="xMidYMid meet" />
+    <svg
+      bind:this={svgElement}
+      viewBox="0 0 1600 900"
+      role="img"
+      aria-label="Reference plan with editable furniture overlay"
+      onpointermove={handlePointerMove}
+      onpointerup={finishPointer}
+      onpointercancel={finishPointer}
+      onpointerdown={startBackgroundPan}
+    >
+      <image href={backgroundAssetPath} width="1600" height="900" preserveAspectRatio="xMidYMid meet" />
 
-    <g class="furniture-layer">
-      {#each visibleObjects as object (object.id)}
-        {@const bounds = objectBoundsSvg(object, layout.plan_transform)}
-        {@const symbol = symbolForFurnitureObject(object.type, object.abbreviation)}
-        <g
-          class:selected={selectedObjectId === object.id}
-          class={`furniture-object ${object.layer} ${symbol.shape}`}
-          data-furniture-object={object.id}
-          role="button"
-          aria-label={object.label}
-          tabindex="0"
-          transform={`rotate(${object.rotation_deg}, ${bounds.cx}, ${bounds.cy})`}
-          onpointerdown={(event) => startMove(event, object)}
-        >
-          <rect
-            class="symbol-body"
-            x={bounds.x}
-            y={bounds.y}
-            width={bounds.width}
-            height={bounds.height}
-            rx="2"
-            fill={object.colour}
-          />
-
-          {#if symbol.shape === "sofa"}
-            <line x1={bounds.x} y1={bounds.y + bounds.height * 0.35} x2={bounds.x + bounds.width} y2={bounds.y + bounds.height * 0.35} />
-            <line x1={bounds.x + bounds.width * 0.5} y1={bounds.y} x2={bounds.x + bounds.width * 0.5} y2={bounds.y + bounds.height * 0.35} />
-          {:else if symbol.shape === "bed"}
-            <rect x={bounds.x + 4} y={bounds.y + 4} width={Math.max(5, bounds.width - 8)} height={Math.max(5, bounds.height * 0.22)} rx="2" />
-          {:else if symbol.shape === "desk"}
-            <line x1={bounds.x} y1={bounds.y + bounds.height * 0.72} x2={bounds.x + bounds.width} y2={bounds.y + bounds.height * 0.72} />
-          {:else if symbol.shape === "table"}
-            <ellipse cx={bounds.cx} cy={bounds.cy} rx={Math.max(3, bounds.width * 0.42)} ry={Math.max(3, bounds.height * 0.38)} />
-          {:else if symbol.shape === "chair"}
-            <line x1={bounds.x + bounds.width * 0.25} y1={bounds.y + bounds.height * 0.2} x2={bounds.x + bounds.width * 0.25} y2={bounds.y + bounds.height * 0.85} />
-            <line x1={bounds.x + bounds.width * 0.75} y1={bounds.y + bounds.height * 0.2} x2={bounds.x + bounds.width * 0.75} y2={bounds.y + bounds.height * 0.85} />
-          {:else if symbol.shape === "storage"}
-            <line x1={bounds.x} y1={bounds.y + bounds.height * 0.5} x2={bounds.x + bounds.width} y2={bounds.y + bounds.height * 0.5} />
-          {:else if symbol.shape === "appliance" || symbol.shape === "fixture"}
-            <rect x={bounds.x + 4} y={bounds.y + 4} width={Math.max(4, bounds.width - 8)} height={Math.max(4, bounds.height - 8)} rx="3" />
-          {/if}
-
-          {#if symbol.abbreviation}
-            <text x={bounds.cx} y={bounds.cy}>{symbol.abbreviation}</text>
-          {/if}
-
-          {#if selectedObjectId === object.id}
-            <line
-              class="rotate-stem"
-              x1={bounds.cx}
-              y1={bounds.y}
-              x2={bounds.cx}
-              y2={bounds.y - 18}
-            />
-            <circle
-              class="rotate-handle"
-              cx={bounds.cx}
-              cy={bounds.y - 25}
-              r="7"
-              role="button"
-              aria-label={`Rotate ${object.label}`}
-              tabindex="0"
-              onpointerdown={(event) => startRotate(event, object)}
-            />
+      <g class="furniture-layer">
+        {#each visibleObjects as object (object.id)}
+          {@const bounds = objectBoundsSvg(object, layout.plan_transform)}
+          {@const symbol = symbolForFurnitureObject(object.type, object.abbreviation)}
+          <g
+            class:selected={selectedObjectId === object.id}
+            class={`furniture-object ${object.layer} ${symbol.shape}`}
+            data-furniture-object={object.id}
+            role="button"
+            aria-label={object.label}
+            tabindex="0"
+            transform={`rotate(${object.rotation_deg}, ${bounds.cx}, ${bounds.cy})`}
+            onpointerdown={(event) => startMove(event, object)}
+          >
             <rect
-              class="resize-handle"
-              x={bounds.x + bounds.width - 5}
-              y={bounds.y + bounds.height - 5}
-              width="10"
-              height="10"
-              role="button"
-              aria-label={`Resize ${object.label}`}
-              tabindex="0"
-              onpointerdown={(event) => startResize(event, object)}
+              class="symbol-body"
+              x={bounds.x}
+              y={bounds.y}
+              width={bounds.width}
+              height={bounds.height}
+              rx="2"
+              fill={object.colour}
             />
-          {/if}
-        </g>
-      {/each}
-    </g>
-  </svg>
+
+            {#if symbol.shape === "sofa"}
+              <line x1={bounds.x} y1={bounds.y + bounds.height * 0.35} x2={bounds.x + bounds.width} y2={bounds.y + bounds.height * 0.35} />
+              <line x1={bounds.x + bounds.width * 0.5} y1={bounds.y} x2={bounds.x + bounds.width * 0.5} y2={bounds.y + bounds.height * 0.35} />
+            {:else if symbol.shape === "bed"}
+              <rect x={bounds.x + 4} y={bounds.y + 4} width={Math.max(5, bounds.width - 8)} height={Math.max(5, bounds.height * 0.22)} rx="2" />
+            {:else if symbol.shape === "desk"}
+              <line x1={bounds.x} y1={bounds.y + bounds.height * 0.72} x2={bounds.x + bounds.width} y2={bounds.y + bounds.height * 0.72} />
+            {:else if symbol.shape === "table"}
+              <ellipse cx={bounds.cx} cy={bounds.cy} rx={Math.max(3, bounds.width * 0.42)} ry={Math.max(3, bounds.height * 0.38)} />
+            {:else if symbol.shape === "chair"}
+              <line x1={bounds.x + bounds.width * 0.25} y1={bounds.y + bounds.height * 0.2} x2={bounds.x + bounds.width * 0.25} y2={bounds.y + bounds.height * 0.85} />
+              <line x1={bounds.x + bounds.width * 0.75} y1={bounds.y + bounds.height * 0.2} x2={bounds.x + bounds.width * 0.75} y2={bounds.y + bounds.height * 0.85} />
+            {:else if symbol.shape === "storage"}
+              <line x1={bounds.x} y1={bounds.y + bounds.height * 0.5} x2={bounds.x + bounds.width} y2={bounds.y + bounds.height * 0.5} />
+            {:else if symbol.shape === "appliance" || symbol.shape === "fixture"}
+              <rect x={bounds.x + 4} y={bounds.y + 4} width={Math.max(4, bounds.width - 8)} height={Math.max(4, bounds.height - 8)} rx="3" />
+            {/if}
+
+            {#if symbol.abbreviation}
+              <text x={bounds.cx} y={bounds.cy}>{symbol.abbreviation}</text>
+            {/if}
+
+            {#if selectedObjectId === object.id}
+              <line
+                class="rotate-stem"
+                x1={bounds.cx}
+                y1={bounds.y}
+                x2={bounds.cx}
+                y2={bounds.y - 18}
+              />
+              <circle
+                class="rotate-handle"
+                cx={bounds.cx}
+                cy={bounds.y - 25}
+                r="7"
+                role="button"
+                aria-label={`Rotate ${object.label}`}
+                tabindex="0"
+                onpointerdown={(event) => startRotate(event, object)}
+              />
+              <rect
+                class="resize-handle"
+                x={bounds.x + bounds.width - 5}
+                y={bounds.y + bounds.height - 5}
+                width="10"
+                height="10"
+                role="button"
+                aria-label={`Resize ${object.label}`}
+                tabindex="0"
+                onpointerdown={(event) => startResize(event, object)}
+              />
+            {/if}
+          </g>
+        {/each}
+      </g>
+    </svg>
+  </div>
 </div>
 
 <style>
   .plan-canvas {
     position: relative;
     width: 100%;
+    height: clamp(320px, 48vh, 520px);
     min-width: 0;
-    overflow: auto;
+    overflow: hidden;
     background: #ffffff;
     border: 1px solid #cfd8dd;
     border-radius: 8px;
@@ -392,10 +396,17 @@
     cursor: grabbing;
   }
 
+  .plan-stage {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform-origin: 0 0;
+    will-change: transform;
+  }
+
   svg {
     display: block;
-    width: calc(100% * var(--plan-zoom));
-    min-width: calc(720px * var(--plan-zoom));
+    width: max(100%, 720px);
     height: auto;
     aspect-ratio: 16 / 9;
     touch-action: none;
