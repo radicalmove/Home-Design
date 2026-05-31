@@ -31,6 +31,7 @@ pub fn validate_house_model(model: &HouseModel) -> ModelValidationResult {
     validate_top_level_contract(model, &mut result);
     validate_current_structure(model, &mut result);
     validate_current_site(model, &mut result);
+    validate_measurement_audit(model, &mut result);
     validate_daylight(model, &mut result);
 
     result
@@ -175,6 +176,80 @@ fn validate_daylight(model: &HouseModel, result: &mut ModelValidationResult) {
                         room.id
                     ));
                 }
+            }
+        }
+    }
+}
+
+fn validate_measurement_audit(model: &HouseModel, result: &mut ModelValidationResult) {
+    if model.measurement_audit.status != "active_measurement_audit" {
+        result
+            .errors
+            .push("measurement_audit.status must be active_measurement_audit".to_string());
+    }
+
+    if model.measurement_audit.units != "metres" {
+        result
+            .errors
+            .push("measurement_audit.units must be metres".to_string());
+    }
+
+    let photo_check_ids = photo_check_ids(model);
+    let room_ids = model
+        .rooms
+        .iter()
+        .map(|room| room.id.as_str())
+        .collect::<BTreeSet<_>>();
+    let anchor_ids = model
+        .anchors
+        .iter()
+        .map(|anchor| anchor.id.as_str())
+        .collect::<BTreeSet<_>>();
+    let built_in_ids = model
+        .current_structure
+        .built_ins
+        .iter()
+        .map(|item| item.id.as_str())
+        .collect::<BTreeSet<_>>();
+
+    for item in &model.measurement_audit.items {
+        let target_exists = match item.target_kind.as_str() {
+            "room" => room_ids.contains(item.target_id.as_str()),
+            "anchor" => anchor_ids.contains(item.target_id.as_str()),
+            "built_in" => built_in_ids.contains(item.target_id.as_str()),
+            "assumption" => true,
+            _ => {
+                result.errors.push(format!(
+                    "measurement_audit.{} has unsupported target kind: {}",
+                    item.id, item.target_kind
+                ));
+                true
+            }
+        };
+
+        if !target_exists {
+            result.errors.push(format!(
+                "measurement_audit.{} references unknown {}: {}",
+                item.id, item.target_kind, item.target_id
+            ));
+        }
+
+        if !matches!(
+            item.measurement_status.as_str(),
+            "measured" | "partly_measured" | "estimated" | "needs_checking"
+        ) {
+            result.errors.push(format!(
+                "measurement_audit.{} has unsupported measurement status: {}",
+                item.id, item.measurement_status
+            ));
+        }
+
+        for check_id in &item.evidence_check_ids {
+            if !photo_check_ids.contains(check_id.as_str()) {
+                result.errors.push(format!(
+                    "measurement_audit.{} references unknown evidence check: {check_id}",
+                    item.id
+                ));
             }
         }
     }

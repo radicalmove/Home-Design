@@ -30,6 +30,7 @@
   let appError = $state<string | null>(null);
 
   let selectedView = $derived(activeView(project, selectedViewId));
+  let measurementAudit = $derived(modelStatus?.summary.measurement_audit ?? null);
 
   function toErrorMessage(reason: unknown): string {
     return reason instanceof Error ? reason.message : String(reason);
@@ -126,6 +127,29 @@
             </div>
           </dl>
         </section>
+        {#if measurementAudit}
+          <section class="audit-summary" aria-label="Measurement audit status">
+            <span class="eyebrow">Measurements</span>
+            <div class="audit-state">
+              <strong>{measurementAudit.measured_count} measured</strong>
+              <span>{measurementAudit.total_count} records</span>
+            </div>
+            <dl>
+              <div>
+                <dt>Partial</dt>
+                <dd>{measurementAudit.partly_measured_count}</dd>
+              </div>
+              <div>
+                <dt>Estimated</dt>
+                <dd>{measurementAudit.estimated_count}</dd>
+              </div>
+              <div>
+                <dt>Check</dt>
+                <dd>{measurementAudit.needs_checking_count}</dd>
+              </div>
+            </dl>
+          </section>
+        {/if}
       {:else if modelStatusError}
         <section class="model-summary warning" aria-label="Model validation status">
           <span class="eyebrow">Model</span>

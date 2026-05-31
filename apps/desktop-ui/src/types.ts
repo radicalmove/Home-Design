@@ -34,6 +34,15 @@ export type HouseModelSummary = {
   current_feature_count: number;
   site_element_count: number;
   shadow_source_count: number;
+  measurement_audit: MeasurementAuditSummary;
+};
+
+export type MeasurementAuditSummary = {
+  total_count: number;
+  measured_count: number;
+  partly_measured_count: number;
+  estimated_count: number;
+  needs_checking_count: number;
 };
 
 export type BuiltInModelStatus = {

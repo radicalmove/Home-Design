@@ -21,6 +21,9 @@ fn rust_model_loader_reads_current_house_model_contract() {
     assert_eq!(model.current_site.status, "active_site_source_of_truth");
     assert_eq!(model.current_site.elements.len(), 11);
     assert_eq!(model.current_site.shadow_sources.len(), 3);
+    assert_eq!(model.measurement_audit.status, "active_measurement_audit");
+    assert_eq!(model.measurement_audit.units, "metres");
+    assert_eq!(model.measurement_audit.items.len(), 18);
 
     let kitchen = model.room("kitchen_dining").expect("kitchen/dining");
     assert_eq!(kitchen.name, "Kitchen / Dining");
@@ -38,6 +41,31 @@ fn rust_model_loader_reads_current_house_model_contract() {
         Some(16.1)
     );
     assert_eq!(model.anchor_value_m("combined_external_depth"), Some(11.58));
+}
+
+#[test]
+fn rust_model_loader_exposes_measurement_audit_records() {
+    let model = load_house_model_from_path(model_path()).expect("load house model");
+
+    let bedroom_2 = model
+        .measurement_audit
+        .item("room:bedroom_2")
+        .expect("Bedroom 2 audit record");
+
+    assert_eq!(bedroom_2.target_kind, "room");
+    assert_eq!(bedroom_2.target_id, "bedroom_2");
+    assert_eq!(bedroom_2.measurement_status, "measured");
+    assert_eq!(
+        bedroom_2.confidence,
+        "measured_dimensions_reference_position_photo_context"
+    );
+    assert_eq!(bedroom_2.dimensions_m.get("length").copied(), Some(4.73));
+    assert_eq!(bedroom_2.dimensions_m.get("width").copied(), Some(2.75));
+    assert!(
+        bedroom_2
+            .source_records
+            .contains(&"DATA/house_model.json.rooms.bedroom_2.dimensions_m".to_string())
+    );
 }
 
 #[test]
@@ -89,6 +117,10 @@ fn rust_model_validation_reports_core_contract_failures() {
         .evidence_check_ids
         .push("missing_photo_check".to_string());
     model.daylight.rooms.remove("kitchen_dining");
+    model.measurement_audit.items[0]
+        .evidence_check_ids
+        .push("missing_photo_check".to_string());
+    model.measurement_audit.items[1].target_id = "missing_room".to_string();
 
     let result = validate_house_model(&model);
 
@@ -118,6 +150,13 @@ fn rust_model_validation_reports_core_contract_failures() {
             .errors
             .contains(&"missing daylight matrix for kitchen_dining".to_string())
     );
+    assert!(result.errors.iter().any(
+        |error| error == "measurement_audit.room:lounge references unknown room: missing_room"
+    ));
+    assert!(
+        result.errors.iter().any(|error| error
+            == "measurement_audit.room:kitchen_dining references unknown evidence check: missing_photo_check")
+    );
 }
 
 #[test]
@@ -143,4 +182,9 @@ fn rust_model_summary_reports_counts_for_desktop_status() {
     assert_eq!(summary.current_feature_count, 30);
     assert_eq!(summary.site_element_count, 11);
     assert_eq!(summary.shadow_source_count, 3);
+    assert_eq!(summary.measurement_audit.total_count, 18);
+    assert_eq!(summary.measurement_audit.measured_count, 15);
+    assert_eq!(summary.measurement_audit.partly_measured_count, 1);
+    assert_eq!(summary.measurement_audit.estimated_count, 2);
+    assert_eq!(summary.measurement_audit.needs_checking_count, 0);
 }

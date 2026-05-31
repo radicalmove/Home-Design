@@ -51,6 +51,8 @@ pub struct HouseModel {
     pub current_site: CurrentSite,
     #[serde(default)]
     pub daylight: Daylight,
+    #[serde(default)]
+    pub measurement_audit: MeasurementAudit,
 }
 
 impl HouseModel {
@@ -91,6 +93,7 @@ pub struct HouseModelSummary {
     pub current_feature_count: usize,
     pub site_element_count: usize,
     pub shadow_source_count: usize,
+    pub measurement_audit: MeasurementAuditSummary,
 }
 
 pub fn summarize_house_model(model: &HouseModel) -> HouseModelSummary {
@@ -102,6 +105,7 @@ pub fn summarize_house_model(model: &HouseModel) -> HouseModelSummary {
         current_feature_count: model.current_structure.features.len(),
         site_element_count: model.current_site.elements.len(),
         shadow_source_count: model.current_site.shadow_sources.len(),
+        measurement_audit: summarize_measurement_audit(&model.measurement_audit),
     }
 }
 
@@ -186,6 +190,73 @@ pub struct CurrentSite {
     pub elements: Vec<ModeledItem>,
     #[serde(default)]
     pub shadow_sources: Vec<ModeledItem>,
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+pub struct MeasurementAudit {
+    #[serde(default)]
+    pub status: String,
+    #[serde(default)]
+    pub units: String,
+    #[serde(default)]
+    pub method: String,
+    #[serde(default)]
+    pub items: Vec<MeasurementAuditItem>,
+}
+
+impl MeasurementAudit {
+    pub fn item(&self, item_id: &str) -> Option<&MeasurementAuditItem> {
+        self.items.iter().find(|item| item.id == item_id)
+    }
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+pub struct MeasurementAuditItem {
+    pub id: String,
+    pub target_kind: String,
+    pub target_id: String,
+    pub label: String,
+    pub measurement_status: String,
+    #[serde(default)]
+    pub confidence: String,
+    #[serde(default)]
+    pub dimension_source: String,
+    #[serde(default)]
+    pub dimensions_m: BTreeMap<String, f64>,
+    #[serde(default)]
+    pub evidence_check_ids: Vec<String>,
+    #[serde(default)]
+    pub source_records: Vec<String>,
+    #[serde(default)]
+    pub notes: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct MeasurementAuditSummary {
+    pub total_count: usize,
+    pub measured_count: usize,
+    pub partly_measured_count: usize,
+    pub estimated_count: usize,
+    pub needs_checking_count: usize,
+}
+
+fn summarize_measurement_audit(audit: &MeasurementAudit) -> MeasurementAuditSummary {
+    let mut summary = MeasurementAuditSummary {
+        total_count: audit.items.len(),
+        ..MeasurementAuditSummary::default()
+    };
+
+    for item in &audit.items {
+        match item.measurement_status.as_str() {
+            "measured" => summary.measured_count += 1,
+            "partly_measured" => summary.partly_measured_count += 1,
+            "estimated" => summary.estimated_count += 1,
+            "needs_checking" => summary.needs_checking_count += 1,
+            _ => {}
+        }
+    }
+
+    summary
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]

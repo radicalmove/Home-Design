@@ -281,7 +281,7 @@
       "category": "bedroom",
       "dimensions_m": {
         "length": 2.9,
-        "width": 2.7,
+        "width": 2.75,
         "height": 2.4
       },
       "confidence": "measured",
@@ -303,7 +303,7 @@
       "name": "Bathroom",
       "category": "wet",
       "dimensions_m": {
-        "length": 2.7,
+        "length": 2.75,
         "width": 1.64,
         "height": 2.4
       },
@@ -482,6 +482,412 @@
       "confidence": "inferred"
     }
   ],
+  "measurement_audit": {
+    "status": "active_measurement_audit",
+    "units": "metres",
+    "method": "Persistent audit records consolidate the room dimensions, anchor measurements, built-ins, wall-thickness assumptions, source records, and photo evidence already held in the model and calibration report. Room dimensions are clear internal measurements unless a note says otherwise.",
+    "items": [
+      {
+        "id": "room:kitchen_dining",
+        "target_kind": "room",
+        "target_id": "kitchen_dining",
+        "label": "Kitchen / Dining clear internal dimensions",
+        "measurement_status": "measured",
+        "confidence": "measured_dimensions_photo_verified_openings",
+        "dimension_source": "direct_user_measurement",
+        "dimensions_m": {
+          "length": 8.12,
+          "width": 2.5,
+          "height": 2.4
+        },
+        "evidence_check_ids": ["deck_doors_and_kitchen_window"],
+        "source_records": [
+          "DATA/house_model.json.rooms.kitchen_dining.dimensions_m",
+          "DATA/house_model.json.current_structure.spaces.kitchen_dining"
+        ],
+        "notes": [
+          "Length is measured from the Bedroom 2 entrance to the dining end wall.",
+          "Display dimension endpoints should use internal wall faces."
+        ]
+      },
+      {
+        "id": "room:lounge",
+        "target_kind": "room",
+        "target_id": "lounge",
+        "label": "Lounge clear internal dimensions",
+        "measurement_status": "measured",
+        "confidence": "measured_dimensions_inferred_position",
+        "dimension_source": "direct_user_measurement",
+        "dimensions_m": {
+          "length": 4.9,
+          "width": 3.7,
+          "height": 2.4
+        },
+        "evidence_check_ids": ["sunroom_lounge_slider", "lounge_photo_context"],
+        "source_records": [
+          "DATA/house_model.json.rooms.lounge.dimensions_m",
+          "DATA/house_model.json.current_structure.spaces.lounge"
+        ],
+        "notes": [
+          "Dimensions are measured; display position is inferred from the surrounding calibrated model."
+        ]
+      },
+      {
+        "id": "room:sunroom",
+        "target_kind": "room",
+        "target_id": "sunroom",
+        "label": "Sunroom irregular internal segments",
+        "measurement_status": "partly_measured",
+        "confidence": "measured_approx",
+        "dimension_source": "hand_drawn_internal_measurement_sketch",
+        "dimensions_m": {
+          "top_run": 5.0,
+          "right_side": 4.14,
+          "bottom_run": 1.55,
+          "lower_vertical": 0.71,
+          "diagonal": 1.86,
+          "inset_horizontal": 1.2,
+          "left_side": 2.15,
+          "hallway_wall_to_nw_window_inside": 5.02,
+          "lounge_wall_to_west_window_inside": 4.07,
+          "height": 2.1
+        },
+        "evidence_check_ids": ["sunroom_wraparound_glazing"],
+        "source_records": [
+          "DATA/house_model.json.rooms.sunroom.measured_segments_m",
+          "sunroom-dimensions.HEIC"
+        ],
+        "notes": [
+          "Segments are measured but the polygon is still treated as an approximate fitted shape."
+        ]
+      },
+      {
+        "id": "room:hallway",
+        "target_kind": "room",
+        "target_id": "hallway",
+        "label": "Hallway clear internal dimensions",
+        "measurement_status": "measured",
+        "confidence": "measured_dimensions_photo_verified",
+        "dimension_source": "direct_user_measurement",
+        "dimensions_m": {
+          "length": 4.8,
+          "width": 1.3,
+          "height": 2.4
+        },
+        "evidence_check_ids": ["hallway_spine_and_room_connections"],
+        "source_records": [
+          "DATA/house_model.json.rooms.hallway.dimensions_m",
+          "DATA/house_model.json.current_structure.spaces.hallway"
+        ],
+        "notes": [
+          "Interior circulation spine is measured and photo verified."
+        ]
+      },
+      {
+        "id": "room:master_bedroom",
+        "target_kind": "room",
+        "target_id": "master_bedroom",
+        "label": "Master Bedroom clear internal dimensions",
+        "measurement_status": "measured",
+        "confidence": "measured_dimensions_reference_position_photo_context",
+        "dimension_source": "direct_user_measurement",
+        "dimensions_m": {
+          "length": 3.3,
+          "width": 4.2,
+          "height": 2.4
+        },
+        "evidence_check_ids": ["master_bedroom_photo_context"],
+        "source_records": [
+          "DATA/house_model.json.rooms.master_bedroom.dimensions_m",
+          "DATA/house_model.json.current_structure.spaces.master_bedroom"
+        ],
+        "notes": [
+          "Clear floor area does not subtract the separate 0.62m wardrobe bay."
+        ]
+      },
+      {
+        "id": "room:office",
+        "target_kind": "room",
+        "target_id": "office",
+        "label": "Office clear internal dimensions",
+        "measurement_status": "measured",
+        "confidence": "measured_dimensions_reference_position_photo_context",
+        "dimension_source": "direct_user_measurement",
+        "dimensions_m": {
+          "length": 2.9,
+          "width": 2.75,
+          "height": 2.4
+        },
+        "evidence_check_ids": ["office_photo_context", "hallway_spine_and_room_connections"],
+        "source_records": [
+          "DATA/house_model.json.rooms.office.dimensions_m",
+          "DATA/house_model.json.current_structure.spaces.office"
+        ],
+        "notes": [
+          "Current-structure geometry uses the rechecked 2.75m depth."
+        ]
+      },
+      {
+        "id": "room:bathroom",
+        "target_kind": "room",
+        "target_id": "bathroom",
+        "label": "Bathroom clear internal dimensions",
+        "measurement_status": "measured",
+        "confidence": "measured_dimensions_reference_position_photo_context",
+        "dimension_source": "direct_user_measurement",
+        "dimensions_m": {
+          "length": 1.64,
+          "width": 2.75,
+          "height": 2.4
+        },
+        "evidence_check_ids": ["bathroom_photo_context", "hallway_spine_and_room_connections"],
+        "source_records": [
+          "DATA/house_model.json.rooms.bathroom.dimensions_m",
+          "DATA/house_model.json.current_structure.spaces.bathroom"
+        ],
+        "notes": [
+          "Current-structure geometry stores the clear horizontal span as 1.64m and the clear vertical room depth as 2.75m."
+        ]
+      },
+      {
+        "id": "room:bedroom_2",
+        "target_kind": "room",
+        "target_id": "bedroom_2",
+        "label": "Bedroom 2 clear internal dimensions",
+        "measurement_status": "measured",
+        "confidence": "measured_dimensions_reference_position_photo_context",
+        "dimension_source": "direct_user_measurement",
+        "dimensions_m": {
+          "length": 4.73,
+          "width": 2.75,
+          "height": 2.4
+        },
+        "evidence_check_ids": ["bedroom2_photo_context"],
+        "source_records": [
+          "DATA/house_model.json.rooms.bedroom_2.dimensions_m",
+          "DATA/house_model.json.current_structure.spaces.bedroom_2"
+        ],
+        "notes": [
+          "Longer, narrower room; dimensions must not be swapped.",
+          "Display dimension endpoints should use internal wall faces."
+        ]
+      },
+      {
+        "id": "room:entrance",
+        "target_kind": "room",
+        "target_id": "entrance",
+        "label": "Entrance clear internal dimensions",
+        "measurement_status": "measured",
+        "confidence": "measured_dimensions_photo_verified",
+        "dimension_source": "direct_user_measurement",
+        "dimensions_m": {
+          "length": 3.7,
+          "width": 1.16,
+          "height": 2.45
+        },
+        "evidence_check_ids": ["entrance_laundry_back_entry"],
+        "source_records": [
+          "DATA/house_model.json.rooms.entrance.dimensions_m",
+          "DATA/house_model.json.current_structure.spaces.entrance"
+        ],
+        "notes": [
+          "Narrowing and sliding-door chain measurements remain in the room notes."
+        ]
+      },
+      {
+        "id": "room:laundry",
+        "target_kind": "room",
+        "target_id": "laundry",
+        "label": "Laundry clear internal dimensions",
+        "measurement_status": "measured",
+        "confidence": "measured_dimensions_photo_verified",
+        "dimension_source": "direct_user_measurement",
+        "dimensions_m": {
+          "length": 3.03,
+          "width": 1.8,
+          "height": 2.45
+        },
+        "evidence_check_ids": ["entrance_laundry_back_entry"],
+        "source_records": [
+          "DATA/house_model.json.rooms.laundry.dimensions_m",
+          "DATA/house_model.json.current_structure.spaces.laundry"
+        ],
+        "notes": [
+          "Laundry/toilet clear internal width is 1.80m."
+        ]
+      },
+      {
+        "id": "room:toilet",
+        "target_kind": "room",
+        "target_id": "toilet",
+        "label": "Toilet clear internal dimensions",
+        "measurement_status": "measured",
+        "confidence": "measured_dimensions_photo_verified",
+        "dimension_source": "direct_user_measurement",
+        "dimensions_m": {
+          "length": 0.91,
+          "width": 1.8,
+          "height": 2.45
+        },
+        "evidence_check_ids": ["toilet_laundry_connection"],
+        "source_records": [
+          "DATA/house_model.json.rooms.toilet.dimensions_m",
+          "DATA/house_model.json.current_structure.spaces.toilet"
+        ],
+        "notes": [
+          "Toilet clear internal depth is 0.91m."
+        ]
+      },
+      {
+        "id": "anchor:long_side_master_to_laundry",
+        "target_kind": "anchor",
+        "target_id": "long_side_master_to_laundry",
+        "label": "Long straight side run from master end to laundry/toilet end",
+        "measurement_status": "estimated",
+        "confidence": "measured_rough",
+        "dimension_source": "rough_external_measurement",
+        "dimensions_m": {
+          "length": 16.1,
+          "tolerance": 0.45
+        },
+        "evidence_check_ids": ["external_site_driveway_garage_deck_rear_garden"],
+        "source_records": [
+          "DATA/house_model.json.anchors.long_side_master_to_laundry",
+          "OUTPUT/calibration_report.md"
+        ],
+        "notes": [
+          "Use as a flexible calibration guide rather than a hard constraint."
+        ]
+      },
+      {
+        "id": "anchor:master_street_frontage",
+        "target_kind": "anchor",
+        "target_id": "master_street_frontage",
+        "label": "Master bedroom exterior width parallel with street",
+        "measurement_status": "measured",
+        "confidence": "measured_approx",
+        "dimension_source": "external_user_measurement",
+        "dimensions_m": {
+          "width": 4.77
+        },
+        "evidence_check_ids": ["master_bedroom_photo_context"],
+        "source_records": [
+          "DATA/house_model.json.anchors.master_street_frontage",
+          "OUTPUT/calibration_report.md"
+        ],
+        "notes": [
+          "External frontage anchor for the master bedroom side."
+        ]
+      },
+      {
+        "id": "anchor:dining_edge_to_entrance_laundry_edge",
+        "target_kind": "anchor",
+        "target_id": "dining_edge_to_entrance_laundry_edge",
+        "label": "Dining-room outside edge to entrance/laundry edge",
+        "measurement_status": "measured",
+        "confidence": "measured",
+        "dimension_source": "external_user_measurement",
+        "dimensions_m": {
+          "length": 7.12
+        },
+        "evidence_check_ids": ["deck_doors_and_kitchen_window", "entrance_laundry_back_entry"],
+        "source_records": [
+          "DATA/house_model.json.anchors.dining_edge_to_entrance_laundry_edge",
+          "OUTPUT/calibration_report.md"
+        ],
+        "notes": [
+          "External anchor used with the laundry/toilet projection for combined depth."
+        ]
+      },
+      {
+        "id": "anchor:laundry_toilet_projection_wall",
+        "target_kind": "anchor",
+        "target_id": "laundry_toilet_projection_wall",
+        "label": "Laundry/toilet rear jut-out wall",
+        "measurement_status": "measured",
+        "confidence": "measured",
+        "dimension_source": "external_user_measurement",
+        "dimensions_m": {
+          "length": 4.46
+        },
+        "evidence_check_ids": ["entrance_laundry_back_entry", "toilet_laundry_connection"],
+        "source_records": [
+          "DATA/house_model.json.anchors.laundry_toilet_projection_wall",
+          "OUTPUT/calibration_report.md"
+        ],
+        "notes": [
+          "External anchor for laundry/toilet projection."
+        ]
+      },
+      {
+        "id": "anchor:combined_external_depth",
+        "target_kind": "anchor",
+        "target_id": "combined_external_depth",
+        "label": "Combined external depth across dining/entrance/laundry line",
+        "measurement_status": "measured",
+        "confidence": "derived_measured",
+        "dimension_source": "derived_from_measured_anchors",
+        "dimensions_m": {
+          "length": 11.58,
+          "tolerance": 0.15
+        },
+        "evidence_check_ids": ["deck_doors_and_kitchen_window", "entrance_laundry_back_entry"],
+        "source_records": [
+          "DATA/house_model.json.anchors.combined_external_depth",
+          "OUTPUT/calibration_report.md"
+        ],
+        "notes": [
+          "Derived as 7.12m plus 4.46m."
+        ]
+      },
+      {
+        "id": "built_in:master_bedroom_wardrobe",
+        "target_kind": "built_in",
+        "target_id": "master_bedroom_wardrobe",
+        "label": "Master Bedroom Wardrobe built-in bay",
+        "measurement_status": "measured",
+        "confidence": "measured_photo_context",
+        "dimension_source": "direct_user_measurement",
+        "dimensions_m": {
+          "depth": 0.62,
+          "width": 2.7
+        },
+        "evidence_check_ids": ["master_bedroom_photo_context", "office_photo_context"],
+        "source_records": [
+          "DATA/house_model.json.current_structure.built_ins.master_bedroom_wardrobe"
+        ],
+        "notes": [
+          "Wardrobe bay is separate from the master bedroom clear floor area."
+        ]
+      },
+      {
+        "id": "assumption:wall_thicknesses",
+        "target_kind": "assumption",
+        "target_id": "wall_thicknesses",
+        "label": "Wall thickness calibration assumptions",
+        "measurement_status": "estimated",
+        "confidence": "mixed_measured_and_pending",
+        "dimension_source": "user_measurements_and_assumptions",
+        "dimensions_m": {
+          "exterior_wall_thickness": 0.3,
+          "internal_wall_thickness": 0.14,
+          "sunroom_frame_thickness": 0.1,
+          "entrance_deck_wall": 0.14,
+          "kitchen_entrance_return_wall": 0.13,
+          "laundry_toilet_wall": 0.12,
+          "toilet_south_external_wall": 0.27
+        },
+        "evidence_check_ids": [],
+        "source_records": [
+          "DATA/house_model.json.assumptions",
+          "OUTPUT/calibration_report.md"
+        ],
+        "notes": [
+          "Most wall thicknesses are measured or remeasured, while the sunroom frame thickness remains an initial assumption."
+        ]
+      }
+    ]
+  },
   "overlay_calibration": {
     "reference_image": "House-Outline-Internal-walls.png",
     "canvas_px": {

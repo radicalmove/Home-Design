@@ -49,6 +49,10 @@ fn load_builtin_model_status_validates_packaged_house_model() {
     assert_eq!(status.summary.units, "metres");
     assert_eq!(status.summary.room_count, 11);
     assert_eq!(status.summary.current_feature_count, 30);
+    assert_eq!(status.summary.measurement_audit.total_count, 18);
+    assert_eq!(status.summary.measurement_audit.measured_count, 15);
+    assert_eq!(status.summary.measurement_audit.partly_measured_count, 1);
+    assert_eq!(status.summary.measurement_audit.estimated_count, 2);
 }
 
 #[test]

@@ -63,6 +63,13 @@ describe("home design Tauri commands", () => {
         current_feature_count: 30,
         site_element_count: 11,
         shadow_source_count: 3,
+        measurement_audit: {
+          total_count: 18,
+          measured_count: 15,
+          partly_measured_count: 1,
+          estimated_count: 2,
+          needs_checking_count: 0,
+        },
       },
       valid: true,
       validation_error_count: 0,
@@ -73,6 +80,7 @@ describe("home design Tauri commands", () => {
 
     expect(invokeMock).toHaveBeenCalledWith("load_builtin_model_status");
     expect(status.summary.room_count).toBe(11);
+    expect(status.summary.measurement_audit.measured_count).toBe(15);
     expect(status.validation_error_count).toBe(0);
   });
 

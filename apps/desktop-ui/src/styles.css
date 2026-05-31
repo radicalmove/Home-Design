@@ -96,7 +96,8 @@ button {
   line-height: 1.45;
 }
 
-.model-summary {
+.model-summary,
+.audit-summary {
   display: grid;
   gap: 12px;
   padding: 14px 16px;
@@ -106,7 +107,8 @@ button {
 }
 
 .model-summary strong,
-.model-summary p {
+.model-summary p,
+.audit-summary strong {
   margin: 0;
 }
 
@@ -121,7 +123,8 @@ button {
   border-color: rgba(242, 165, 128, 0.58);
 }
 
-.model-state {
+.model-state,
+.audit-state {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -130,7 +133,8 @@ button {
   font-size: 0.85rem;
 }
 
-.model-state span {
+.model-state span,
+.audit-state span {
   color: rgba(246, 248, 249, 0.66);
   font-size: 0.75rem;
 }
@@ -139,28 +143,34 @@ button {
   color: #f2a580;
 }
 
-.model-summary dl {
+.model-summary dl,
+.audit-summary dl {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
   margin: 0;
 }
 
-.model-summary dl div {
+.model-summary dl div,
+.audit-summary dl div {
   min-width: 0;
 }
 
 .model-summary dt,
-.model-summary dd {
+.model-summary dd,
+.audit-summary dt,
+.audit-summary dd {
   margin: 0;
 }
 
-.model-summary dt {
+.model-summary dt,
+.audit-summary dt {
   color: rgba(246, 248, 249, 0.62);
   font-size: 0.68rem;
 }
 
-.model-summary dd {
+.model-summary dd,
+.audit-summary dd {
   color: #f6f8f9;
   font-size: 1rem;
   font-weight: 740;

@@ -12,7 +12,8 @@ pub use furniture::{
 };
 pub use model::{
     Anchor, Assumptions, CurrentSite, CurrentStructure, Daylight, GeometryKind, HouseModel,
-    HouseModelSummary, ModelLoadError, ModeledItem, PhotoEvidence, PhotoEvidenceCheck, Room,
+    HouseModelSummary, MeasurementAudit, MeasurementAuditItem, MeasurementAuditSummary,
+    ModelLoadError, ModeledItem, PhotoEvidence, PhotoEvidenceCheck, Room,
     load_house_model_from_path, summarize_house_model,
 };
 pub use validation::{ModelValidationResult, validate_house_model};
