@@ -121,6 +121,11 @@ THIN_EXTERIOR_WALL_STROKE_PX = round(REFERENCE_PX_PER_M * 0.14, 1)
 TRIMMED_EXTERIOR_WALL_STROKE_PX = 6.0
 THIN_INTERIOR_WALL_STROKE_PX = round(REFERENCE_PX_PER_M * 0.125, 1)
 TOILET_EXTERIOR_WALL_STROKE_PX = round(REFERENCE_PX_PER_M * 0.27, 1)
+EXTERIOR_WALL_HALF_PX = EXTERIOR_WALL_STROKE_PX / 2
+INTERIOR_WALL_HALF_PX = INTERIOR_WALL_STROKE_PX / 2
+THIN_EXTERIOR_WALL_HALF_PX = THIN_EXTERIOR_WALL_STROKE_PX / 2
+THIN_INTERIOR_WALL_HALF_PX = THIN_INTERIOR_WALL_STROKE_PX / 2
+TOILET_EXTERIOR_WALL_HALF_PX = TOILET_EXTERIOR_WALL_STROKE_PX / 2
 POCKET_DOOR_IDS = {"hallway_to_bathroom_sliding_door"}
 POCKET_DOOR_POCKET_CENTERLINES = {
     "hallway_to_bathroom_sliding_door": (743.4, 523.0, 773.9, 523.0),
@@ -225,27 +230,27 @@ DIMENSION_ANNOTATIONS = [
     _dimension_annotation("overall-master-to-laundry", "external", "16.10 m", 533.9, 617.8, 960.4, 617.8, 0.0, 44.0, "measured", "anchor:long_side_master_to_laundry"),
     _dimension_annotation("overall-external-depth", "external", "11.58 m", 984.4, 302.3, 984.4, 602.2, 44.0, 0.0, "measured", "anchor:combined_external_depth"),
     _dimension_annotation("sunroom-approx-span", "external", "~4.87 m", 533.9, 326.0, 663.1, 326.0, 0.0, -24.0, "approximate", "room:sunroom.reference_position"),
-    _dimension_annotation("kitchen-dining-clear-length", "internal", "8.12 m", 833.0, 302.3, 833.0, 523.3, 30.0, 0.0, "measured", "room:kitchen_dining.length"),
-    _dimension_annotation("kitchen-dining-clear-width", "internal", "2.50 m", 758.8, 302.3, 833.0, 302.3, 0.0, -28.0, "measured", "room:kitchen_dining.width"),
-    _dimension_annotation("lounge-clear-length", "internal", "4.90 m", 679.0, 348.8, 679.0, 484.6, -18.0, 0.0, "measured", "room:lounge.length"),
-    _dimension_annotation("lounge-clear-width", "internal", "3.70 m", 659.1, 348.8, 760.9, 348.8, 0.0, -20.0, "measured", "room:lounge.width"),
-    _dimension_annotation("hallway-clear-length", "internal", "4.80 m", 627.1, 482.4, 760.9, 482.4, 0.0, -18.0, "measured", "room:hallway.length"),
-    _dimension_annotation("hallway-clear-width", "internal", "1.30 m", 627.1, 482.4, 627.1, 523.0, -16.0, 0.0, "measured", "room:hallway.width"),
-    _dimension_annotation("master-bedroom-clear-length", "internal", "3.30 m", 533.9, 601.8, 627.1, 601.8, 0.0, 18.0, "measured", "room:master_bedroom.length"),
-    _dimension_annotation("master-bedroom-clear-width", "internal", "4.20 m", 533.9, 482.4, 533.9, 601.8, -24.0, 0.0, "measured", "room:master_bedroom.width"),
-    _dimension_annotation("wardrobe-bay-depth", "built_in", "0.62 m", 627.1, 609.5, 646.8, 609.5, 0.0, 16.0, "measured", "built_in:master_bedroom_wardrobe"),
-    _dimension_annotation("office-clear-length", "internal", "2.90 m", 646.8, 601.8, 727.1, 601.8, 0.0, 18.0, "measured", "room:office.length"),
-    _dimension_annotation("office-clear-width", "internal", "2.75 m", 646.8, 523.0, 646.8, 601.8, -14.0, 0.0, "measured", "room:office.width"),
-    _dimension_annotation("bathroom-clear-length", "internal", "1.64 m", 727.1, 601.8, 773.9, 601.8, 0.0, 18.0, "measured", "room:bathroom.length"),
-    _dimension_annotation("bathroom-clear-width", "internal", "2.75 m", 773.9, 523.0, 773.9, 601.8, 14.0, 0.0, "measured", "room:bathroom.width"),
-    _dimension_annotation("bedroom-2-clear-length", "internal", "4.73 m", 773.9, 546.0, 902.8, 546.0, 0.0, -16.0, "measured", "room:bedroom_2.length"),
-    _dimension_annotation("bedroom-2-clear-width", "internal", "2.75 m", 902.8, 523.0, 902.8, 601.8, -18.0, 0.0, "measured", "room:bedroom_2.width"),
-    _dimension_annotation("entrance-clear-length", "internal", "3.70 m", 803.7, 489.1, 902.8, 489.1, 0.0, -18.0, "measured", "room:entrance.length"),
-    _dimension_annotation("entrance-clear-width", "internal", "1.16 m", 902.8, 489.1, 902.8, 523.3, 16.0, 0.0, "measured", "room:entrance.width"),
-    _dimension_annotation("laundry-clear-length", "internal", "3.03 m", 956.4, 489.1, 956.4, 572.9, 24.0, 0.0, "measured", "room:laundry.length"),
-    _dimension_annotation("laundry-clear-width", "internal", "1.80 m", 902.8, 489.1, 956.4, 489.1, 0.0, -28.0, "measured", "room:laundry.width"),
-    _dimension_annotation("toilet-clear-length", "internal", "0.91 m", 956.4, 572.9, 956.4, 602.2, 24.0, 0.0, "measured", "room:toilet.length"),
-    _dimension_annotation("toilet-clear-width", "internal", "1.80 m", 902.8, 602.2, 956.4, 602.2, 0.0, 20.0, "measured", "room:toilet.width"),
+    _dimension_annotation("kitchen-dining-clear-length", "internal", "8.12 m", 833.0 - EXTERIOR_WALL_HALF_PX, 302.3 + EXTERIOR_WALL_HALF_PX, 833.0 - EXTERIOR_WALL_HALF_PX, 523.3 - THIN_INTERIOR_WALL_HALF_PX, 34.0, 0.0, "measured", "room:kitchen_dining.length"),
+    _dimension_annotation("kitchen-dining-clear-width", "internal", "2.50 m", 760.9 + INTERIOR_WALL_HALF_PX, 302.3 + EXTERIOR_WALL_HALF_PX, 833.0 - EXTERIOR_WALL_HALF_PX, 302.3 + EXTERIOR_WALL_HALF_PX, 0.0, -32.0, "measured", "room:kitchen_dining.width"),
+    _dimension_annotation("lounge-clear-length", "internal", "4.90 m", 659.1 + INTERIOR_WALL_HALF_PX, 348.8 + EXTERIOR_WALL_HALF_PX, 659.1 + INTERIOR_WALL_HALF_PX, 484.6 - INTERIOR_WALL_HALF_PX, 0.0, 0.0, "measured", "room:lounge.length"),
+    _dimension_annotation("lounge-clear-width", "internal", "3.70 m", 659.1 + INTERIOR_WALL_HALF_PX, 348.8 + EXTERIOR_WALL_HALF_PX, 760.9 - INTERIOR_WALL_HALF_PX, 348.8 + EXTERIOR_WALL_HALF_PX, 0.0, -24.0, "measured", "room:lounge.width"),
+    _dimension_annotation("hallway-clear-length", "internal", "4.80 m", 627.1 + EXTERIOR_WALL_HALF_PX, 484.6 + INTERIOR_WALL_HALF_PX, 760.9 - INTERIOR_WALL_HALF_PX, 484.6 + INTERIOR_WALL_HALF_PX, 0.0, -22.0, "measured", "room:hallway.length"),
+    _dimension_annotation("hallway-clear-width", "internal", "1.30 m", 627.1 + EXTERIOR_WALL_HALF_PX, 484.6 + INTERIOR_WALL_HALF_PX, 627.1 + EXTERIOR_WALL_HALF_PX, 523.0 - INTERIOR_WALL_HALF_PX, -20.0, 0.0, "measured", "room:hallway.width"),
+    _dimension_annotation("master-bedroom-clear-length", "internal", "3.30 m", 533.9 + EXTERIOR_WALL_HALF_PX, 601.8 - EXTERIOR_WALL_HALF_PX, 627.1 - THIN_INTERIOR_WALL_HALF_PX, 601.8 - EXTERIOR_WALL_HALF_PX, 0.0, 22.0, "measured", "room:master_bedroom.length"),
+    _dimension_annotation("master-bedroom-clear-width", "internal", "4.20 m", 533.9 + EXTERIOR_WALL_HALF_PX, 482.4 + EXTERIOR_WALL_HALF_PX, 533.9 + EXTERIOR_WALL_HALF_PX, 601.8 - EXTERIOR_WALL_HALF_PX, -28.0, 0.0, "measured", "room:master_bedroom.width"),
+    _dimension_annotation("wardrobe-bay-depth", "built_in", "0.62 m", 627.1 + THIN_INTERIOR_WALL_HALF_PX, 609.5, 646.8 - THIN_INTERIOR_WALL_HALF_PX, 609.5, 0.0, 16.0, "measured", "built_in:master_bedroom_wardrobe"),
+    _dimension_annotation("office-clear-length", "internal", "2.90 m", 646.8 + THIN_INTERIOR_WALL_HALF_PX, 601.8 - EXTERIOR_WALL_HALF_PX, 727.1 - THIN_INTERIOR_WALL_HALF_PX, 601.8 - EXTERIOR_WALL_HALF_PX, 0.0, 22.0, "measured", "room:office.length"),
+    _dimension_annotation("office-clear-width", "internal", "2.75 m", 646.8 + THIN_INTERIOR_WALL_HALF_PX, 523.0 + THIN_INTERIOR_WALL_HALF_PX, 646.8 + THIN_INTERIOR_WALL_HALF_PX, 601.8 - EXTERIOR_WALL_HALF_PX, -15.7, 0.0, "measured", "room:office.width"),
+    _dimension_annotation("bathroom-clear-length", "internal", "1.64 m", 727.1 + THIN_INTERIOR_WALL_HALF_PX, 601.8 - EXTERIOR_WALL_HALF_PX, 773.9 - THIN_INTERIOR_WALL_HALF_PX, 601.8 - EXTERIOR_WALL_HALF_PX, 0.0, 22.0, "measured", "room:bathroom.length"),
+    _dimension_annotation("bathroom-clear-width", "internal", "2.75 m", 773.9 - THIN_INTERIOR_WALL_HALF_PX, 523.0 + THIN_INTERIOR_WALL_HALF_PX, 773.9 - THIN_INTERIOR_WALL_HALF_PX, 601.8 - EXTERIOR_WALL_HALF_PX, 15.7, 0.0, "measured", "room:bathroom.width"),
+    _dimension_annotation("bedroom-2-clear-length", "internal", "4.73 m", 773.9 + THIN_INTERIOR_WALL_HALF_PX, 546.0, 902.8 - INTERIOR_WALL_HALF_PX, 546.0, 0.0, -16.0, "measured", "room:bedroom_2.length"),
+    _dimension_annotation("bedroom-2-clear-width", "internal", "2.75 m", 902.8 - INTERIOR_WALL_HALF_PX, 523.3 + THIN_INTERIOR_WALL_HALF_PX, 902.8 - INTERIOR_WALL_HALF_PX, 601.8 - EXTERIOR_WALL_HALF_PX, -16.2, 0.0, "measured", "room:bedroom_2.width"),
+    _dimension_annotation("entrance-clear-length", "internal", "3.70 m", 803.7 + THIN_INTERIOR_WALL_HALF_PX, 489.1 + THIN_EXTERIOR_WALL_HALF_PX, 902.8 - INTERIOR_WALL_HALF_PX, 489.1 + THIN_EXTERIOR_WALL_HALF_PX, 0.0, -19.9, "measured", "room:entrance.length"),
+    _dimension_annotation("entrance-clear-width", "internal", "1.16 m", 902.8 - INTERIOR_WALL_HALF_PX, 489.1 + THIN_EXTERIOR_WALL_HALF_PX, 902.8 - INTERIOR_WALL_HALF_PX, 523.3 - THIN_INTERIOR_WALL_HALF_PX, 17.9, 0.0, "measured", "room:entrance.width"),
+    _dimension_annotation("laundry-clear-length", "internal", "3.03 m", 956.4 - EXTERIOR_WALL_HALF_PX, 489.1 + THIN_EXTERIOR_WALL_HALF_PX, 956.4 - EXTERIOR_WALL_HALF_PX, 572.9 - THIN_INTERIOR_WALL_HALF_PX, 28.0, 0.0, "measured", "room:laundry.length"),
+    _dimension_annotation("laundry-clear-width", "internal", "1.80 m", 902.8 + INTERIOR_WALL_HALF_PX, 489.1 + THIN_EXTERIOR_WALL_HALF_PX, 956.4 - EXTERIOR_WALL_HALF_PX, 489.1 + THIN_EXTERIOR_WALL_HALF_PX, 0.0, -29.9, "measured", "room:laundry.width"),
+    _dimension_annotation("toilet-clear-length", "internal", "0.91 m", 956.4 - EXTERIOR_WALL_HALF_PX, 572.9 + THIN_INTERIOR_WALL_HALF_PX, 956.4 - EXTERIOR_WALL_HALF_PX, 602.2 - TOILET_EXTERIOR_WALL_HALF_PX, 28.0, 0.0, "measured", "room:toilet.length"),
+    _dimension_annotation("toilet-clear-width", "internal", "1.80 m", 902.8 + INTERIOR_WALL_HALF_PX, 602.2 - TOILET_EXTERIOR_WALL_HALF_PX, 956.4 - EXTERIOR_WALL_HALF_PX, 602.2 - TOILET_EXTERIOR_WALL_HALF_PX, 0.0, 23.6, "measured", "room:toilet.width"),
 ]
 
 def render_reference_plan_svg(model: HouseModel) -> str:
