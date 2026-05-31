@@ -160,6 +160,15 @@ export function viewOriginAfterPan(
   };
 }
 
+export function screenPixelsToSvgUnits(
+  canvasSize: PlanViewportSize,
+  viewBoxSize: PlanViewportSize,
+  pixels: number,
+): number {
+  const safeCanvasWidth = Math.max(1, canvasSize.width);
+  return (pixels / safeCanvasWidth) * viewBoxSize.width;
+}
+
 export function angleDegFromCenter(point: PlanPoint, bounds: Pick<SvgBounds, "cx" | "cy">): number {
   const angle = Math.atan2(point.y - bounds.cy, point.x - bounds.cx) * (180 / Math.PI);
   return normaliseDegrees(angle);

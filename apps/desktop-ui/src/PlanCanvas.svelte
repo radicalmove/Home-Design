@@ -10,6 +10,7 @@
     planViewBoxSize,
     resizeObjectFromHandle,
     rotateDeltaIntoObjectSpace,
+    screenPixelsToSvgUnits,
     svgPointInViewBox,
     viewOriginAfterPan,
   } from "./lib/furnitureGeometry";
@@ -113,6 +114,11 @@
   let viewBoxValue = $derived(
     `${viewOrigin.x.toFixed(3)} ${viewOrigin.y.toFixed(3)} ${viewBoxSize.width.toFixed(3)} ${viewBoxSize.height.toFixed(3)}`,
   );
+  let resizeHandleSize = $derived(screenPixelsToSvgUnits(canvasSize, viewBoxSize, 12));
+  let resizeHandleHalfSize = $derived(resizeHandleSize / 2);
+  let rotateHandleRadius = $derived(screenPixelsToSvgUnits(canvasSize, viewBoxSize, 7));
+  let rotateStemLength = $derived(screenPixelsToSvgUnits(canvasSize, viewBoxSize, 18));
+  let rotateHandleOffset = $derived(screenPixelsToSvgUnits(canvasSize, viewBoxSize, 25));
 
   $effect(() => {
     if (viewOriginInitialised || canvasWidth <= 0 || canvasHeight <= 0) {
@@ -438,13 +444,13 @@
               x1={bounds.cx}
               y1={bounds.y}
               x2={bounds.cx}
-              y2={bounds.y - 18}
+              y2={bounds.y - rotateStemLength}
             />
             <circle
               class="rotate-handle"
               cx={bounds.cx}
-              cy={bounds.y - 25}
-              r="7"
+              cy={bounds.y - rotateHandleOffset}
+              r={rotateHandleRadius}
               role="button"
               aria-label={`Rotate ${object.label}`}
               tabindex="0"
@@ -454,10 +460,10 @@
               <rect
                 class={`resize-handle ${handle.name}`}
                 data-resize-handle={handle.name}
-                x={bounds.x + bounds.width * handle.x - 5}
-                y={bounds.y + bounds.height * handle.y - 5}
-                width="10"
-                height="10"
+                x={bounds.x + bounds.width * handle.x - resizeHandleHalfSize}
+                y={bounds.y + bounds.height * handle.y - resizeHandleHalfSize}
+                width={resizeHandleSize}
+                height={resizeHandleSize}
                 role="button"
                 aria-label={`Resize ${object.label} from ${handle.label}`}
                 tabindex="0"

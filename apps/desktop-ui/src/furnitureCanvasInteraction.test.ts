@@ -37,6 +37,17 @@ describe("furniture canvas interaction layout", () => {
     expect(planCanvasSource).toContain("startResize(event, object, handle.name)");
   });
 
+  it("sizes edit handles from screen pixels instead of fixed SVG units", () => {
+    expect(planCanvasSource).toContain("screenPixelsToSvgUnits");
+    expect(planCanvasSource).toContain("resizeHandleSize");
+    expect(planCanvasSource).toContain("rotateHandleRadius");
+    expect(planCanvasSource).toContain("width={resizeHandleSize}");
+    expect(planCanvasSource).toContain("height={resizeHandleSize}");
+    expect(planCanvasSource).toContain("r={rotateHandleRadius}");
+    expect(planCanvasSource).not.toContain('width="10"');
+    expect(planCanvasSource).not.toContain('r="7"');
+  });
+
   it("keeps collapsed catalog groups stacked at the top of the scroll panel", () => {
     expect(catalogSource).toMatch(/\.catalog-groups\s*{[\s\S]*align-content:\s*start;/);
   });

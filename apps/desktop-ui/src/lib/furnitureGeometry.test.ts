@@ -13,6 +13,7 @@ import {
   resizeObjectFromHandle,
   resizeObjectFromCorner,
   rotateDeltaIntoObjectSpace,
+  screenPixelsToSvgUnits,
   viewOriginAfterPan,
   svgToMetres,
 } from "./furnitureGeometry";
@@ -143,6 +144,17 @@ describe("furniture geometry", () => {
         fullView,
       ).y,
     ).toBeCloseTo(-800);
+  });
+
+  it("converts screen pixels to SVG units so edit handles keep apparent size across zoom", () => {
+    const canvasSize = { width: 300, height: 600 };
+    const fullView = planViewBoxSize(canvasSize, 1);
+    const zoomedView = planViewBoxSize(canvasSize, 5);
+
+    expect(screenPixelsToSvgUnits(canvasSize, fullView, 12)).toBeCloseTo(64);
+    expect(screenPixelsToSvgUnits(canvasSize, zoomedView, 12)).toBeCloseTo(12.8);
+    expect((screenPixelsToSvgUnits(canvasSize, fullView, 12) / fullView.width) * canvasSize.width).toBeCloseTo(12);
+    expect((screenPixelsToSvgUnits(canvasSize, zoomedView, 12) / zoomedView.width) * canvasSize.width).toBeCloseTo(12);
   });
 
   it("measures rotation from object centre in SVG space", () => {
