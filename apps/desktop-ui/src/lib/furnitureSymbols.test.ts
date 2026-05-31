@@ -15,6 +15,8 @@ describe("furniture symbols", () => {
 
   it("uses top-down furniture silhouettes for moveable furniture", () => {
     expect(symbolForFurnitureObject("sofa", null).shape).toBe("sofa");
+    expect(symbolForFurnitureObject("l_sofa", null).shape).toBe("l-shape");
     expect(symbolForFurnitureObject("desk", null).shape).toBe("desk");
+    expect(symbolForFurnitureObject("l_desk", null).shape).toBe("l-shape");
   });
 });

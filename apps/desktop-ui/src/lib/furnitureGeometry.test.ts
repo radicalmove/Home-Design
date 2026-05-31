@@ -5,6 +5,7 @@ import {
   centeredViewOrigin,
   clampPlanZoom,
   dimensionLabel,
+  lShapePath,
   metresToSvg,
   nextWheelPlanZoom,
   objectBoundsSvg,
@@ -59,6 +60,22 @@ describe("furniture geometry", () => {
 
     expect(bounds.width).toBeCloseTo(54.32, 1);
     expect(bounds.height).toBeCloseTo(24.44, 1);
+  });
+
+  it("builds an L-shaped footprint path from adjustable arm dimensions", () => {
+    expect(
+      lShapePath(
+        { x: 10, y: 20, width: 100, height: 80 },
+        { main_depth_m: 0.5, return_width_m: 0.75 },
+        {
+          units: "metres",
+          svg_width_px: 1600,
+          svg_height_px: 900,
+          origin_svg_px: { x: 0, y: 0 },
+          px_per_m: 20,
+        },
+      ),
+    ).toBe("M 10.0 20.0 H 110.0 V 30.0 H 25.0 V 100.0 H 10.0 Z");
   });
 
   it("formats live dimensions in metres", () => {

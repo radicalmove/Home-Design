@@ -1,9 +1,10 @@
 <script lang="ts">
-  import type { FurnitureLayerKind, FurnitureObject, PlanPoint } from "./types";
+  import type { FurnitureLShapeDimensions, FurnitureLayerKind, FurnitureObject, PlanPoint } from "./types";
 
   type FurnitureSize = {
     width_m: number;
     depth_m: number;
+    l_shape?: FurnitureLShapeDimensions | null;
   };
 
   type Props = {
@@ -53,6 +54,32 @@
   function updateDepth(event: Event) {
     if (object) {
       onResize(object.id, { width_m: object.width_m, depth_m: numberValue(event) });
+    }
+  }
+
+  function updateLShapeMainDepth(event: Event) {
+    if (object?.l_shape) {
+      onResize(object.id, {
+        width_m: object.width_m,
+        depth_m: object.depth_m,
+        l_shape: {
+          ...object.l_shape,
+          main_depth_m: numberValue(event),
+        },
+      });
+    }
+  }
+
+  function updateLShapeReturnWidth(event: Event) {
+    if (object?.l_shape) {
+      onResize(object.id, {
+        width_m: object.width_m,
+        depth_m: object.depth_m,
+        l_shape: {
+          ...object.l_shape,
+          return_width_m: numberValue(event),
+        },
+      });
     }
   }
 
@@ -113,6 +140,30 @@
         D m
         <input type="number" min="0.2" step="0.05" value={object.depth_m} oninput={updateDepth} />
       </label>
+      {#if object.l_shape}
+        <label>
+          Main arm D m
+          <input
+            type="number"
+            min="0.2"
+            max={object.depth_m}
+            step="0.05"
+            value={object.l_shape.main_depth_m}
+            oninput={updateLShapeMainDepth}
+          />
+        </label>
+        <label>
+          Return W m
+          <input
+            type="number"
+            min="0.2"
+            max={object.width_m}
+            step="0.05"
+            value={object.l_shape.return_width_m}
+            oninput={updateLShapeReturnWidth}
+          />
+        </label>
+      {/if}
       <label>
         Rotation
         <input type="number" step="5" value={object.rotation_deg} oninput={updateRotation} />

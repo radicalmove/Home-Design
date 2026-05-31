@@ -56,6 +56,16 @@ describe("furniture canvas interaction layout", () => {
     expect(planCanvasSource).toContain("startResize(event, object, handle.name)");
   });
 
+  it("renders L-shaped furniture footprints and exposes arm dimension fields", () => {
+    expect(planCanvasSource).toContain("lShapePath");
+    expect(planCanvasSource).toContain('symbol.shape === "l-shape"');
+    expect(planCanvasSource).toContain("object.l_shape");
+    expect(inspectorSource).toContain("updateLShapeMainDepth");
+    expect(inspectorSource).toContain("updateLShapeReturnWidth");
+    expect(inspectorSource).toContain("Main arm D m");
+    expect(inspectorSource).toContain("Return W m");
+  });
+
   it("sizes edit handles from screen pixels instead of fixed SVG units", () => {
     expect(planCanvasSource).toContain("screenPixelsToSvgUnits");
     expect(planCanvasSource).toContain("resizeHandleSize");

@@ -4,6 +4,7 @@
     angleDegFromCenter,
     centeredViewOrigin,
     dimensionLabel,
+    lShapePath,
     nextWheelPlanZoom,
     normaliseDegrees,
     objectBoundsSvg,
@@ -16,11 +17,12 @@
   } from "./lib/furnitureGeometry";
   import { symbolForFurnitureObject } from "./lib/furnitureSymbols";
   import type { ResizeHandleName } from "./lib/furnitureGeometry";
-  import type { FurnitureLayout, FurnitureObject, PlanPoint } from "./types";
+  import type { FurnitureLShapeDimensions, FurnitureLayout, FurnitureObject, PlanPoint } from "./types";
 
   type FurnitureSize = {
     width_m: number;
     depth_m: number;
+    l_shape?: FurnitureLShapeDimensions | null;
   };
 
   type DragState = {
@@ -445,15 +447,23 @@
           transform={`rotate(${object.rotation_deg}, ${bounds.cx}, ${bounds.cy})`}
           onpointerdown={(event) => startMove(event, object)}
         >
-          <rect
-            class="symbol-body"
-            x={bounds.x}
-            y={bounds.y}
-            width={bounds.width}
-            height={bounds.height}
-            rx="2"
-            fill={object.colour}
-          />
+          {#if symbol.shape === "l-shape" && object.l_shape}
+            <path
+              class="symbol-body"
+              d={lShapePath(bounds, object.l_shape, layout.plan_transform)}
+              fill={object.colour}
+            />
+          {:else}
+            <rect
+              class="symbol-body"
+              x={bounds.x}
+              y={bounds.y}
+              width={bounds.width}
+              height={bounds.height}
+              rx="2"
+              fill={object.colour}
+            />
+          {/if}
 
           {#if symbol.shape === "sofa"}
             <line x1={bounds.x} y1={bounds.y + bounds.height * 0.35} x2={bounds.x + bounds.width} y2={bounds.y + bounds.height * 0.35} />

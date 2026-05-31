@@ -60,6 +60,11 @@ export type PlanPoint = {
   y: number;
 };
 
+export type FurnitureLShapeDimensions = {
+  main_depth_m: number;
+  return_width_m: number;
+};
+
 export type PlanTransform = {
   units: "metres";
   svg_width_px: number;
@@ -79,6 +84,7 @@ export type FurnitureObject = {
   y_m: number;
   width_m: number;
   depth_m: number;
+  l_shape?: FurnitureLShapeDimensions | null;
   rotation_deg: number;
   colour: string;
   locked: boolean;
@@ -106,6 +112,7 @@ export type FurnitureCatalogItem = {
   abbreviation: string | null;
   default_width_m: number;
   default_depth_m: number;
+  default_l_shape?: FurnitureLShapeDimensions | null;
   colour: string;
   symbol: string;
 };

@@ -9,6 +9,12 @@ pub enum FurnitureLayerKind {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct FurnitureLShapeDimensions {
+    pub main_depth_m: f64,
+    pub return_width_m: f64,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct PlanPoint {
     pub x: f64,
     pub y: f64,
@@ -36,6 +42,8 @@ pub struct FurnitureObject {
     pub y_m: f64,
     pub width_m: f64,
     pub depth_m: f64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub l_shape: Option<FurnitureLShapeDimensions>,
     pub rotation_deg: f64,
     pub colour: String,
     pub locked: bool,
@@ -73,6 +81,8 @@ pub struct FurnitureCatalogItem {
     pub abbreviation: Option<String>,
     pub default_width_m: f64,
     pub default_depth_m: f64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub default_l_shape: Option<FurnitureLShapeDimensions>,
     pub colour: String,
     pub symbol: String,
 }
@@ -304,6 +314,18 @@ pub fn default_furniture_catalog() -> FurnitureCatalog {
                         "#33312e",
                         "sofa",
                     ),
+                    catalog_l_shape_item(
+                        "l_sofa",
+                        "L-shaped sofa",
+                        FurnitureLayerKind::Moveable,
+                        "l_sofa",
+                        None,
+                        2.8,
+                        1.85,
+                        0.9,
+                        1.05,
+                        "#33312e",
+                    ),
                     catalog_item(
                         "armchair",
                         "Armchair",
@@ -419,6 +441,18 @@ pub fn default_furniture_catalog() -> FurnitureCatalog {
                         0.7,
                         "#ffffff",
                         "desk",
+                    ),
+                    catalog_l_shape_item(
+                        "l_desk",
+                        "L-shaped desk",
+                        FurnitureLayerKind::Moveable,
+                        "l_desk",
+                        None,
+                        1.8,
+                        1.6,
+                        0.65,
+                        0.65,
+                        "#ffffff",
                     ),
                     catalog_item(
                         "office_chair",
@@ -581,17 +615,19 @@ pub fn seed_current_furniture_layout() -> FurnitureLayout {
                 Some("Approximate shower position for planning."),
                 Some("room:bathroom"),
             ),
-            furniture_object(
+            furniture_l_shape_object(
                 "lounge_sofa",
-                Some("sofa"),
+                Some("l_sofa"),
                 FurnitureLayerKind::Moveable,
-                "sofa",
+                "l_sofa",
                 "L-shaped sofa",
                 None,
                 5.1,
                 3.6,
-                2.35,
+                2.8,
                 1.85,
+                0.9,
+                1.05,
                 0.0,
                 "#33312e",
                 Some("Photo-based lounge sofa seed with rear flow gap."),
@@ -629,16 +665,18 @@ pub fn seed_current_furniture_layout() -> FurnitureLayout {
                 Some("Approximate bed/daybed position from bedroom photos."),
                 Some("scenario_editor:bedroom2_bed"),
             ),
-            furniture_object(
+            furniture_l_shape_object(
                 "office_desk",
-                Some("desk"),
+                Some("l_desk"),
                 FurnitureLayerKind::Moveable,
-                "desk",
-                "Office desk",
+                "l_desk",
+                "L-shaped desk",
                 None,
                 4.05,
                 9.8,
                 1.75,
+                1.6,
+                0.65,
                 0.65,
                 0.0,
                 "#ffffff",
@@ -728,6 +766,42 @@ pub fn validate_furniture_layout(layout: &FurnitureLayout) -> FurnitureValidatio
         if object.depth_m <= 0.05 {
             errors.push(format!("{} depth_m must be positive", object.id));
         }
+        if let Some(l_shape) = &object.l_shape {
+            validate_finite(
+                &format!("{}.l_shape.main_depth_m", object.id),
+                l_shape.main_depth_m,
+                &mut errors,
+            );
+            validate_finite(
+                &format!("{}.l_shape.return_width_m", object.id),
+                l_shape.return_width_m,
+                &mut errors,
+            );
+            if l_shape.main_depth_m <= 0.05 {
+                errors.push(format!(
+                    "{} l_shape.main_depth_m must be positive",
+                    object.id
+                ));
+            }
+            if l_shape.return_width_m <= 0.05 {
+                errors.push(format!(
+                    "{} l_shape.return_width_m must be positive",
+                    object.id
+                ));
+            }
+            if l_shape.main_depth_m > object.depth_m {
+                errors.push(format!(
+                    "{} l_shape.main_depth_m must fit within depth_m",
+                    object.id
+                ));
+            }
+            if l_shape.return_width_m > object.width_m {
+                errors.push(format!(
+                    "{} l_shape.return_width_m must fit within width_m",
+                    object.id
+                ));
+            }
+        }
         if !is_hex_colour(&object.colour) {
             errors.push(format!("{} colour must be a hex colour", object.id));
         }
@@ -755,8 +829,39 @@ fn catalog_item(
         abbreviation: abbreviation.map(str::to_string),
         default_width_m,
         default_depth_m,
+        default_l_shape: None,
         colour: colour.to_string(),
         symbol: symbol.to_string(),
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+fn catalog_l_shape_item(
+    id: &str,
+    label: &str,
+    layer: FurnitureLayerKind,
+    object_type: &str,
+    abbreviation: Option<&str>,
+    default_width_m: f64,
+    default_depth_m: f64,
+    main_depth_m: f64,
+    return_width_m: f64,
+    colour: &str,
+) -> FurnitureCatalogItem {
+    FurnitureCatalogItem {
+        id: id.to_string(),
+        label: label.to_string(),
+        layer,
+        object_type: object_type.to_string(),
+        abbreviation: abbreviation.map(str::to_string),
+        default_width_m,
+        default_depth_m,
+        default_l_shape: Some(FurnitureLShapeDimensions {
+            main_depth_m,
+            return_width_m,
+        }),
+        colour: colour.to_string(),
+        symbol: "l-shape".to_string(),
     }
 }
 
@@ -788,12 +893,55 @@ fn furniture_object(
         y_m,
         width_m,
         depth_m,
+        l_shape: None,
         rotation_deg,
         colour: colour.to_string(),
         locked: false,
         notes: notes.map(str::to_string),
         evidence: evidence.map(str::to_string),
     }
+}
+
+#[allow(clippy::too_many_arguments)]
+fn furniture_l_shape_object(
+    id: &str,
+    catalog_id: Option<&str>,
+    layer: FurnitureLayerKind,
+    object_type: &str,
+    label: &str,
+    abbreviation: Option<&str>,
+    x_m: f64,
+    y_m: f64,
+    width_m: f64,
+    depth_m: f64,
+    main_depth_m: f64,
+    return_width_m: f64,
+    rotation_deg: f64,
+    colour: &str,
+    notes: Option<&str>,
+    evidence: Option<&str>,
+) -> FurnitureObject {
+    let mut object = furniture_object(
+        id,
+        catalog_id,
+        layer,
+        object_type,
+        label,
+        abbreviation,
+        x_m,
+        y_m,
+        width_m,
+        depth_m,
+        rotation_deg,
+        colour,
+        notes,
+        evidence,
+    );
+    object.l_shape = Some(FurnitureLShapeDimensions {
+        main_depth_m,
+        return_width_m,
+    });
+    object
 }
 
 fn validate_finite(field: &str, value: f64, errors: &mut Vec<String>) {

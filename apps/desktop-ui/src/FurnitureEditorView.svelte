@@ -22,6 +22,7 @@
     FurnitureCatalog,
     FurnitureCatalogItem,
     FurnitureLayerKind,
+    FurnitureLShapeDimensions,
     FurnitureLayout,
     PlanPoint,
   } from "./types";
@@ -29,6 +30,7 @@
   type FurnitureSize = {
     width_m: number;
     depth_m: number;
+    l_shape?: FurnitureLShapeDimensions | null;
   };
 
   type SaveState = "idle" | "saving" | "saved" | "error";

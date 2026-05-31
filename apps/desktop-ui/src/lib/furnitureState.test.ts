@@ -40,6 +40,23 @@ const layout: FurnitureLayout = {
       notes: null,
       evidence: null,
     },
+    {
+      id: "legacy-l-shaped-sofa",
+      catalog_id: "sofa",
+      layer: "moveable",
+      type: "sofa",
+      label: "L-shaped sofa",
+      abbreviation: null,
+      x_m: 3,
+      y_m: 4,
+      width_m: 2.8,
+      depth_m: 1.85,
+      rotation_deg: 0,
+      colour: "#33312e",
+      locked: false,
+      notes: null,
+      evidence: null,
+    },
   ],
 };
 
@@ -55,13 +72,44 @@ const catalogItem: FurnitureCatalogItem = {
   symbol: "rectangle",
 };
 
+const lShapeCatalogItem: FurnitureCatalogItem = {
+  id: "l_sofa",
+  label: "L-shaped sofa",
+  layer: "moveable",
+  type: "l_sofa",
+  abbreviation: null,
+  default_width_m: 2.8,
+  default_depth_m: 1.85,
+  default_l_shape: {
+    main_depth_m: 0.9,
+    return_width_m: 1.05,
+  },
+  colour: "#33312e",
+  symbol: "l-shape",
+};
+
 describe("furniture state reducers", () => {
   it("adds catalog items with unique ids", () => {
     const updated = addCatalogItem(layout, catalogItem, { x: 3, y: 4 });
 
-    expect(updated.objects).toHaveLength(2);
-    expect(updated.objects[1].id).toMatch(/^custom_rectangle-/);
-    expect(updated.objects[1].x_m).toBe(3);
+    expect(updated.objects).toHaveLength(3);
+    expect(updated.objects[2].id).toMatch(/^custom_rectangle-/);
+    expect(updated.objects[2].x_m).toBe(3);
+  });
+
+  it("adds L-shaped catalog items with adjustable arm dimensions", () => {
+    const updated = addCatalogItem(layout, lShapeCatalogItem, { x: 6, y: 7 });
+
+    expect(updated.objects.at(-1)).toMatchObject({
+      catalog_id: "l_sofa",
+      type: "l_sofa",
+      width_m: 2.8,
+      depth_m: 1.85,
+      l_shape: {
+        main_depth_m: 0.9,
+        return_width_m: 1.05,
+      },
+    });
   });
 
   it("moves, resizes, rotates, and recolours objects immutably", () => {
@@ -116,6 +164,10 @@ describe("furniture state reducers", () => {
           y_m: 7.471349780045722,
           width_m: 1.704,
           depth_m: 0.666,
+          l_shape: {
+            main_depth_m: 0.704,
+            return_width_m: 3.1,
+          },
         },
       ],
     };
@@ -127,14 +179,54 @@ describe("furniture state reducers", () => {
       y_m: 7.47,
       width_m: 1.7,
       depth_m: 0.67,
+      l_shape: {
+        main_depth_m: 0.67,
+        return_width_m: 1.7,
+      },
     });
     expect(loaded.objects[0].x_m).toBe(6.276969728639951);
   });
 
+  it("upgrades legacy seeded L-shaped furniture when saved layouts are loaded", () => {
+    const normalised = normaliseFurnitureLayout(layout);
+    const upgraded = normalised.objects.find((object) => object.id === "legacy-l-shaped-sofa");
+
+    expect(upgraded).toMatchObject({
+      catalog_id: "l_sofa",
+      type: "l_sofa",
+      l_shape: {
+        main_depth_m: 0.9,
+        return_width_m: 1.05,
+      },
+    });
+  });
+
+  it("resizes L-shaped arm dimensions separately from the outer footprint", () => {
+    const withLShape = addCatalogItem(layout, lShapeCatalogItem, { x: 6, y: 7 });
+    const objectId = withLShape.objects.at(-1)?.id ?? "";
+    const updated = resizeObject(withLShape, objectId, {
+      width_m: 2.4,
+      depth_m: 1.6,
+      l_shape: {
+        main_depth_m: 0.75,
+        return_width_m: 0.85,
+      },
+    });
+
+    expect(updated.objects.at(-1)).toMatchObject({
+      width_m: 2.4,
+      depth_m: 1.6,
+      l_shape: {
+        main_depth_m: 0.75,
+        return_width_m: 0.85,
+      },
+    });
+  });
+
   it("duplicates and deletes objects", () => {
     const duplicated = duplicateObject(layout, "sofa");
-    expect(duplicated.objects).toHaveLength(2);
-    expect(duplicated.objects[1].id).toMatch(/^sofa-copy-/);
+    expect(duplicated.objects).toHaveLength(3);
+    expect(duplicated.objects.at(-1)?.id).toMatch(/^sofa-copy-/);
 
     const deleted = deleteObject(duplicated, "sofa");
     expect(deleted.objects.map((object) => object.id)).not.toContain("sofa");

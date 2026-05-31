@@ -1,4 +1,4 @@
-import type { FurnitureObject, PlanPoint, PlanTransform } from "../types";
+import type { FurnitureLShapeDimensions, FurnitureObject, PlanPoint, PlanTransform } from "../types";
 
 export type SvgBounds = {
   x: number;
@@ -64,6 +64,42 @@ export function objectBoundsSvg(object: FurnitureObject, transform: PlanTransfor
     cx: centre.x,
     cy: centre.y,
   };
+}
+
+function formatPathNumber(value: number): string {
+  return value.toFixed(1);
+}
+
+export function lShapePath(
+  bounds: Pick<SvgBounds, "x" | "y" | "width" | "height">,
+  lShape: FurnitureLShapeDimensions,
+  transform: PlanTransform,
+): string {
+  const mainDepth = Math.min(bounds.height, Math.max(0, lShape.main_depth_m * transform.px_per_m));
+  const returnWidth = Math.min(bounds.width, Math.max(0, lShape.return_width_m * transform.px_per_m));
+  const x0 = bounds.x;
+  const y0 = bounds.y;
+  const x1 = bounds.x + bounds.width;
+  const y1 = bounds.y + bounds.height;
+  const innerX = bounds.x + returnWidth;
+  const innerY = bounds.y + mainDepth;
+
+  return [
+    "M",
+    formatPathNumber(x0),
+    formatPathNumber(y0),
+    "H",
+    formatPathNumber(x1),
+    "V",
+    formatPathNumber(innerY),
+    "H",
+    formatPathNumber(innerX),
+    "V",
+    formatPathNumber(y1),
+    "H",
+    formatPathNumber(x0),
+    "Z",
+  ].join(" ");
 }
 
 export function dimensionLabel(object: Pick<FurnitureObject, "width_m" | "depth_m">): string {

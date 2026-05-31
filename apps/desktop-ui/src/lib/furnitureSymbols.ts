@@ -4,6 +4,7 @@ export type FurnitureSymbol = {
     | "appliance"
     | "fixture"
     | "sofa"
+    | "l-shape"
     | "bed"
     | "desk"
     | "table"
@@ -25,6 +26,9 @@ export function symbolForFurnitureObject(type: string, abbreviation: string | nu
       return { shape: "fixture", abbreviation };
     case "sofa":
       return { shape: "sofa", abbreviation };
+    case "l_sofa":
+    case "l_desk":
+      return { shape: "l-shape", abbreviation };
     case "bed":
       return { shape: "bed", abbreviation };
     case "desk":
