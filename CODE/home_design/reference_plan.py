@@ -224,12 +224,12 @@ DIMENSION_ANNOTATIONS = [
         "id": "kitchen-dining-clear-length",
         "kind": "internal",
         "label": "8.12 m",
-        "x1": 758.8,
-        "y1": 331.0,
+        "x1": 833.0,
+        "y1": 302.3,
         "x2": 833.0,
-        "y2": 331.0,
-        "offset_x": 0.0,
-        "offset_y": -18.0,
+        "y2": 523.3,
+        "offset_x": 22.0,
+        "offset_y": 0.0,
         "confidence": "measured",
         "source": "room:kitchen_dining.length",
     },
@@ -419,7 +419,7 @@ text { font-family: Arial, sans-serif; fill: #1d2522; }
 .ref-scale-label { font-size: 7px; text-anchor: middle; dominant-baseline: auto; fill: #2f3134; }
 .ref-dimension-line, .ref-dimension-extension, .ref-dimension-tick { stroke: #263238; stroke-width: 0.85; stroke-linecap: butt; fill: none; }
 .ref-dimension-extension { opacity: 0.58; }
-.ref-dimension-label { font-size: 7px; font-weight: 700; text-anchor: middle; dominant-baseline: middle; fill: #263238; }
+.ref-dimension-label { font-size: 7px; font-weight: 700; text-anchor: middle; dominant-baseline: middle; fill: #263238; paint-order: stroke; stroke: #fffdf8; stroke-width: 3px; stroke-linejoin: round; }
 .ref-dimension-label.approximate { fill: #7a5a1f; }
 .ref-dimension-group.approximate .ref-dimension-line, .ref-dimension-group.approximate .ref-dimension-tick { stroke-dasharray: 3 2; stroke: #7a5a1f; }
 .ref-compass-axis { stroke: #2f3134; stroke-width: 1.1; stroke-linecap: round; }

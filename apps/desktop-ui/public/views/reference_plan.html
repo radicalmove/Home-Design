@@ -265,7 +265,7 @@ text { font-family: Arial, sans-serif; fill: #1d2522; }
 .ref-scale-label { font-size: 7px; text-anchor: middle; dominant-baseline: auto; fill: #2f3134; }
 .ref-dimension-line, .ref-dimension-extension, .ref-dimension-tick { stroke: #263238; stroke-width: 0.85; stroke-linecap: butt; fill: none; }
 .ref-dimension-extension { opacity: 0.58; }
-.ref-dimension-label { font-size: 7px; font-weight: 700; text-anchor: middle; dominant-baseline: middle; fill: #263238; }
+.ref-dimension-label { font-size: 7px; font-weight: 700; text-anchor: middle; dominant-baseline: middle; fill: #263238; paint-order: stroke; stroke: #fffdf8; stroke-width: 3px; stroke-linejoin: round; }
 .ref-dimension-label.approximate { fill: #7a5a1f; }
 .ref-dimension-group.approximate .ref-dimension-line, .ref-dimension-group.approximate .ref-dimension-tick { stroke-dasharray: 3 2; stroke: #7a5a1f; }
 .ref-compass-axis { stroke: #2f3134; stroke-width: 1.1; stroke-linecap: round; }
@@ -545,12 +545,12 @@ text { font-family: Arial, sans-serif; fill: #1d2522; }
 <text class="ref-dimension-label measured" x="1012.4" y="452.2">11.58 m</text>
 </g>
 <g class="ref-dimension-group measured" data-ref-dimension="kitchen-dining-clear-length" data-ref-dimension-kind="internal" data-ref-dimension-confidence="measured" data-ref-dimension-source="room:kitchen_dining.length">
-<line class="ref-dimension-extension" x1="758.8" y1="331.0" x2="758.8" y2="313.0"/>
-<line class="ref-dimension-extension" x1="833.0" y1="331.0" x2="833.0" y2="313.0"/>
-<line class="ref-dimension-line" x1="758.8" y1="313.0" x2="833.0" y2="313.0"/>
-<line class="ref-dimension-tick" x1="758.8" y1="308.5" x2="758.8" y2="317.5"/>
-<line class="ref-dimension-tick" x1="833.0" y1="308.5" x2="833.0" y2="317.5"/>
-<text class="ref-dimension-label measured" x="795.9" y="313.0">8.12 m</text>
+<line class="ref-dimension-extension" x1="833.0" y1="302.3" x2="855.0" y2="302.3"/>
+<line class="ref-dimension-extension" x1="833.0" y1="523.3" x2="855.0" y2="523.3"/>
+<line class="ref-dimension-line" x1="855.0" y1="302.3" x2="855.0" y2="523.3"/>
+<line class="ref-dimension-tick" x1="850.5" y1="302.3" x2="859.5" y2="302.3"/>
+<line class="ref-dimension-tick" x1="850.5" y1="523.3" x2="859.5" y2="523.3"/>
+<text class="ref-dimension-label measured" x="855.0" y="412.8">8.12 m</text>
 </g>
 <g class="ref-dimension-group measured" data-ref-dimension="lounge-clear-depth" data-ref-dimension-kind="internal" data-ref-dimension-confidence="measured" data-ref-dimension-source="room:lounge.depth">
 <line class="ref-dimension-extension" x1="679.0" y1="348.8" x2="661.0" y2="348.8"/>

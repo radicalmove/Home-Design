@@ -1224,9 +1224,11 @@ class ReferencePlanRenderTests(unittest.TestCase):
         )
         self.assertIn('pattern id="lawn-soft"', svg)
         self.assertIn('class="ref-room-label"', svg)
-        self.assertIn("font-size: 9px;", svg)
         self.assertIn(".ref-room-label, .ref-site-label { text-anchor: middle; dominant-baseline: middle; font-weight: 500; }", svg)
-        self.assertNotIn("paint-order: stroke", svg)
+        room_label_rule = svg.split(".ref-room-label {", 1)[1].split("}", 1)[0]
+        self.assertIn("font-size: 9px;", room_label_rule)
+        self.assertNotIn("paint-order: stroke", room_label_rule)
+        self.assertNotIn("stroke-width", room_label_rule)
         self.assertIn('class="ref-room-label" x="710.0" y="389.4"', svg)
         self.assertIn('class="ref-room-label" x="580.5" y="512.0"', svg)
         self.assertIn('class="ref-room-label" x="687.0" y="554.0"', svg)
@@ -1272,6 +1274,24 @@ class ReferencePlanRenderTests(unittest.TestCase):
         self.assertIn('data-ref-dimension="master-bedroom-clear-width"', svg)
         self.assertIn(">16.10 m<", svg)
         self.assertIn(">3.30 m<", svg)
+
+    def test_reference_plan_kitchen_dining_length_dimension_follows_long_axis(self):
+        model = load_model("DATA/house_model.json")
+        svg = render_reference_plan_svg(model)
+
+        self.assertIn('data-ref-dimension="kitchen-dining-clear-length"', svg)
+        self.assertIn('data-ref-dimension-source="room:kitchen_dining.length"', svg)
+        self.assertIn('<line class="ref-dimension-line" x1="855.0" y1="302.3" x2="855.0" y2="523.3"/>', svg)
+        self.assertIn('<text class="ref-dimension-label measured" x="855.0" y="412.8">8.12 m</text>', svg)
+        self.assertNotIn('<line class="ref-dimension-line" x1="758.8" y1="313.0" x2="833.0" y2="313.0"/>', svg)
+
+    def test_reference_plan_dimension_labels_have_readability_stroke(self):
+        model = load_model("DATA/house_model.json")
+        svg = render_reference_plan_svg(model)
+
+        self.assertIn("paint-order: stroke", svg)
+        self.assertIn("stroke: #fffdf8", svg)
+        self.assertIn("stroke-width: 3px", svg)
 
     def test_reference_plan_dimension_layer_marks_approximate_dimensions(self):
         model = load_model("DATA/house_model.json")
