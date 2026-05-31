@@ -98,9 +98,10 @@
     }
   }
 
-  function handleResizeObject(objectId: string, size: FurnitureSize) {
+  function handleResizeObject(objectId: string, size: FurnitureSize, point?: PlanPoint) {
     if (layout) {
-      commitLayout(resizeObject(layout, objectId, size));
+      const resizedLayout = resizeObject(layout, objectId, size);
+      commitLayout(point ? moveObject(resizedLayout, objectId, point) : resizedLayout);
     }
   }
 

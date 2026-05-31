@@ -14,6 +14,24 @@ export type PlanViewportSize = {
   height: number;
 };
 
+export type ResizeHandleName = "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "nw";
+
+type ResizeHandleDirection = {
+  x: -1 | 0 | 1;
+  y: -1 | 0 | 1;
+};
+
+const RESIZE_HANDLE_DIRECTIONS: Record<ResizeHandleName, ResizeHandleDirection> = {
+  n: { x: 0, y: -1 },
+  ne: { x: 1, y: -1 },
+  e: { x: 1, y: 0 },
+  se: { x: 1, y: 1 },
+  s: { x: 0, y: 1 },
+  sw: { x: -1, y: 1 },
+  w: { x: -1, y: 0 },
+  nw: { x: -1, y: -1 },
+};
+
 export const MIN_PLAN_ZOOM = 0.5;
 export const MAX_PLAN_ZOOM = 5;
 export const PLAN_WHEEL_ZOOM_FACTOR = 1.1;
@@ -175,5 +193,45 @@ export function resizeObjectFromCorner<T extends FurnitureObject>(
     ...object,
     width_m: Math.max(minimumM, object.width_m + delta.deltaWidthM),
     depth_m: Math.max(minimumM, object.depth_m + delta.deltaDepthM),
+  };
+}
+
+function resizedAxis(
+  sizeM: number,
+  pointerDeltaM: number,
+  direction: -1 | 0 | 1,
+  minimumM: number,
+): { sizeM: number; centreDeltaM: number } {
+  if (direction === 0) {
+    return { sizeM, centreDeltaM: 0 };
+  }
+
+  const nextSizeM = Math.max(minimumM, sizeM + direction * pointerDeltaM);
+  const appliedEdgeDeltaM = (nextSizeM - sizeM) / direction;
+  return {
+    sizeM: nextSizeM,
+    centreDeltaM: appliedEdgeDeltaM / 2,
+  };
+}
+
+export function resizeObjectFromHandle<T extends FurnitureObject>(
+  object: T,
+  handle: ResizeHandleName,
+  delta: { deltaWidthM: number; deltaDepthM: number },
+  minimumM = 0.2,
+): T {
+  const direction = RESIZE_HANDLE_DIRECTIONS[handle];
+  const width = resizedAxis(object.width_m, delta.deltaWidthM, direction.x, minimumM);
+  const depth = resizedAxis(object.depth_m, delta.deltaDepthM, direction.y, minimumM);
+  const radians = (object.rotation_deg * Math.PI) / 180;
+  const cos = Math.cos(radians);
+  const sin = Math.sin(radians);
+
+  return {
+    ...object,
+    x_m: object.x_m + width.centreDeltaM * cos - depth.centreDeltaM * sin,
+    y_m: object.y_m + width.centreDeltaM * sin + depth.centreDeltaM * cos,
+    width_m: width.sizeM,
+    depth_m: depth.sizeM,
   };
 }

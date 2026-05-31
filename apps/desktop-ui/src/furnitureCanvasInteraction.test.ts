@@ -22,4 +22,16 @@ describe("furniture canvas interaction layout", () => {
     expect(planCanvasSource).toContain("showLabels: boolean;");
     expect(planCanvasSource).toContain("{#if showLabels && symbol.abbreviation}");
   });
+
+  it("renders side and corner handles for anchored furniture resizing", () => {
+    expect(planCanvasSource).toContain("const RESIZE_HANDLES");
+    expect(planCanvasSource).toContain('name: "n"');
+    expect(planCanvasSource).toContain('name: "e"');
+    expect(planCanvasSource).toContain('name: "s"');
+    expect(planCanvasSource).toContain('name: "w"');
+    expect(planCanvasSource).toContain('name: "nw"');
+    expect(planCanvasSource).toContain('name: "se"');
+    expect(planCanvasSource).toContain("data-resize-handle={handle.name}");
+    expect(planCanvasSource).toContain("startResize(event, object, handle.name)");
+  });
 });

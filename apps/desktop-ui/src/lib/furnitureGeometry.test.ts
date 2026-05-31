@@ -10,6 +10,7 @@ import {
   objectBoundsSvg,
   planViewBoxSize,
   planZoomLabel,
+  resizeObjectFromHandle,
   resizeObjectFromCorner,
   rotateDeltaIntoObjectSpace,
   viewOriginAfterPan,
@@ -68,6 +69,39 @@ describe("furniture geometry", () => {
 
     expect(resized.width_m).toBe(0.2);
     expect(resized.depth_m).toBeCloseTo(1.9);
+  });
+
+  it("resizes one horizontal edge while keeping the opposite edge fixed", () => {
+    const resizedEast = resizeObjectFromHandle(object, "e", { deltaWidthM: 0.6, deltaDepthM: 2 });
+    expect(resizedEast.width_m).toBeCloseTo(2.6);
+    expect(resizedEast.depth_m).toBeCloseTo(0.9);
+    expect(resizedEast.x_m - resizedEast.width_m / 2).toBeCloseTo(object.x_m - object.width_m / 2);
+    expect(resizedEast.x_m).toBeCloseTo(5.3);
+
+    const resizedWest = resizeObjectFromHandle(object, "w", { deltaWidthM: 0.6, deltaDepthM: 2 });
+    expect(resizedWest.width_m).toBeCloseTo(1.4);
+    expect(resizedWest.depth_m).toBeCloseTo(0.9);
+    expect(resizedWest.x_m + resizedWest.width_m / 2).toBeCloseTo(object.x_m + object.width_m / 2);
+    expect(resizedWest.x_m).toBeCloseTo(5.3);
+  });
+
+  it("resizes one vertical edge while keeping the opposite edge fixed", () => {
+    const resizedNorth = resizeObjectFromHandle(object, "n", { deltaWidthM: 1, deltaDepthM: 0.2 });
+
+    expect(resizedNorth.width_m).toBeCloseTo(2);
+    expect(resizedNorth.depth_m).toBeCloseTo(0.7);
+    expect(resizedNorth.y_m + resizedNorth.depth_m / 2).toBeCloseTo(object.y_m + object.depth_m / 2);
+    expect(resizedNorth.y_m).toBeCloseTo(3.1);
+  });
+
+  it("resizes a rotated object along its local edge axis", () => {
+    const rotated = { ...object, rotation_deg: 90 };
+    const resized = resizeObjectFromHandle(rotated, "e", { deltaWidthM: 1, deltaDepthM: 0 });
+
+    expect(resized.width_m).toBeCloseTo(3);
+    expect(resized.depth_m).toBeCloseTo(0.9);
+    expect(resized.x_m).toBeCloseTo(rotated.x_m);
+    expect(resized.y_m).toBeCloseTo(rotated.y_m + 0.5);
   });
 
   it("clamps and labels furniture plan zoom", () => {

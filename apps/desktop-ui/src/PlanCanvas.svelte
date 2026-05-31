@@ -8,11 +8,13 @@
     normaliseDegrees,
     objectBoundsSvg,
     planViewBoxSize,
+    resizeObjectFromHandle,
     rotateDeltaIntoObjectSpace,
     svgPointInViewBox,
     viewOriginAfterPan,
   } from "./lib/furnitureGeometry";
   import { symbolForFurnitureObject } from "./lib/furnitureSymbols";
+  import type { ResizeHandleName } from "./lib/furnitureGeometry";
   import type { FurnitureLayout, FurnitureObject, PlanPoint } from "./types";
 
   type FurnitureSize = {
@@ -25,6 +27,7 @@
     pointerId: number;
     object: FurnitureObject;
     startSvg: PlanPoint;
+    resizeHandle?: ResizeHandleName;
     startAngleDeg?: number;
     startRotationDeg?: number;
   };
@@ -45,11 +48,27 @@
     zoom: number;
     onSelectObject: (objectId: string | null) => void;
     onMoveObject: (objectId: string, point: PlanPoint) => void;
-    onResizeObject: (objectId: string, size: FurnitureSize) => void;
+    onResizeObject: (objectId: string, size: FurnitureSize, point?: PlanPoint) => void;
     onRotateObject: (objectId: string, rotationDeg: number) => void;
     onZoomChange: (zoom: number) => void;
     onResizePreview: (label: string | null, x: number, y: number) => void;
   };
+
+  const RESIZE_HANDLES: Array<{
+    name: ResizeHandleName;
+    x: number;
+    y: number;
+    label: string;
+  }> = [
+    { name: "n", x: 0.5, y: 0, label: "top edge" },
+    { name: "ne", x: 1, y: 0, label: "top right corner" },
+    { name: "e", x: 1, y: 0.5, label: "right edge" },
+    { name: "se", x: 1, y: 1, label: "bottom right corner" },
+    { name: "s", x: 0.5, y: 1, label: "bottom edge" },
+    { name: "sw", x: 0, y: 1, label: "bottom left corner" },
+    { name: "w", x: 0, y: 0.5, label: "left edge" },
+    { name: "nw", x: 0, y: 0, label: "top left corner" },
+  ];
 
   let {
     layout,
@@ -243,7 +262,7 @@
     svgElement?.setPointerCapture(event.pointerId);
   }
 
-  function startResize(event: PointerEvent, object: FurnitureObject) {
+  function startResize(event: PointerEvent, object: FurnitureObject, handle: ResizeHandleName) {
     event.preventDefault();
     event.stopPropagation();
     onSelectObject(object.id);
@@ -252,6 +271,7 @@
       pointerId: event.pointerId,
       object,
       startSvg: svgPointFromEvent(event),
+      resizeHandle: handle,
     };
     svgElement?.setPointerCapture(event.pointerId);
     const local = localPointFromEvent(event);
@@ -315,11 +335,16 @@
       dragState.object.rotation_deg,
       layout.plan_transform,
     );
+    const resized = resizeObjectFromHandle(
+      dragState.object,
+      dragState.resizeHandle ?? "se",
+      localDelta,
+    );
     const size = {
-      width_m: Math.max(0.2, dragState.object.width_m + localDelta.deltaWidthM),
-      depth_m: Math.max(0.2, dragState.object.depth_m + localDelta.deltaDepthM),
+      width_m: resized.width_m,
+      depth_m: resized.depth_m,
     };
-    onResizeObject(dragState.object.id, size);
+    onResizeObject(dragState.object.id, size, { x: resized.x_m, y: resized.y_m });
     const local = localPointFromEvent(event);
     onResizePreview(`${size.width_m.toFixed(2)} m x ${size.depth_m.toFixed(2)} m`, local.x, local.y);
   }
@@ -425,17 +450,20 @@
               tabindex="0"
               onpointerdown={(event) => startRotate(event, object)}
             />
-            <rect
-              class="resize-handle"
-              x={bounds.x + bounds.width - 5}
-              y={bounds.y + bounds.height - 5}
-              width="10"
-              height="10"
-              role="button"
-              aria-label={`Resize ${object.label}`}
-              tabindex="0"
-              onpointerdown={(event) => startResize(event, object)}
-            />
+            {#each RESIZE_HANDLES as handle}
+              <rect
+                class={`resize-handle ${handle.name}`}
+                data-resize-handle={handle.name}
+                x={bounds.x + bounds.width * handle.x - 5}
+                y={bounds.y + bounds.height * handle.y - 5}
+                width="10"
+                height="10"
+                role="button"
+                aria-label={`Resize ${object.label} from ${handle.label}`}
+                tabindex="0"
+                onpointerdown={(event) => startResize(event, object, handle.name)}
+              />
+            {/each}
           {/if}
         </g>
       {/each}
@@ -537,6 +565,26 @@
     stroke: #d84d2a;
     stroke-width: 2;
     vector-effect: non-scaling-stroke;
+  }
+
+  .resize-handle.n,
+  .resize-handle.s {
+    cursor: ns-resize;
+  }
+
+  .resize-handle.e,
+  .resize-handle.w {
+    cursor: ew-resize;
+  }
+
+  .resize-handle.ne,
+  .resize-handle.sw {
+    cursor: nesw-resize;
+  }
+
+  .resize-handle.nw,
+  .resize-handle.se {
+    cursor: nwse-resize;
   }
 
   .rotate-stem {
