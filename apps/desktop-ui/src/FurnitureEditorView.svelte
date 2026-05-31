@@ -46,6 +46,7 @@
   let fixedVisible = $state(true);
   let moveableVisible = $state(true);
   let labelsVisible = $state(false);
+  let roomLabelsVisible = $state(false);
   let loading = $state(true);
   let loadError = $state<string | null>(null);
   let saveError = $state<string | null>(null);
@@ -214,9 +215,11 @@
         fixedVisible={fixedVisible}
         moveableVisible={moveableVisible}
         labelsVisible={labelsVisible}
+        roomLabelsVisible={roomLabelsVisible}
         onToggleFixed={() => (fixedVisible = !fixedVisible)}
         onToggleMoveable={() => (moveableVisible = !moveableVisible)}
         onToggleLabels={() => (labelsVisible = !labelsVisible)}
+        onToggleRoomLabels={() => (roomLabelsVisible = !roomLabelsVisible)}
       />
       <div class="editor-zoom-controls" aria-label="Furniture plan zoom controls">
         <button type="button" aria-label="Zoom out" onclick={() => zoomPlan(-0.1)}>-</button>
@@ -248,6 +251,7 @@
           {fixedVisible}
           {moveableVisible}
           showLabels={labelsVisible}
+          showRoomLabels={roomLabelsVisible}
           zoom={planZoom}
           onSelectObject={(objectId) => (selectedObjectId = objectId)}
           onMoveObject={handleMoveObject}

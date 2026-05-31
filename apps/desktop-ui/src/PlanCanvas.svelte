@@ -39,6 +39,13 @@
     startOrigin: PlanPoint;
   };
 
+  type RoomLabel = {
+    id: string;
+    x: number;
+    y: number;
+    lines: string[];
+  };
+
   type Props = {
     layout: FurnitureLayout;
     backgroundAssetPath: string;
@@ -46,6 +53,7 @@
     fixedVisible: boolean;
     moveableVisible: boolean;
     showLabels: boolean;
+    showRoomLabels: boolean;
     zoom: number;
     onSelectObject: (objectId: string | null) => void;
     onMoveObject: (objectId: string, point: PlanPoint) => void;
@@ -71,6 +79,20 @@
     { name: "nw", x: 0, y: 0, label: "top left corner" },
   ];
 
+  const ROOM_LABELS: RoomLabel[] = [
+    { id: "sunroom", x: 608.2, y: 415.0, lines: ["Sunroom"] },
+    { id: "lounge", x: 710.0, y: 389.4, lines: ["Lounge"] },
+    { id: "kitchen-dining", x: 796.5, y: 372.0, lines: ["Kitchen / Dining"] },
+    { id: "entrance", x: 853.2, y: 506.2, lines: ["Entrance"] },
+    { id: "laundry", x: 929.6, y: 558.0, lines: ["Laundry"] },
+    { id: "toilet", x: 929.6, y: 587.5, lines: ["Toilet"] },
+    { id: "hallway", x: 684.0, y: 504.0, lines: ["Hallway"] },
+    { id: "master-bedroom", x: 580.5, y: 512.0, lines: ["Master", "Bedroom"] },
+    { id: "office", x: 687.0, y: 554.0, lines: ["Office"] },
+    { id: "bathroom", x: 750.5, y: 562.4, lines: ["Bathroom"] },
+    { id: "bedroom-2", x: 838.4, y: 592.0, lines: ["Bedroom 2"] },
+  ];
+
   let {
     layout,
     backgroundAssetPath,
@@ -78,6 +100,7 @@
     fixedVisible,
     moveableVisible,
     showLabels,
+    showRoomLabels,
     zoom,
     onSelectObject,
     onMoveObject,
@@ -392,6 +415,22 @@
   >
     <image href={backgroundAssetPath} width="1600" height="900" preserveAspectRatio="xMidYMid meet" />
 
+    {#if showRoomLabels}
+      <g class="room-label-layer" aria-hidden="true">
+        {#each ROOM_LABELS as roomLabel (roomLabel.id)}
+          <text class="room-label" x={roomLabel.x} y={roomLabel.y}>
+            {#if roomLabel.lines.length === 1}
+              {roomLabel.lines[0]}
+            {:else}
+              {#each roomLabel.lines as line, index}
+                <tspan x={roomLabel.x} dy={index === 0 ? -4 : 9}>{line}</tspan>
+              {/each}
+            {/if}
+          </text>
+        {/each}
+      </g>
+    {/if}
+
     <g class="furniture-layer">
       {#each visibleObjects as object (object.id)}
         {@const bounds = objectBoundsSvg(object, layout.plan_transform)}
@@ -553,7 +592,7 @@
     vector-effect: non-scaling-stroke;
   }
 
-  text {
+  .furniture-object text {
     font-size: 13px;
     font-weight: 800;
     text-anchor: middle;
@@ -562,6 +601,19 @@
     paint-order: stroke;
     stroke: #ffffff;
     stroke-width: 3px;
+    pointer-events: none;
+  }
+
+  .room-label-layer {
+    pointer-events: none;
+  }
+
+  .room-label {
+    font-size: 9px;
+    font-weight: 500;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    fill: #1d2522;
     pointer-events: none;
   }
 

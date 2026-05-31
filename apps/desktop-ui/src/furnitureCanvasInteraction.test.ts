@@ -4,6 +4,7 @@ import editorSource from "./FurnitureEditorView.svelte?raw";
 import inspectorSource from "./FurnitureObjectInspector.svelte?raw";
 import layerControlsSource from "./FurnitureLayerControls.svelte?raw";
 import planCanvasSource from "./PlanCanvas.svelte?raw";
+import furnitureBackgroundSource from "../public/views/reference_plan.svg?raw";
 
 describe("furniture canvas interaction layout", () => {
   it("uses a crisp SVG viewBox canvas with a tall editing viewport", () => {
@@ -23,6 +24,24 @@ describe("furniture canvas interaction layout", () => {
     expect(layerControlsSource).toContain("checked={labelsVisible}");
     expect(planCanvasSource).toContain("showLabels: boolean;");
     expect(planCanvasSource).toContain("{#if showLabels && symbol.abbreviation}");
+  });
+
+  it("hides reference room labels by default behind a separate toggle", () => {
+    expect(editorSource).toContain("let roomLabelsVisible = $state(false);");
+    expect(editorSource).toContain("roomLabelsVisible={roomLabelsVisible}");
+    expect(editorSource).toContain("showRoomLabels={roomLabelsVisible}");
+    expect(layerControlsSource).toContain("roomLabelsVisible: boolean;");
+    expect(layerControlsSource).toContain("onToggleRoomLabels: () => void;");
+    expect(layerControlsSource).toContain("checked={roomLabelsVisible}");
+    expect(layerControlsSource).toContain("Room Labels");
+    expect(planCanvasSource).toContain("showRoomLabels: boolean;");
+    expect(planCanvasSource).toContain("class=\"room-label-layer\"");
+    expect(planCanvasSource).toContain("{#if showRoomLabels}");
+  });
+
+  it("uses a label-free packaged reference background for furniture editing", () => {
+    expect(furnitureBackgroundSource).not.toContain('class="ref-room-label"');
+    expect(furnitureBackgroundSource).toContain('class="ref-site-label"');
   });
 
   it("renders side and corner handles for anchored furniture resizing", () => {

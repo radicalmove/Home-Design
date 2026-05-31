@@ -569,16 +569,5 @@ text { font-family: Arial, sans-serif; fill: #1d2522; }
 <text class="ref-site-label" x="530.0" y="416.4">Front Path</text>
 <text class="ref-site-label" x="1105.0" y="295.0">Garage / Shed</text>
 <text class="ref-site-label" x="1295.0" y="295.0">Cottage</text>
-<text class="ref-room-label" x="608.2" y="415.0">Sunroom</text>
-<text class="ref-room-label" x="710.0" y="389.4">Lounge</text>
-<text class="ref-room-label" x="796.5" y="372.0">Kitchen / Dining</text>
-<text class="ref-room-label" x="853.2" y="506.2">Entrance</text>
-<text class="ref-room-label" x="929.6" y="558.0">Laundry</text>
-<text class="ref-room-label" x="929.6" y="587.5">Toilet</text>
-<text class="ref-room-label" x="684.0" y="504.0">Hallway</text>
-<text class="ref-room-label" x="580.5" y="512.0"><tspan x="580.5" dy="-4">Master</tspan><tspan x="580.5" dy="9">Bedroom</tspan></text>
-<text class="ref-room-label" x="687.0" y="554.0">Office</text>
-<text class="ref-room-label" x="750.5" y="562.4">Bathroom</text>
-<text class="ref-room-label" x="838.4" y="592.0">Bedroom 2</text>
 </g>
 </svg>

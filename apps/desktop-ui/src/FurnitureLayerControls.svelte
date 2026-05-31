@@ -3,18 +3,22 @@
     fixedVisible: boolean;
     moveableVisible: boolean;
     labelsVisible: boolean;
+    roomLabelsVisible: boolean;
     onToggleFixed: () => void;
     onToggleMoveable: () => void;
     onToggleLabels: () => void;
+    onToggleRoomLabels: () => void;
   };
 
   let {
     fixedVisible,
     moveableVisible,
     labelsVisible,
+    roomLabelsVisible,
     onToggleFixed,
     onToggleMoveable,
     onToggleLabels,
+    onToggleRoomLabels,
   }: Props = $props();
 </script>
 
@@ -29,7 +33,11 @@
   </label>
   <label>
     <input type="checkbox" checked={labelsVisible} onchange={onToggleLabels} />
-    Labels
+    Furniture Labels
+  </label>
+  <label>
+    <input type="checkbox" checked={roomLabelsVisible} onchange={onToggleRoomLabels} />
+    Room Labels
   </label>
 </section>
 
