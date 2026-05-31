@@ -2,11 +2,20 @@
   type Props = {
     fixedVisible: boolean;
     moveableVisible: boolean;
+    labelsVisible: boolean;
     onToggleFixed: () => void;
     onToggleMoveable: () => void;
+    onToggleLabels: () => void;
   };
 
-  let { fixedVisible, moveableVisible, onToggleFixed, onToggleMoveable }: Props = $props();
+  let {
+    fixedVisible,
+    moveableVisible,
+    labelsVisible,
+    onToggleFixed,
+    onToggleMoveable,
+    onToggleLabels,
+  }: Props = $props();
 </script>
 
 <section class="layer-controls" aria-label="Furniture layers">
@@ -17,6 +26,10 @@
   <label>
     <input type="checkbox" checked={moveableVisible} onchange={onToggleMoveable} />
     Moveable
+  </label>
+  <label>
+    <input type="checkbox" checked={labelsVisible} onchange={onToggleLabels} />
+    Labels
   </label>
 </section>
 

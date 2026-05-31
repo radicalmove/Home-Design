@@ -41,6 +41,7 @@
     selectedObjectId: string | null;
     fixedVisible: boolean;
     moveableVisible: boolean;
+    showLabels: boolean;
     zoom: number;
     onSelectObject: (objectId: string | null) => void;
     onMoveObject: (objectId: string, point: PlanPoint) => void;
@@ -56,6 +57,7 @@
     selectedObjectId,
     fixedVisible,
     moveableVisible,
+    showLabels,
     zoom,
     onSelectObject,
     onMoveObject,
@@ -401,7 +403,7 @@
             <rect x={bounds.x + 4} y={bounds.y + 4} width={Math.max(4, bounds.width - 8)} height={Math.max(4, bounds.height - 8)} rx="3" />
           {/if}
 
-          {#if symbol.abbreviation}
+          {#if showLabels && symbol.abbreviation}
             <text x={bounds.cx} y={bounds.cy}>{symbol.abbreviation}</text>
           {/if}
 
