@@ -1,7 +1,10 @@
 <script lang="ts">
+  import { tick } from "svelte";
   import {
+    anchoredScrollAfterZoom,
     angleDegFromCenter,
     dimensionLabel,
+    nextWheelPlanZoom,
     normaliseDegrees,
     objectBoundsSvg,
     rotateDeltaIntoObjectSpace,
@@ -23,6 +26,12 @@
     startRotationDeg?: number;
   };
 
+  type PanState = {
+    pointerId: number;
+    startClient: PlanPoint;
+    startScroll: PlanPoint;
+  };
+
   type Props = {
     layout: FurnitureLayout;
     backgroundAssetPath: string;
@@ -34,6 +43,7 @@
     onMoveObject: (objectId: string, point: PlanPoint) => void;
     onResizeObject: (objectId: string, size: FurnitureSize) => void;
     onRotateObject: (objectId: string, rotationDeg: number) => void;
+    onZoomChange: (zoom: number) => void;
     onResizePreview: (label: string | null, x: number, y: number) => void;
   };
 
@@ -48,11 +58,14 @@
     onMoveObject,
     onResizeObject,
     onRotateObject,
+    onZoomChange,
     onResizePreview,
   }: Props = $props();
 
+  let canvasElement = $state<HTMLDivElement | null>(null);
   let svgElement = $state<SVGSVGElement | null>(null);
   let dragState = $state<DragState | null>(null);
+  let panState = $state<PanState | null>(null);
 
   let visibleObjects = $derived(
     layout.objects.filter(
@@ -89,11 +102,62 @@
     event.preventDefault();
   }
 
-  function selectBackground(event: PointerEvent) {
+  function startBackgroundPan(event: PointerEvent) {
     event.preventDefault();
-    if (!dragState) {
-      onSelectObject(null);
+    if (event.button !== 0 || dragState || !canvasElement) {
+      return;
     }
+
+    onSelectObject(null);
+    panState = {
+      pointerId: event.pointerId,
+      startClient: { x: event.clientX, y: event.clientY },
+      startScroll: { x: canvasElement.scrollLeft, y: canvasElement.scrollTop },
+    };
+    canvasElement.setPointerCapture(event.pointerId);
+  }
+
+  function handlePanPointerMove(event: PointerEvent) {
+    if (!panState || event.pointerId !== panState.pointerId || !canvasElement) {
+      return;
+    }
+
+    event.preventDefault();
+    canvasElement.scrollLeft = panState.startScroll.x - (event.clientX - panState.startClient.x);
+    canvasElement.scrollTop = panState.startScroll.y - (event.clientY - panState.startClient.y);
+  }
+
+  function finishPan(event: PointerEvent) {
+    if (!panState || event.pointerId !== panState.pointerId) {
+      return;
+    }
+
+    canvasElement?.releasePointerCapture(event.pointerId);
+    panState = null;
+  }
+
+  async function handleWheel(event: WheelEvent) {
+    if (!canvasElement || event.deltaY === 0) {
+      return;
+    }
+
+    event.preventDefault();
+    const nextZoom = nextWheelPlanZoom(zoom, event.deltaY);
+    if (nextZoom === zoom) {
+      return;
+    }
+
+    const canvasBounds = canvasElement.getBoundingClientRect();
+    const nextScroll = anchoredScrollAfterZoom(
+      { x: canvasElement.scrollLeft, y: canvasElement.scrollTop },
+      { x: event.clientX - canvasBounds.left, y: event.clientY - canvasBounds.top },
+      zoom,
+      nextZoom,
+    );
+    onZoomChange(nextZoom);
+    await tick();
+    canvasElement.scrollLeft = nextScroll.x;
+    canvasElement.scrollTop = nextScroll.y;
   }
 
   function startMove(event: PointerEvent, object: FurnitureObject) {
@@ -201,12 +265,18 @@
 </script>
 
 <div
+  bind:this={canvasElement}
   class="plan-canvas"
+  class:is-panning={Boolean(panState)}
   role="group"
   aria-label="Furniture plan editor"
   style={`--plan-zoom: ${zoom};`}
   ondragstart={preventDragDefaults}
   onselectstart={preventDragDefaults}
+  onwheel={handleWheel}
+  onpointermove={handlePanPointerMove}
+  onpointerup={finishPan}
+  onpointercancel={finishPan}
 >
   <svg
     bind:this={svgElement}
@@ -216,7 +286,7 @@
     onpointermove={handlePointerMove}
     onpointerup={finishPointer}
     onpointercancel={finishPointer}
-    onpointerdown={selectBackground}
+    onpointerdown={startBackgroundPan}
   >
     <image href={backgroundAssetPath} width="1600" height="900" preserveAspectRatio="xMidYMid meet" />
 
@@ -312,8 +382,14 @@
     border: 1px solid #cfd8dd;
     border-radius: 8px;
     overscroll-behavior: contain;
+    cursor: grab;
+    touch-action: none;
     user-select: none;
     -webkit-user-select: none;
+  }
+
+  .plan-canvas.is-panning {
+    cursor: grabbing;
   }
 
   svg {

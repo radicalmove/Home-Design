@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
+  anchoredScrollAfterZoom,
   angleDegFromCenter,
   clampPlanZoom,
   dimensionLabel,
   metresToSvg,
+  nextWheelPlanZoom,
   objectBoundsSvg,
   planZoomLabel,
   resizeObjectFromCorner,
@@ -69,6 +71,20 @@ describe("furniture geometry", () => {
     expect(clampPlanZoom(0.2)).toBe(0.5);
     expect(clampPlanZoom(3)).toBe(2.5);
     expect(planZoomLabel(1.25)).toBe("125%");
+  });
+
+  it("computes wheel zoom and keeps the cursor anchor stable", () => {
+    expect(nextWheelPlanZoom(1, -1)).toBe(1.1);
+    expect(nextWheelPlanZoom(1, 1)).toBe(0.9);
+
+    expect(
+      anchoredScrollAfterZoom(
+        { x: 100, y: 50 },
+        { x: 200, y: 100 },
+        1,
+        1.5,
+      ),
+    ).toEqual({ x: 250, y: 125 });
   });
 
   it("measures rotation from object centre in SVG space", () => {

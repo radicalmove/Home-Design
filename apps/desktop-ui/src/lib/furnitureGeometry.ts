@@ -11,6 +11,7 @@ export type SvgBounds = {
 
 export const MIN_PLAN_ZOOM = 0.5;
 export const MAX_PLAN_ZOOM = 2.5;
+export const PLAN_WHEEL_ZOOM_FACTOR = 1.1;
 
 export function metresToSvg(point: PlanPoint, transform: PlanTransform): PlanPoint {
   return {
@@ -51,6 +52,32 @@ export function clampPlanZoom(zoom: number): number {
 
 export function planZoomLabel(zoom: number): string {
   return `${Math.round(clampPlanZoom(zoom) * 100)}%`;
+}
+
+export function nextWheelPlanZoom(currentZoom: number, deltaY: number): number {
+  if (deltaY === 0) {
+    return clampPlanZoom(currentZoom);
+  }
+
+  const zoomFactor = deltaY < 0 ? PLAN_WHEEL_ZOOM_FACTOR : 1 / PLAN_WHEEL_ZOOM_FACTOR;
+  return clampPlanZoom(currentZoom * zoomFactor);
+}
+
+export function anchoredScrollAfterZoom(
+  currentScroll: PlanPoint,
+  pointerOffset: PlanPoint,
+  currentZoom: number,
+  nextZoom: number,
+): PlanPoint {
+  if (currentZoom <= 0) {
+    return currentScroll;
+  }
+
+  const zoomRatio = nextZoom / currentZoom;
+  return {
+    x: (currentScroll.x + pointerOffset.x) * zoomRatio - pointerOffset.x,
+    y: (currentScroll.y + pointerOffset.y) * zoomRatio - pointerOffset.y,
+  };
 }
 
 export function angleDegFromCenter(point: PlanPoint, bounds: Pick<SvgBounds, "cx" | "cy">): number {

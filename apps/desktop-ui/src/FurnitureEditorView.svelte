@@ -140,6 +140,10 @@
     planZoom = clampPlanZoom(planZoom + delta);
   }
 
+  function handlePlanZoom(nextZoom: number) {
+    planZoom = clampPlanZoom(nextZoom);
+  }
+
   function resetPlanZoom() {
     planZoom = 1;
   }
@@ -231,6 +235,7 @@
           onMoveObject={handleMoveObject}
           onResizeObject={handleResizeObject}
           onRotateObject={handleRotateObject}
+          onZoomChange={handlePlanZoom}
           onResizePreview={handleResizePreview}
         />
         <DimensionBadge
