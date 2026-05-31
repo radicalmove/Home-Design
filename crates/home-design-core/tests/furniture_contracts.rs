@@ -30,7 +30,42 @@ fn default_catalog_groups_current_house_first_objects() {
     assert!(item_ids.contains("l_sofa"));
     assert!(item_ids.contains("queen_bed"));
     assert!(item_ids.contains("l_desk"));
+    assert!(item_ids.contains("bedside_table"));
+    assert!(item_ids.contains("dresser_drawers"));
+    assert!(item_ids.contains("wardrobe_doors"));
+    assert!(item_ids.contains("partition_wall"));
     assert!(item_ids.contains("custom_rectangle"));
+
+    let bedroom_items: BTreeSet<_> = catalog
+        .groups
+        .iter()
+        .find(|group| group.id == "bedroom-office")
+        .expect("bedroom and office group")
+        .items
+        .iter()
+        .map(|item| item.id.as_str())
+        .collect();
+    assert!(bedroom_items.contains("bedside_table"));
+    assert!(bedroom_items.contains("dresser_drawers"));
+    assert!(bedroom_items.contains("wardrobe_doors"));
+
+    let partition_wall = catalog
+        .groups
+        .iter()
+        .flat_map(|group| group.items.iter())
+        .find(|item| item.id == "partition_wall")
+        .expect("partition wall catalog item");
+    assert_eq!(partition_wall.layer, FurnitureLayerKind::Fixed);
+    assert_eq!(partition_wall.default_depth_m, 0.03);
+
+    let wardrobe_doors = catalog
+        .groups
+        .iter()
+        .flat_map(|group| group.items.iter())
+        .find(|item| item.id == "wardrobe_doors")
+        .expect("wardrobe doors catalog item");
+    assert_eq!(wardrobe_doors.layer, FurnitureLayerKind::Fixed);
+    assert_eq!(wardrobe_doors.symbol, "sliding-door");
 
     let l_sofa = catalog
         .groups

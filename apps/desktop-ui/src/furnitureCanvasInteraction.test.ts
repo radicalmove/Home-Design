@@ -66,6 +66,13 @@ describe("furniture canvas interaction layout", () => {
     expect(inspectorSource).toContain("Return W m");
   });
 
+  it("renders bedroom storage, thin partition wall, and wardrobe-door furniture symbols", () => {
+    expect(planCanvasSource).toContain('symbol.shape === "bedside-table"');
+    expect(planCanvasSource).toContain('symbol.shape === "drawers"');
+    expect(planCanvasSource).toContain('symbol.shape === "partition-wall"');
+    expect(planCanvasSource).toContain('symbol.shape === "sliding-door"');
+  });
+
   it("sizes edit handles from screen pixels instead of fixed SVG units", () => {
     expect(planCanvasSource).toContain("screenPixelsToSvgUnits");
     expect(planCanvasSource).toContain("resizeHandleSize");

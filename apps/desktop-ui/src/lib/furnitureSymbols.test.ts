@@ -18,5 +18,12 @@ describe("furniture symbols", () => {
     expect(symbolForFurnitureObject("l_sofa", null).shape).toBe("l-shape");
     expect(symbolForFurnitureObject("desk", null).shape).toBe("desk");
     expect(symbolForFurnitureObject("l_desk", null).shape).toBe("l-shape");
+    expect(symbolForFurnitureObject("bedside_table", null).shape).toBe("bedside-table");
+    expect(symbolForFurnitureObject("dresser_drawers", null).shape).toBe("drawers");
+  });
+
+  it("uses fixed structural symbols for walls and wardrobe doors", () => {
+    expect(symbolForFurnitureObject("partition_wall", null).shape).toBe("partition-wall");
+    expect(symbolForFurnitureObject("wardrobe_doors", null).shape).toBe("sliding-door");
   });
 });

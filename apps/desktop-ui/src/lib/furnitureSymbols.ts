@@ -6,10 +6,14 @@ export type FurnitureSymbol = {
     | "sofa"
     | "l-shape"
     | "bed"
+    | "bedside-table"
     | "desk"
     | "table"
     | "chair"
-    | "storage";
+    | "storage"
+    | "drawers"
+    | "partition-wall"
+    | "sliding-door";
   abbreviation: string | null;
 };
 
@@ -31,6 +35,14 @@ export function symbolForFurnitureObject(type: string, abbreviation: string | nu
       return { shape: "l-shape", abbreviation };
     case "bed":
       return { shape: "bed", abbreviation };
+    case "bedside_table":
+      return { shape: "bedside-table", abbreviation };
+    case "dresser_drawers":
+      return { shape: "drawers", abbreviation };
+    case "partition_wall":
+      return { shape: "partition-wall", abbreviation };
+    case "wardrobe_doors":
+      return { shape: "sliding-door", abbreviation };
     case "desk":
       return { shape: "desk", abbreviation };
     case "table":

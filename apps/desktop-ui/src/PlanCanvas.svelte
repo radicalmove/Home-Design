@@ -470,6 +470,9 @@
             <line x1={bounds.x + bounds.width * 0.5} y1={bounds.y} x2={bounds.x + bounds.width * 0.5} y2={bounds.y + bounds.height * 0.35} />
           {:else if symbol.shape === "bed"}
             <rect x={bounds.x + 4} y={bounds.y + 4} width={Math.max(5, bounds.width - 8)} height={Math.max(5, bounds.height * 0.22)} rx="2" />
+          {:else if symbol.shape === "bedside-table"}
+            <rect x={bounds.x + bounds.width * 0.18} y={bounds.y + bounds.height * 0.18} width={bounds.width * 0.64} height={bounds.height * 0.64} rx="2" />
+            <circle cx={bounds.cx} cy={bounds.y + bounds.height * 0.58} r={Math.max(1.5, Math.min(bounds.width, bounds.height) * 0.08)} />
           {:else if symbol.shape === "desk"}
             <line x1={bounds.x} y1={bounds.y + bounds.height * 0.72} x2={bounds.x + bounds.width} y2={bounds.y + bounds.height * 0.72} />
           {:else if symbol.shape === "table"}
@@ -477,6 +480,19 @@
           {:else if symbol.shape === "chair"}
             <line x1={bounds.x + bounds.width * 0.25} y1={bounds.y + bounds.height * 0.2} x2={bounds.x + bounds.width * 0.25} y2={bounds.y + bounds.height * 0.85} />
             <line x1={bounds.x + bounds.width * 0.75} y1={bounds.y + bounds.height * 0.2} x2={bounds.x + bounds.width * 0.75} y2={bounds.y + bounds.height * 0.85} />
+          {:else if symbol.shape === "drawers"}
+            <line x1={bounds.x} y1={bounds.y + bounds.height * 0.33} x2={bounds.x + bounds.width} y2={bounds.y + bounds.height * 0.33} />
+            <line x1={bounds.x} y1={bounds.y + bounds.height * 0.66} x2={bounds.x + bounds.width} y2={bounds.y + bounds.height * 0.66} />
+            <circle cx={bounds.cx} cy={bounds.y + bounds.height * 0.16} r={Math.max(1.4, Math.min(bounds.width, bounds.height) * 0.04)} />
+            <circle cx={bounds.cx} cy={bounds.y + bounds.height * 0.5} r={Math.max(1.4, Math.min(bounds.width, bounds.height) * 0.04)} />
+            <circle cx={bounds.cx} cy={bounds.y + bounds.height * 0.83} r={Math.max(1.4, Math.min(bounds.width, bounds.height) * 0.04)} />
+          {:else if symbol.shape === "partition-wall"}
+            <line x1={bounds.x} y1={bounds.cy} x2={bounds.x + bounds.width} y2={bounds.cy} />
+          {:else if symbol.shape === "sliding-door"}
+            <line x1={bounds.x} y1={bounds.y + bounds.height * 0.25} x2={bounds.x + bounds.width} y2={bounds.y + bounds.height * 0.25} />
+            <line x1={bounds.x} y1={bounds.y + bounds.height * 0.75} x2={bounds.x + bounds.width} y2={bounds.y + bounds.height * 0.75} />
+            <line x1={bounds.x + bounds.width * 0.12} y1={bounds.cy} x2={bounds.x + bounds.width * 0.58} y2={bounds.cy} />
+            <line x1={bounds.x + bounds.width * 0.42} y1={bounds.cy} x2={bounds.x + bounds.width * 0.88} y2={bounds.cy} />
           {:else if symbol.shape === "storage"}
             <line x1={bounds.x} y1={bounds.y + bounds.height * 0.5} x2={bounds.x + bounds.width} y2={bounds.y + bounds.height * 0.5} />
           {:else if symbol.shape === "appliance" || symbol.shape === "fixture"}
@@ -593,8 +609,14 @@
     stroke-width: 2.4;
   }
 
+  .furniture-object.partition-wall .symbol-body {
+    stroke-dasharray: none;
+    fill-opacity: 0.96;
+  }
+
   line:not(.rotate-stem),
   ellipse,
+  circle,
   .furniture-object rect:not(.symbol-body):not(.resize-handle) {
     fill: none;
     stroke: #203139;
