@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
 import catalogSource from "./FurnitureCatalogPanel.svelte?raw";
 import editorSource from "./FurnitureEditorView.svelte?raw";
 import inspectorSource from "./FurnitureObjectInspector.svelte?raw";
 import layerControlsSource from "./FurnitureLayerControls.svelte?raw";
 import planCanvasSource from "./PlanCanvas.svelte?raw";
 import furnitureBackgroundSource from "../public/views/reference_plan.svg?raw";
+
+const appStylesSource = readFileSync(new URL("./styles.css", import.meta.url), "utf8");
 
 describe("furniture canvas interaction layout", () => {
   it("uses a crisp SVG viewBox canvas with a tall editing viewport", () => {
@@ -100,6 +103,17 @@ describe("furniture canvas interaction layout", () => {
 
   it("keeps collapsed catalog groups stacked at the top of the scroll panel", () => {
     expect(catalogSource).toMatch(/\.catalog-groups\s*{[\s\S]*align-content:\s*start;/);
+  });
+
+  it("keeps catalog wheel scrolling isolated from the main furniture view", () => {
+    expect(catalogSource).toContain("stopCatalogWheelPropagation");
+    expect(catalogSource).toContain("onwheel={stopCatalogWheelPropagation}");
+    expect(catalogSource).toMatch(/\.catalog-groups\s*{[\s\S]*overscroll-behavior:\s*contain;/);
+    expect(appStylesSource).toMatch(/body\s*{[^}]*overflow:\s*hidden;/);
+    expect(appStylesSource).toMatch(/\.workspace\s*{[^}]*height:\s*100vh;/);
+    expect(appStylesSource).toMatch(/\.workspace\s*{[^}]*overflow:\s*hidden;/);
+    expect(editorSource).toMatch(/\.furniture-editor\s*{[\s\S]*height:\s*100%;/);
+    expect(editorSource).toMatch(/\.furniture-editor\s*{[\s\S]*overflow:\s*hidden;/);
   });
 
   it("lets the selected object switch between fixed and moveable layers", () => {

@@ -7,9 +7,13 @@
   };
 
   let { catalog, onAddItem }: Props = $props();
+
+  function stopCatalogWheelPropagation(event: WheelEvent) {
+    event.stopPropagation();
+  }
 </script>
 
-<aside class="catalog-panel" aria-label="Furniture catalog">
+<aside class="catalog-panel" aria-label="Furniture catalog" onwheel={stopCatalogWheelPropagation}>
   <header>
     <span class="eyebrow">Catalog</span>
     <h3>Objects</h3>
@@ -68,6 +72,7 @@
     gap: 10px;
     min-height: 0;
     overflow: auto;
+    overscroll-behavior: contain;
   }
 
   details {

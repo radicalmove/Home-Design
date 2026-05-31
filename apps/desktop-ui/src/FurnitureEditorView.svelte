@@ -290,8 +290,10 @@
     display: grid;
     grid-template-rows: auto minmax(0, 1fr);
     gap: 12px;
+    height: 100%;
     min-width: 0;
     min-height: 0;
+    overflow: hidden;
   }
 
   .editor-toolbar {
