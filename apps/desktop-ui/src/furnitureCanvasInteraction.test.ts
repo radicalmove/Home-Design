@@ -84,6 +84,14 @@ describe("furniture canvas interaction layout", () => {
     expect(planCanvasSource).toContain("REFERENCE_WALL_SEGMENTS");
   });
 
+  it("sizes wall-distance labels from screen pixels instead of fixed SVG text", () => {
+    expect(planCanvasSource).toContain("wallDistanceLabelFontSize");
+    expect(planCanvasSource).toContain("wallDistanceLabelStrokeWidth");
+    expect(planCanvasSource).toContain("font-size={wallDistanceLabelFontSize}");
+    expect(planCanvasSource).toContain("stroke-width={wallDistanceLabelStrokeWidth}");
+    expect(planCanvasSource).not.toContain("font-size: 8px");
+  });
+
   it("renders fireplace, TV, and heat-pump furniture symbols", () => {
     expect(planCanvasSource).toContain('symbol.shape === "fireplace"');
     expect(planCanvasSource).toContain('symbol.shape === "tv"');

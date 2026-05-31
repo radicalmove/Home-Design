@@ -193,6 +193,8 @@
   let rotateHandleRadius = $derived(screenPixelsToSvgUnits(canvasSize, viewBoxSize, 7));
   let rotateStemLength = $derived(screenPixelsToSvgUnits(canvasSize, viewBoxSize, 18));
   let rotateHandleOffset = $derived(screenPixelsToSvgUnits(canvasSize, viewBoxSize, 25));
+  let wallDistanceLabelFontSize = $derived(screenPixelsToSvgUnits(canvasSize, viewBoxSize, 11));
+  let wallDistanceLabelStrokeWidth = $derived(screenPixelsToSvgUnits(canvasSize, viewBoxSize, 3));
 
   $effect(() => {
     if (viewOriginInitialised || canvasWidth <= 0 || canvasHeight <= 0) {
@@ -636,7 +638,13 @@
             x2={guide.x2}
             y2={guide.y2}
           />
-          <text class="wall-distance-label" x={guide.labelX} y={guide.labelY}>
+          <text
+            class="wall-distance-label"
+            x={guide.labelX}
+            y={guide.labelY}
+            font-size={wallDistanceLabelFontSize}
+            stroke-width={wallDistanceLabelStrokeWidth}
+          >
             {guide.label}
           </text>
         {/each}
@@ -764,14 +772,12 @@
   }
 
   .wall-distance-label {
-    font-size: 8px;
     font-weight: 800;
     text-anchor: middle;
     dominant-baseline: middle;
     fill: #0b514c;
     paint-order: stroke;
     stroke: #ffffff;
-    stroke-width: 3px;
     stroke-linejoin: round;
   }
 
