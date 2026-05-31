@@ -1,5 +1,11 @@
 <script lang="ts">
-  import { dimensionLabel, objectBoundsSvg } from "./lib/furnitureGeometry";
+  import {
+    angleDegFromCenter,
+    dimensionLabel,
+    normaliseDegrees,
+    objectBoundsSvg,
+    rotateDeltaIntoObjectSpace,
+  } from "./lib/furnitureGeometry";
   import { symbolForFurnitureObject } from "./lib/furnitureSymbols";
   import type { FurnitureLayout, FurnitureObject, PlanPoint } from "./types";
 
@@ -9,10 +15,12 @@
   };
 
   type DragState = {
-    kind: "move" | "resize";
+    kind: "move" | "resize" | "rotate";
     pointerId: number;
     object: FurnitureObject;
     startSvg: PlanPoint;
+    startAngleDeg?: number;
+    startRotationDeg?: number;
   };
 
   type Props = {
@@ -21,9 +29,11 @@
     selectedObjectId: string | null;
     fixedVisible: boolean;
     moveableVisible: boolean;
+    zoom: number;
     onSelectObject: (objectId: string | null) => void;
     onMoveObject: (objectId: string, point: PlanPoint) => void;
     onResizeObject: (objectId: string, size: FurnitureSize) => void;
+    onRotateObject: (objectId: string, rotationDeg: number) => void;
     onResizePreview: (label: string | null, x: number, y: number) => void;
   };
 
@@ -33,9 +43,11 @@
     selectedObjectId,
     fixedVisible,
     moveableVisible,
+    zoom,
     onSelectObject,
     onMoveObject,
     onResizeObject,
+    onRotateObject,
     onResizePreview,
   }: Props = $props();
 
@@ -73,13 +85,19 @@
     };
   }
 
-  function selectBackground() {
+  function preventDragDefaults(event: Event) {
+    event.preventDefault();
+  }
+
+  function selectBackground(event: PointerEvent) {
+    event.preventDefault();
     if (!dragState) {
       onSelectObject(null);
     }
   }
 
   function startMove(event: PointerEvent, object: FurnitureObject) {
+    event.preventDefault();
     event.stopPropagation();
     onSelectObject(object.id);
     dragState = {
@@ -92,6 +110,7 @@
   }
 
   function startResize(event: PointerEvent, object: FurnitureObject) {
+    event.preventDefault();
     event.stopPropagation();
     onSelectObject(object.id);
     dragState = {
@@ -103,6 +122,25 @@
     svgElement?.setPointerCapture(event.pointerId);
     const local = localPointFromEvent(event);
     onResizePreview(dimensionLabel(object), local.x, local.y);
+  }
+
+  function startRotate(event: PointerEvent, object: FurnitureObject) {
+    event.preventDefault();
+    event.stopPropagation();
+    const startSvg = svgPointFromEvent(event);
+    const bounds = objectBoundsSvg(object, layout.plan_transform);
+    dragState = {
+      kind: "rotate",
+      pointerId: event.pointerId,
+      object,
+      startSvg,
+      startAngleDeg: angleDegFromCenter(startSvg, bounds),
+      startRotationDeg: object.rotation_deg,
+    };
+    onSelectObject(object.id);
+    svgElement?.setPointerCapture(event.pointerId);
+    const local = localPointFromEvent(event);
+    onResizePreview(`${normaliseDegrees(object.rotation_deg)} deg`, local.x, local.y);
   }
 
   function handlePointerMove(event: PointerEvent) {
@@ -124,9 +162,28 @@
       return;
     }
 
+    if (dragState.kind === "rotate") {
+      const bounds = objectBoundsSvg(dragState.object, layout.plan_transform);
+      const currentAngle = angleDegFromCenter(currentSvg, bounds);
+      const nextRotation = normaliseDegrees(
+        (dragState.startRotationDeg ?? dragState.object.rotation_deg)
+          + currentAngle
+          - (dragState.startAngleDeg ?? currentAngle),
+      );
+      onRotateObject(dragState.object.id, nextRotation);
+      const local = localPointFromEvent(event);
+      onResizePreview(`${nextRotation} deg`, local.x, local.y);
+      return;
+    }
+
+    const localDelta = rotateDeltaIntoObjectSpace(
+      deltaSvg,
+      dragState.object.rotation_deg,
+      layout.plan_transform,
+    );
     const size = {
-      width_m: Math.max(0.2, dragState.object.width_m + deltaSvg.x / layout.plan_transform.px_per_m),
-      depth_m: Math.max(0.2, dragState.object.depth_m + deltaSvg.y / layout.plan_transform.px_per_m),
+      width_m: Math.max(0.2, dragState.object.width_m + localDelta.deltaWidthM),
+      depth_m: Math.max(0.2, dragState.object.depth_m + localDelta.deltaDepthM),
     };
     onResizeObject(dragState.object.id, size);
     const local = localPointFromEvent(event);
@@ -143,7 +200,14 @@
   }
 </script>
 
-<div class="plan-canvas" aria-label="Furniture plan editor">
+<div
+  class="plan-canvas"
+  role="group"
+  aria-label="Furniture plan editor"
+  style={`--plan-zoom: ${zoom};`}
+  ondragstart={preventDragDefaults}
+  onselectstart={preventDragDefaults}
+>
   <svg
     bind:this={svgElement}
     viewBox="0 0 1600 900"
@@ -152,7 +216,6 @@
     onpointermove={handlePointerMove}
     onpointerup={finishPointer}
     onpointercancel={finishPointer}
-    onpointerleave={finishPointer}
     onpointerdown={selectBackground}
   >
     <image href={backgroundAssetPath} width="1600" height="900" preserveAspectRatio="xMidYMid meet" />
@@ -204,6 +267,23 @@
           {/if}
 
           {#if selectedObjectId === object.id}
+            <line
+              class="rotate-stem"
+              x1={bounds.cx}
+              y1={bounds.y}
+              x2={bounds.cx}
+              y2={bounds.y - 18}
+            />
+            <circle
+              class="rotate-handle"
+              cx={bounds.cx}
+              cy={bounds.y - 25}
+              r="7"
+              role="button"
+              aria-label={`Rotate ${object.label}`}
+              tabindex="0"
+              onpointerdown={(event) => startRotate(event, object)}
+            />
             <rect
               class="resize-handle"
               x={bounds.x + bounds.width - 5}
@@ -231,16 +311,28 @@
     background: #ffffff;
     border: 1px solid #cfd8dd;
     border-radius: 8px;
+    overscroll-behavior: contain;
+    user-select: none;
+    -webkit-user-select: none;
   }
 
   svg {
     display: block;
-    width: 100%;
-    min-width: 720px;
+    width: calc(100% * var(--plan-zoom));
+    min-width: calc(720px * var(--plan-zoom));
     height: auto;
     aspect-ratio: 16 / 9;
     touch-action: none;
     background: #ffffff;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  image {
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
   }
 
   .furniture-object {
@@ -271,7 +363,7 @@
     stroke-width: 2.4;
   }
 
-  line,
+  line:not(.rotate-stem),
   ellipse,
   .furniture-object rect:not(.symbol-body):not(.resize-handle) {
     fill: none;
@@ -298,5 +390,24 @@
     stroke: #d84d2a;
     stroke-width: 2;
     vector-effect: non-scaling-stroke;
+  }
+
+  .rotate-stem {
+    stroke: #d84d2a;
+    stroke-width: 1.4;
+    stroke-dasharray: 3 2;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .rotate-handle {
+    cursor: grab;
+    fill: #ffffff;
+    stroke: #d84d2a;
+    stroke-width: 2;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .rotate-handle:active {
+    cursor: grabbing;
   }
 </style>

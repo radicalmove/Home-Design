@@ -1,4 +1,5 @@
 import type { FurnitureCatalogItem, FurnitureLayout, FurnitureObject, PlanPoint } from "../types";
+import { normaliseDegrees } from "./furnitureGeometry";
 
 type FurnitureSize = {
   width_m: number;
@@ -103,7 +104,7 @@ export function rotateObject(
 ): FurnitureLayout {
   return updateObject(layout, objectId, (object) => ({
     ...object,
-    rotation_deg: rotationDeg,
+    rotation_deg: normaliseDegrees(rotationDeg),
   }));
 }
 

@@ -5,6 +5,7 @@
   import FurnitureLayerControls from "./FurnitureLayerControls.svelte";
   import FurnitureObjectInspector from "./FurnitureObjectInspector.svelte";
   import PlanCanvas from "./PlanCanvas.svelte";
+  import { clampPlanZoom, planZoomLabel } from "./lib/furnitureGeometry";
   import { loadFurnitureEditorData, persistFurnitureLayout } from "./lib/furnitureStore";
   import {
     addCatalogItem,
@@ -42,6 +43,7 @@
   let saveError = $state<string | null>(null);
   let saveState = $state<SaveState>("idle");
   let dimensionBadge = $state({ label: null as string | null, x: 0, y: 0 });
+  let planZoom = $state(1);
 
   let saveTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -134,6 +136,14 @@
     dimensionBadge = { label, x, y };
   }
 
+  function zoomPlan(delta: number) {
+    planZoom = clampPlanZoom(planZoom + delta);
+  }
+
+  function resetPlanZoom() {
+    planZoom = 1;
+  }
+
   onMount(() => {
     let cancelled = false;
 
@@ -187,6 +197,12 @@
         onToggleFixed={() => (fixedVisible = !fixedVisible)}
         onToggleMoveable={() => (moveableVisible = !moveableVisible)}
       />
+      <div class="editor-zoom-controls" aria-label="Furniture plan zoom controls">
+        <button type="button" aria-label="Zoom out" onclick={() => zoomPlan(-0.1)}>-</button>
+        <span>{planZoomLabel(planZoom)}</span>
+        <button type="button" aria-label="Zoom in" onclick={() => zoomPlan(0.1)}>+</button>
+        <button type="button" onclick={resetPlanZoom}>Reset</button>
+      </div>
       <div class:error={saveState === "error"} class="save-status" aria-live="polite">
         {#if saveState === "saving"}
           Saving...
@@ -210,9 +226,11 @@
           {selectedObjectId}
           {fixedVisible}
           {moveableVisible}
+          zoom={planZoom}
           onSelectObject={(objectId) => (selectedObjectId = objectId)}
           onMoveObject={handleMoveObject}
           onResizeObject={handleResizeObject}
+          onRotateObject={handleRotateObject}
           onResizePreview={handleResizePreview}
         />
         <DimensionBadge
@@ -253,6 +271,45 @@
     align-items: center;
     justify-content: space-between;
     min-width: 0;
+  }
+
+  .editor-zoom-controls {
+    display: grid;
+    grid-template-columns: 34px minmax(54px, auto) 34px auto;
+    gap: 6px;
+    align-items: center;
+    min-width: 0;
+    padding: 4px;
+    background: #ffffff;
+    border: 1px solid #d4dde1;
+    border-radius: 8px;
+  }
+
+  .editor-zoom-controls button {
+    min-width: 34px;
+    min-height: 32px;
+    padding: 5px 8px;
+    color: #203139;
+    font-weight: 780;
+    cursor: pointer;
+    background: #f7f9fa;
+    border: 1px solid #cfd8dd;
+    border-radius: 6px;
+  }
+
+  .editor-zoom-controls button:hover,
+  .editor-zoom-controls button:focus-visible {
+    background: #e9f4f1;
+    border-color: #8fcabd;
+    outline: none;
+  }
+
+  .editor-zoom-controls span {
+    min-width: 54px;
+    color: #31434a;
+    font-size: 0.8rem;
+    font-weight: 760;
+    text-align: center;
   }
 
   .save-status {

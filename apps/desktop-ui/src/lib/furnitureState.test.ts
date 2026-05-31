@@ -66,7 +66,7 @@ describe("furniture state reducers", () => {
   it("moves, resizes, rotates, and recolours objects immutably", () => {
     let updated = moveObject(layout, "sofa", { x: 2, y: 3 });
     updated = resizeObject(updated, "sofa", { width_m: 2.4, depth_m: 1.2 });
-    updated = rotateObject(updated, "sofa", 90);
+    updated = rotateObject(updated, "sofa", -15);
     updated = recolourObject(updated, "sofa", "#ffffff");
 
     expect(updated.objects[0]).toMatchObject({
@@ -74,7 +74,7 @@ describe("furniture state reducers", () => {
       y_m: 3,
       width_m: 2.4,
       depth_m: 1.2,
-      rotation_deg: 90,
+      rotation_deg: 345,
       colour: "#ffffff",
     });
     expect(layout.objects[0].x_m).toBe(1);

@@ -9,6 +9,9 @@ export type SvgBounds = {
   cy: number;
 };
 
+export const MIN_PLAN_ZOOM = 0.5;
+export const MAX_PLAN_ZOOM = 2.5;
+
 export function metresToSvg(point: PlanPoint, transform: PlanTransform): PlanPoint {
   return {
     x: transform.origin_svg_px.x + point.x * transform.px_per_m,
@@ -40,6 +43,38 @@ export function objectBoundsSvg(object: FurnitureObject, transform: PlanTransfor
 
 export function dimensionLabel(object: Pick<FurnitureObject, "width_m" | "depth_m">): string {
   return `${object.width_m.toFixed(2)} m x ${object.depth_m.toFixed(2)} m`;
+}
+
+export function clampPlanZoom(zoom: number): number {
+  return Math.min(MAX_PLAN_ZOOM, Math.max(MIN_PLAN_ZOOM, Math.round(zoom * 20) / 20));
+}
+
+export function planZoomLabel(zoom: number): string {
+  return `${Math.round(clampPlanZoom(zoom) * 100)}%`;
+}
+
+export function angleDegFromCenter(point: PlanPoint, bounds: Pick<SvgBounds, "cx" | "cy">): number {
+  const angle = Math.atan2(point.y - bounds.cy, point.x - bounds.cx) * (180 / Math.PI);
+  return normaliseDegrees(angle);
+}
+
+export function normaliseDegrees(degrees: number): number {
+  return Math.round(((degrees % 360) + 360) % 360);
+}
+
+export function rotateDeltaIntoObjectSpace(
+  deltaSvg: PlanPoint,
+  rotationDeg: number,
+  transform: PlanTransform,
+): { deltaWidthM: number; deltaDepthM: number } {
+  const radians = (rotationDeg * Math.PI) / 180;
+  const cos = Math.cos(radians);
+  const sin = Math.sin(radians);
+
+  return {
+    deltaWidthM: (deltaSvg.x * cos + deltaSvg.y * sin) / transform.px_per_m,
+    deltaDepthM: (-deltaSvg.x * sin + deltaSvg.y * cos) / transform.px_per_m,
+  };
 }
 
 export function resizeObjectFromCorner<T extends FurnitureObject>(

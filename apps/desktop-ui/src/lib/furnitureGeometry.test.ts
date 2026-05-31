@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
+  angleDegFromCenter,
+  clampPlanZoom,
   dimensionLabel,
   metresToSvg,
   objectBoundsSvg,
+  planZoomLabel,
   resizeObjectFromCorner,
+  rotateDeltaIntoObjectSpace,
   svgToMetres,
 } from "./furnitureGeometry";
 import type { FurnitureObject, PlanTransform } from "../types";
@@ -59,5 +63,25 @@ describe("furniture geometry", () => {
 
     expect(resized.width_m).toBe(0.2);
     expect(resized.depth_m).toBeCloseTo(1.9);
+  });
+
+  it("clamps and labels furniture plan zoom", () => {
+    expect(clampPlanZoom(0.2)).toBe(0.5);
+    expect(clampPlanZoom(3)).toBe(2.5);
+    expect(planZoomLabel(1.25)).toBe("125%");
+  });
+
+  it("measures rotation from object centre in SVG space", () => {
+    const bounds = objectBoundsSvg(object, transform);
+
+    expect(angleDegFromCenter({ x: bounds.cx, y: bounds.cy - 20 }, bounds)).toBe(270);
+    expect(angleDegFromCenter({ x: bounds.cx + 20, y: bounds.cy }, bounds)).toBe(0);
+  });
+
+  it("converts drag deltas into rotated object space for resize handles", () => {
+    const local = rotateDeltaIntoObjectSpace({ x: 0, y: 27.16 }, 90, transform);
+
+    expect(local.deltaWidthM).toBeCloseTo(1, 2);
+    expect(local.deltaDepthM).toBeCloseTo(0, 2);
   });
 });

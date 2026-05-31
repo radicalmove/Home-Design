@@ -103,7 +103,7 @@
         <input type="number" min="0.2" step="0.05" value={object.depth_m} oninput={updateDepth} />
       </label>
       <label>
-        Deg
+        Rotation
         <input type="number" step="5" value={object.rotation_deg} oninput={updateRotation} />
       </label>
       <label>
