@@ -64,6 +64,7 @@
 
   .catalog-groups {
     display: grid;
+    align-content: start;
     gap: 10px;
     min-height: 0;
     overflow: auto;

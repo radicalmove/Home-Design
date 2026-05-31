@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { FurnitureObject, PlanPoint } from "./types";
+  import type { FurnitureLayerKind, FurnitureObject, PlanPoint } from "./types";
 
   type FurnitureSize = {
     width_m: number;
@@ -11,6 +11,7 @@
     onMove: (objectId: string, point: PlanPoint) => void;
     onResize: (objectId: string, size: FurnitureSize) => void;
     onRotate: (objectId: string, rotationDeg: number) => void;
+    onChangeLayer: (objectId: string, layer: FurnitureLayerKind) => void;
     onRecolour: (objectId: string, colour: string) => void;
     onDuplicate: (objectId: string) => void;
     onDelete: (objectId: string) => void;
@@ -21,6 +22,7 @@
     onMove,
     onResize,
     onRotate,
+    onChangeLayer,
     onRecolour,
     onDuplicate,
     onDelete,
@@ -60,6 +62,12 @@
     }
   }
 
+  function updateLayer(event: Event) {
+    if (object) {
+      onChangeLayer(object.id, (event.currentTarget as HTMLSelectElement).value as FurnitureLayerKind);
+    }
+  }
+
   function updateColour(event: Event) {
     if (object) {
       onRecolour(object.id, (event.currentTarget as HTMLInputElement).value);
@@ -76,16 +84,19 @@
   {#if object}
     <dl class="object-meta">
       <div>
-        <dt>Layer</dt>
-        <dd>{object.layer}</dd>
-      </div>
-      <div>
         <dt>Type</dt>
         <dd>{object.type}</dd>
       </div>
     </dl>
 
     <div class="field-grid">
+      <label>
+        Layer
+        <select value={object.layer} onchange={updateLayer}>
+          <option value="fixed">Fixed</option>
+          <option value="moveable">Moveable</option>
+        </select>
+      </label>
       <label>
         X m
         <input type="number" step="0.05" value={object.x_m} oninput={updateX} />
@@ -199,7 +210,8 @@
     font-weight: 760;
   }
 
-  input {
+  input,
+  select {
     width: 100%;
     min-width: 0;
     height: 34px;
@@ -208,6 +220,10 @@
     background: #ffffff;
     border: 1px solid #cfd9de;
     border-radius: 6px;
+  }
+
+  select {
+    cursor: pointer;
   }
 
   input[type="color"] {

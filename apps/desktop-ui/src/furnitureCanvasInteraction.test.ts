@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
+import catalogSource from "./FurnitureCatalogPanel.svelte?raw";
 import editorSource from "./FurnitureEditorView.svelte?raw";
+import inspectorSource from "./FurnitureObjectInspector.svelte?raw";
 import layerControlsSource from "./FurnitureLayerControls.svelte?raw";
 import planCanvasSource from "./PlanCanvas.svelte?raw";
 
@@ -33,5 +35,18 @@ describe("furniture canvas interaction layout", () => {
     expect(planCanvasSource).toContain('name: "se"');
     expect(planCanvasSource).toContain("data-resize-handle={handle.name}");
     expect(planCanvasSource).toContain("startResize(event, object, handle.name)");
+  });
+
+  it("keeps collapsed catalog groups stacked at the top of the scroll panel", () => {
+    expect(catalogSource).toMatch(/\.catalog-groups\s*{[\s\S]*align-content:\s*start;/);
+  });
+
+  it("lets the selected object switch between fixed and moveable layers", () => {
+    expect(editorSource).toContain("changeObjectLayer");
+    expect(editorSource).toContain("onChangeLayer={handleChangeLayer}");
+    expect(inspectorSource).toContain("onChangeLayer: (objectId: string, layer: FurnitureLayerKind) => void;");
+    expect(inspectorSource).toContain("<select");
+    expect(inspectorSource).toContain('<option value="fixed">Fixed</option>');
+    expect(inspectorSource).toContain('<option value="moveable">Moveable</option>');
   });
 });

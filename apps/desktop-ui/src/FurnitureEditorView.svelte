@@ -9,6 +9,7 @@
   import { loadFurnitureEditorData, persistFurnitureLayout } from "./lib/furnitureStore";
   import {
     addCatalogItem,
+    changeObjectLayer,
     deleteObject,
     duplicateObject,
     moveObject,
@@ -17,7 +18,13 @@
     resizeObject,
     rotateObject,
   } from "./lib/furnitureState";
-  import type { FurnitureCatalog, FurnitureCatalogItem, FurnitureLayout, PlanPoint } from "./types";
+  import type {
+    FurnitureCatalog,
+    FurnitureCatalogItem,
+    FurnitureLayerKind,
+    FurnitureLayout,
+    PlanPoint,
+  } from "./types";
 
   type FurnitureSize = {
     width_m: number;
@@ -114,6 +121,12 @@
   function handleRecolourObject(objectId: string, colour: string) {
     if (layout) {
       commitLayout(recolourObject(layout, objectId, colour));
+    }
+  }
+
+  function handleChangeLayer(objectId: string, layer: FurnitureLayerKind) {
+    if (layout) {
+      commitLayout(changeObjectLayer(layout, objectId, layer));
     }
   }
 
@@ -255,6 +268,7 @@
         onMove={handleMoveObject}
         onResize={handleResizeObject}
         onRotate={handleRotateObject}
+        onChangeLayer={handleChangeLayer}
         onRecolour={handleRecolourObject}
         onDuplicate={handleDuplicateObject}
         onDelete={handleDeleteObject}

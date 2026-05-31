@@ -1,4 +1,10 @@
-import type { FurnitureCatalogItem, FurnitureLayout, FurnitureObject, PlanPoint } from "../types";
+import type {
+  FurnitureCatalogItem,
+  FurnitureLayerKind,
+  FurnitureLayout,
+  FurnitureObject,
+  PlanPoint,
+} from "../types";
 import { normaliseDegrees } from "./furnitureGeometry";
 
 type FurnitureSize = {
@@ -116,6 +122,17 @@ export function recolourObject(
   return updateObject(layout, objectId, (object) => ({
     ...object,
     colour,
+  }));
+}
+
+export function changeObjectLayer(
+  layout: FurnitureLayout,
+  objectId: string,
+  layer: FurnitureLayerKind,
+): FurnitureLayout {
+  return updateObject(layout, objectId, (object) => ({
+    ...object,
+    layer,
   }));
 }
 

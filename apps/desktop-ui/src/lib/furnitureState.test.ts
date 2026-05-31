@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   addCatalogItem,
+  changeObjectLayer,
   deleteObject,
   duplicateObject,
   moveObject,
@@ -78,6 +79,13 @@ describe("furniture state reducers", () => {
       colour: "#ffffff",
     });
     expect(layout.objects[0].x_m).toBe(1);
+  });
+
+  it("changes an object's fixed or moveable layer", () => {
+    const updated = changeObjectLayer(layout, "sofa", "fixed");
+
+    expect(updated.objects[0].layer).toBe("fixed");
+    expect(layout.objects[0].layer).toBe("moveable");
   });
 
   it("rounds manual geometry edits to centimetre precision", () => {
