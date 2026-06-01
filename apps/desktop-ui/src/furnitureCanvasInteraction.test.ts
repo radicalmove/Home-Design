@@ -211,6 +211,30 @@ describe("furniture canvas interaction layout", () => {
     expect(inspectorSource).toContain('<option value="moveable">Moveable</option>');
   });
 
+  it("renders furniture in sorted global z-index order", () => {
+    expect(planCanvasSource).toContain("sortedFurnitureObjects");
+    expect(planCanvasSource).toContain("sortedFurnitureObjects(layout.objects)");
+    expect(planCanvasSource).toContain("let visibleObjects = $derived(");
+  });
+
+  it("wires selected furniture order controls through the editor commit path", () => {
+    expect(editorSource).toContain("reorderObject");
+    expect(editorSource).toContain("handleReorderObject");
+    expect(editorSource).toContain("const nextLayout = reorderObject(layout, objectId, action);");
+    expect(editorSource).toContain("if (nextLayout !== layout) {");
+    expect(editorSource).toContain("commitLayout(nextLayout)");
+    expect(editorSource).toContain("onReorder={handleReorderObject}");
+  });
+
+  it("exposes global furniture order controls in the selected object inspector", () => {
+    expect(inspectorSource).toContain('onReorder: (objectId: string, action: FurnitureOrderAction) => void;');
+    expect(inspectorSource).toContain('aria-label="Furniture order controls"');
+    expect(inspectorSource).toContain("Send to Back");
+    expect(inspectorSource).toContain("Send Backward");
+    expect(inspectorSource).toContain("Bring Forward");
+    expect(inspectorSource).toContain("Bring to Front");
+  });
+
   it("adds catalog furniture at the centre of the current canvas viewport", () => {
     expect(planCanvasSource).toContain("onViewportCenterChange");
     expect(planCanvasSource).toContain("svgToMetres");

@@ -21,9 +21,11 @@
     moveObject,
     normaliseFurnitureLayout,
     recolourObject,
+    reorderObject,
     resizeObject,
     rotateObject,
   } from "./lib/furnitureState";
+  import type { FurnitureOrderAction } from "./lib/furnitureState";
   import type {
     FurnitureCatalog,
     FurnitureCatalogItem,
@@ -152,6 +154,15 @@
   function handleChangeLayer(objectId: string, layer: FurnitureLayerKind) {
     if (layout) {
       commitLayout(changeObjectLayer(layout, objectId, layer));
+    }
+  }
+
+  function handleReorderObject(objectId: string, action: FurnitureOrderAction) {
+    if (layout) {
+      const nextLayout = reorderObject(layout, objectId, action);
+      if (nextLayout !== layout) {
+        commitLayout(nextLayout);
+      }
     }
   }
 
@@ -390,6 +401,7 @@
         onResize={handleResizeObject}
         onRotate={handleRotateObject}
         onChangeLayer={handleChangeLayer}
+        onReorder={handleReorderObject}
         onRecolour={handleRecolourObject}
         onDuplicate={handleDuplicateObject}
         onDelete={handleDeleteObject}

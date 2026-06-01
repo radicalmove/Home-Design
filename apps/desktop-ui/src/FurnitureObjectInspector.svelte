@@ -3,6 +3,7 @@
     MIN_FURNITURE_SIZE_M,
     fixedDepthForObject,
   } from "./lib/furnitureState";
+  import type { FurnitureOrderAction } from "./lib/furnitureState";
   import type { FurnitureLShapeDimensions, FurnitureLayerKind, FurnitureObject, PlanPoint } from "./types";
 
   type FurnitureSize = {
@@ -17,6 +18,7 @@
     onResize: (objectId: string, size: FurnitureSize) => void;
     onRotate: (objectId: string, rotationDeg: number) => void;
     onChangeLayer: (objectId: string, layer: FurnitureLayerKind) => void;
+    onReorder: (objectId: string, action: FurnitureOrderAction) => void;
     onRecolour: (objectId: string, colour: string) => void;
     onDuplicate: (objectId: string) => void;
     onDelete: (objectId: string) => void;
@@ -28,6 +30,7 @@
     onResize,
     onRotate,
     onChangeLayer,
+    onReorder,
     onRecolour,
     onDuplicate,
     onDelete,
@@ -194,6 +197,13 @@
       </label>
     </div>
 
+    <div class="order-actions" aria-label="Furniture order controls">
+      <button type="button" onclick={() => onReorder(object.id, "back")}>Send to Back</button>
+      <button type="button" onclick={() => onReorder(object.id, "backward")}>Send Backward</button>
+      <button type="button" onclick={() => onReorder(object.id, "forward")}>Bring Forward</button>
+      <button type="button" onclick={() => onReorder(object.id, "front")}>Bring to Front</button>
+    </div>
+
     <div class="actions">
       <button type="button" onclick={() => onDuplicate(object.id)}>Duplicate</button>
       <button type="button" class="danger" onclick={() => onDelete(object.id)}>Delete</button>
@@ -302,6 +312,12 @@
   }
 
   .actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .order-actions {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;

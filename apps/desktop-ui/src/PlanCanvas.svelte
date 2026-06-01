@@ -21,6 +21,7 @@
   import {
     MIN_FURNITURE_SIZE_M,
     fixedDepthForObject,
+    sortedFurnitureObjects,
   } from "./lib/furnitureState";
   import { symbolForFurnitureObject } from "./lib/furnitureSymbols";
   import type { ResizeHandleName, WallDistanceGuide, WallSegment } from "./lib/furnitureGeometry";
@@ -280,7 +281,7 @@
   let wallDistanceGuides = $state<WallDistanceGuide[]>([]);
 
   let visibleObjects = $derived(
-    layout.objects.filter(
+    sortedFurnitureObjects(layout.objects).filter(
       (object) =>
         (object.layer === "fixed" && fixedVisible) || (object.layer === "moveable" && moveableVisible),
     ),
