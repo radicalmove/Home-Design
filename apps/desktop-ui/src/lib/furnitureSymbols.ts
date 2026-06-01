@@ -3,15 +3,27 @@ export type FurnitureSymbol = {
     | "rectangle"
     | "appliance"
     | "fixture"
+    | "refrigerator"
+    | "washer"
+    | "dryer"
+    | "oven"
+    | "island"
     | "fireplace"
     | "sofa"
     | "l-shape"
     | "bed"
     | "bedside-table"
+    | "bath"
+    | "basin"
+    | "toilet"
+    | "shower"
     | "desk"
     | "table"
+    | "table-and-chairs"
     | "chair"
+    | "armchair"
     | "storage"
+    | "wardrobe"
     | "drawers"
     | "tv"
     | "heat-pump"
@@ -20,16 +32,44 @@ export type FurnitureSymbol = {
   abbreviation: string | null;
 };
 
-export function symbolForFurnitureObject(type: string, abbreviation: string | null): FurnitureSymbol {
+export function symbolForFurnitureObject(
+  type: string,
+  abbreviation: string | null,
+  catalogId: string | null = null,
+): FurnitureSymbol {
+  switch (catalogId) {
+    case "armchair":
+      return { shape: "armchair", abbreviation };
+    case "dining_table":
+      return { shape: "table-and-chairs", abbreviation };
+    case "island":
+      return { shape: "island", abbreviation };
+    case "oven_cooktop":
+      return { shape: "oven", abbreviation };
+    case "wardrobe":
+      return { shape: "wardrobe", abbreviation };
+  }
+
   switch (type) {
     case "refrigerator":
-    case "dishwasher":
+      return { shape: "refrigerator", abbreviation };
     case "washer":
+      return { shape: "washer", abbreviation };
     case "dryer":
+      return { shape: "dryer", abbreviation };
+    case "dishwasher":
       return { shape: "appliance", abbreviation };
+    case "appliance":
+      return { shape: abbreviation === "OV" ? "oven" : "appliance", abbreviation };
+    case "bath":
+      return { shape: "bath", abbreviation };
     case "toilet":
+      return { shape: "toilet", abbreviation };
     case "shower":
+      return { shape: "shower", abbreviation };
     case "vanity":
+      return { shape: "basin", abbreviation };
+    case "fixture":
       return { shape: "fixture", abbreviation };
     case "fireplace":
       return { shape: "fireplace", abbreviation };
@@ -59,6 +99,7 @@ export function symbolForFurnitureObject(type: string, abbreviation: string | nu
     case "chair":
       return { shape: "chair", abbreviation };
     case "wardrobe":
+      return { shape: "wardrobe", abbreviation };
     case "bookcase":
     case "cabinet":
       return { shape: "storage", abbreviation };

@@ -14,6 +14,13 @@ export type PlanViewportSize = {
   height: number;
 };
 
+export type CanvasViewportRect = {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+};
+
 export type WallSegment = {
   id: string;
   x1: number;
@@ -324,6 +331,28 @@ export function svgPointInViewBox(
   return {
     x: viewOrigin.x + (pointerOffset.x / safeCanvasWidth) * viewBoxSize.width,
     y: viewOrigin.y + (pointerOffset.y / safeCanvasHeight) * viewBoxSize.height,
+  };
+}
+
+export function visibleCanvasCenterOffset(
+  canvasRect: CanvasViewportRect,
+  viewportSize: PlanViewportSize,
+): PlanPoint {
+  const visibleLeft = clamp(-canvasRect.left, 0, canvasRect.width);
+  const visibleRight = clamp(viewportSize.width - canvasRect.left, 0, canvasRect.width);
+  const visibleTop = clamp(-canvasRect.top, 0, canvasRect.height);
+  const visibleBottom = clamp(viewportSize.height - canvasRect.top, 0, canvasRect.height);
+
+  if (visibleRight <= visibleLeft || visibleBottom <= visibleTop) {
+    return {
+      x: canvasRect.width / 2,
+      y: canvasRect.height / 2,
+    };
+  }
+
+  return {
+    x: (visibleLeft + visibleRight) / 2,
+    y: (visibleTop + visibleBottom) / 2,
   };
 }
 

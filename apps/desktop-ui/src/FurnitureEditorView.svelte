@@ -15,7 +15,6 @@
   import { loadFurnitureEditorData, persistFurnitureLayout } from "./lib/furnitureStore";
   import {
     addCatalogItem,
-    catalogItemTopLeftForViewportCenter,
     changeObjectLayer,
     deleteObject,
     duplicateObject,
@@ -120,11 +119,7 @@
       return;
     }
 
-    const nextLayout = addCatalogItem(
-      layout,
-      item,
-      catalogItemTopLeftForViewportCenter(item, currentViewportCenter ?? { x: 7.5, y: 5.2 }),
-    );
+    const nextLayout = addCatalogItem(layout, item, currentViewportCenter ?? { x: 7.5, y: 5.2 });
     const nextSelectedObjectId = nextLayout.objects[nextLayout.objects.length - 1]?.id ?? selectedObjectId;
     commitLayout(nextLayout, nextSelectedObjectId);
   }

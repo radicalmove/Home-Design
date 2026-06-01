@@ -123,6 +123,34 @@ describe("furniture canvas interaction layout", () => {
     expect(planCanvasSource).toContain('symbol.shape === "heat-pump"');
   });
 
+  it("draws Planner-style bathroom, laundry, and kitchen symbols", () => {
+    expect(planCanvasSource).toContain('symbolForFurnitureObject(object.type, object.abbreviation, object.catalog_id)');
+    expect(planCanvasSource).toContain('symbol.shape === "bath"');
+    expect(planCanvasSource).toContain('class="bath-inner"');
+    expect(planCanvasSource).toContain('symbol.shape === "basin"');
+    expect(planCanvasSource).toContain('class="basin-bowl"');
+    expect(planCanvasSource).toContain('symbol.shape === "toilet"');
+    expect(planCanvasSource).toContain('class="toilet-bowl"');
+    expect(planCanvasSource).toContain('symbol.shape === "shower"');
+    expect(planCanvasSource).toContain('class="shower-door-swing"');
+    expect(planCanvasSource).toContain('symbol.shape === "washer" || symbol.shape === "dryer"');
+    expect(planCanvasSource).toContain('symbol.shape === "refrigerator"');
+    expect(planCanvasSource).toContain('symbol.shape === "oven"');
+    expect(planCanvasSource).toContain('symbol.shape === "island"');
+    expect(planCanvasSource).toContain('class="symbol-mark"');
+  });
+
+  it("draws Planner-style common furniture silhouettes", () => {
+    expect(planCanvasSource).toContain('symbol.shape === "table-and-chairs"');
+    expect(planCanvasSource).toContain('class="table-chair top"');
+    expect(planCanvasSource).toContain('symbol.shape === "armchair"');
+    expect(planCanvasSource).toContain('class="armchair-arm left"');
+    expect(planCanvasSource).toContain('symbol.shape === "wardrobe"');
+    expect(planCanvasSource).toContain('class="wardrobe-base-line"');
+    expect(planCanvasSource).toContain('class="bed-blanket-fold"');
+    expect(planCanvasSource).toContain('class="sofa-cushion-divider"');
+  });
+
   it("sizes edit handles from screen pixels instead of fixed SVG units", () => {
     expect(planCanvasSource).toContain("screenPixelsToSvgUnits");
     expect(planCanvasSource).toContain("resizeHandleSize");
@@ -161,12 +189,15 @@ describe("furniture canvas interaction layout", () => {
   it("adds catalog furniture at the centre of the current canvas viewport", () => {
     expect(planCanvasSource).toContain("onViewportCenterChange");
     expect(planCanvasSource).toContain("svgToMetres");
-    expect(planCanvasSource).toContain("viewOrigin.x + viewBoxSize.width / 2");
-    expect(planCanvasSource).toContain("viewOrigin.y + viewBoxSize.height / 2");
+    expect(planCanvasSource).toContain("visibleCanvasCenterOffset");
+    expect(planCanvasSource).toContain("svgPointInViewBox");
+    expect(planCanvasSource).toContain("window.innerWidth");
+    expect(planCanvasSource).toContain("window.innerHeight");
     expect(editorSource).toContain("currentViewportCenter");
     expect(editorSource).toContain("onViewportCenterChange={(point) => (currentViewportCenter = point)}");
-    expect(editorSource).toContain("catalogItemTopLeftForViewportCenter(item, currentViewportCenter ??");
+    expect(editorSource).toContain("addCatalogItem(layout, item, currentViewportCenter ??");
     expect(editorSource).not.toContain("selectedObject.x_m + 0.35");
+    expect(editorSource).not.toContain("catalogItemTopLeftForViewportCenter");
   });
 
   it("provides bounded undo and redo controls plus keyboard shortcuts", () => {

@@ -15,6 +15,7 @@
     screenPixelsToSvgUnits,
     svgPointInViewBox,
     svgToMetres,
+    visibleCanvasCenterOffset,
     viewOriginAfterPan,
   } from "./lib/furnitureGeometry";
   import {
@@ -177,6 +178,17 @@
       : RESIZE_HANDLES;
   }
 
+  const OUTLINE_ONLY_SYMBOLS = new Set(["armchair", "table-and-chairs", "toilet"]);
+  const INTRINSIC_TEXT_SYMBOLS = new Set(["dryer", "refrigerator", "washer"]);
+
+  function symbolUsesBaseRect(shape: string): boolean {
+    return !OUTLINE_ONLY_SYMBOLS.has(shape);
+  }
+
+  function symbolShowsIntrinsicText(shape: string): boolean {
+    return INTRINSIC_TEXT_SYMBOLS.has(shape);
+  }
+
   const REFERENCE_WALL_SEGMENTS: WallSegment[] = withWallThickness([
     { id: "sunroom-west-frame", x1: 549.2, y1: 483.4, x2: 549.2, y2: 442.3 },
     { id: "sunroom-front-frame", x1: 549.2, y1: 442.3, x2: 568, y2: 442.3 },
@@ -321,16 +333,28 @@
       return;
     }
 
-    onViewportCenterChange(
-      svgToMetres(
-        {
-          x: viewOrigin.x + viewBoxSize.width / 2,
-          y: viewOrigin.y + viewBoxSize.height / 2,
-        },
-        layout.plan_transform,
-      ),
-    );
+    const viewportCenter = visibleViewportCenterInMetres();
+    if (viewportCenter) {
+      onViewportCenterChange(viewportCenter);
+    }
   });
+
+  function visibleViewportCenterInMetres(): PlanPoint | null {
+    const rect = canvasElement?.getBoundingClientRect();
+    if (!rect || typeof window === "undefined") {
+      return null;
+    }
+
+    const visibleCenter = visibleCanvasCenterOffset(rect, {
+      width: window.innerWidth,
+      height: window.innerHeight,
+    });
+
+    return svgToMetres(
+      svgPointInViewBox(viewOrigin, visibleCenter, canvasSize, viewBoxSize),
+      layout.plan_transform,
+    );
+  }
 
   function svgPointFromEvent(event: PointerEvent): PlanPoint {
     const rect = canvasElement?.getBoundingClientRect();
@@ -613,7 +637,7 @@
     <g class="furniture-layer">
       {#each visibleObjects as object (object.id)}
         {@const bounds = objectBoundsSvg(object, layout.plan_transform)}
-        {@const symbol = symbolForFurnitureObject(object.type, object.abbreviation)}
+        {@const symbol = symbolForFurnitureObject(object.type, object.abbreviation, object.catalog_id)}
         <g
           class:selected={selectedObjectId === object.id}
           class={`furniture-object ${object.layer} ${symbol.shape}`}
@@ -630,7 +654,7 @@
               d={lShapePath(bounds, object.l_shape, layout.plan_transform)}
               fill={object.colour}
             />
-          {:else}
+          {:else if symbolUsesBaseRect(symbol.shape)}
             <rect
               class="symbol-body"
               x={bounds.x}
@@ -643,14 +667,49 @@
           {/if}
 
           {#if symbol.shape === "sofa"}
-            <line x1={bounds.x} y1={bounds.y + bounds.height * 0.35} x2={bounds.x + bounds.width} y2={bounds.y + bounds.height * 0.35} />
-            <line x1={bounds.x + bounds.width * 0.5} y1={bounds.y} x2={bounds.x + bounds.width * 0.5} y2={bounds.y + bounds.height * 0.35} />
+            <line x1={bounds.x + bounds.width * 0.1} y1={bounds.y + bounds.height * 0.26} x2={bounds.x + bounds.width * 0.9} y2={bounds.y + bounds.height * 0.26} />
+            <line class="sofa-cushion-divider" x1={bounds.x + bounds.width * 0.34} y1={bounds.y + bounds.height * 0.26} x2={bounds.x + bounds.width * 0.34} y2={bounds.y + bounds.height * 0.86} />
+            <line class="sofa-cushion-divider" x1={bounds.x + bounds.width * 0.66} y1={bounds.y + bounds.height * 0.26} x2={bounds.x + bounds.width * 0.66} y2={bounds.y + bounds.height * 0.86} />
+            <line x1={bounds.x + bounds.width * 0.1} y1={bounds.y + bounds.height * 0.86} x2={bounds.x + bounds.width * 0.9} y2={bounds.y + bounds.height * 0.86} />
           {:else if symbol.shape === "fireplace"}
             <rect x={bounds.x + bounds.width * 0.18} y={bounds.y + bounds.height * 0.2} width={bounds.width * 0.64} height={bounds.height * 0.52} rx="1.5" />
             <line x1={bounds.x + bounds.width * 0.28} y1={bounds.y + bounds.height * 0.72} x2={bounds.x + bounds.width * 0.72} y2={bounds.y + bounds.height * 0.72} />
             <line x1={bounds.cx} y1={bounds.y + bounds.height * 0.28} x2={bounds.cx} y2={bounds.y + bounds.height * 0.62} />
           {:else if symbol.shape === "bed"}
-            <rect x={bounds.x + 4} y={bounds.y + 4} width={Math.max(5, bounds.width - 8)} height={Math.max(5, bounds.height * 0.22)} rx="2" />
+            <line x1={bounds.x} y1={bounds.y + bounds.height * 0.25} x2={bounds.x + bounds.width} y2={bounds.y + bounds.height * 0.25} />
+            <rect x={bounds.x + bounds.width * 0.1} y={bounds.y + bounds.height * 0.06} width={bounds.width * 0.34} height={bounds.height * 0.15} rx="2" />
+            <rect x={bounds.x + bounds.width * 0.56} y={bounds.y + bounds.height * 0.06} width={bounds.width * 0.34} height={bounds.height * 0.15} rx="2" />
+            <path class="bed-blanket-fold" d={`M ${bounds.x} ${bounds.y + bounds.height * 0.56} L ${bounds.x + bounds.width * 0.32} ${bounds.y + bounds.height * 0.34} L ${bounds.x + bounds.width * 0.32} ${bounds.y + bounds.height}`} />
+          {:else if symbol.shape === "bath"}
+            <rect class="bath-inner" x={bounds.x + bounds.width * 0.08} y={bounds.y + bounds.height * 0.16} width={bounds.width * 0.84} height={bounds.height * 0.68} rx={Math.min(bounds.width, bounds.height) * 0.18} />
+            <circle cx={bounds.x + bounds.width * 0.18} cy={bounds.cy} r={Math.max(1.5, Math.min(bounds.width, bounds.height) * 0.08)} />
+          {:else if symbol.shape === "basin"}
+            <ellipse class="basin-bowl" cx={bounds.cx} cy={bounds.y + bounds.height * 0.58} rx={Math.max(3, bounds.width * 0.34)} ry={Math.max(3, bounds.height * 0.3)} />
+            <line x1={bounds.cx} y1={bounds.y} x2={bounds.cx} y2={bounds.y + bounds.height * 0.3} />
+            <circle cx={bounds.cx} cy={bounds.y + bounds.height * 0.38} r={Math.max(1.5, Math.min(bounds.width, bounds.height) * 0.06)} />
+          {:else if symbol.shape === "toilet"}
+            <rect x={bounds.x + bounds.width * 0.18} y={bounds.y} width={bounds.width * 0.64} height={bounds.height * 0.22} rx="2" />
+            <circle cx={bounds.cx} cy={bounds.y + bounds.height * 0.1} r={Math.max(1.3, Math.min(bounds.width, bounds.height) * 0.05)} />
+            <ellipse class="toilet-bowl" cx={bounds.cx} cy={bounds.y + bounds.height * 0.56} rx={Math.max(3, bounds.width * 0.3)} ry={Math.max(4, bounds.height * 0.36)} />
+            <ellipse cx={bounds.cx} cy={bounds.y + bounds.height * 0.55} rx={Math.max(2, bounds.width * 0.16)} ry={Math.max(3, bounds.height * 0.18)} />
+          {:else if symbol.shape === "shower"}
+            <rect x={bounds.x + bounds.width * 0.05} y={bounds.y + bounds.height * 0.05} width={bounds.width * 0.9} height={bounds.height * 0.9} />
+            <path class="shower-door-swing" d={`M ${bounds.x + bounds.width * 0.95} ${bounds.y + bounds.height * 0.32} Q ${bounds.x + bounds.width * 0.95} ${bounds.y + bounds.height * 0.92} ${bounds.x + bounds.width * 0.35} ${bounds.y + bounds.height * 0.95}`} />
+            <circle cx={bounds.x + bounds.width * 0.18} cy={bounds.y + bounds.height * 0.2} r={Math.max(1.5, Math.min(bounds.width, bounds.height) * 0.05)} />
+            <line x1={bounds.x + bounds.width * 0.22} y1={bounds.y + bounds.height * 0.22} x2={bounds.x + bounds.width * 0.42} y2={bounds.y + bounds.height * 0.22} />
+            <line x1={bounds.x + bounds.width * 0.22} y1={bounds.y + bounds.height * 0.26} x2={bounds.x + bounds.width * 0.22} y2={bounds.y + bounds.height * 0.42} />
+          {:else if symbol.shape === "washer" || symbol.shape === "dryer"}
+            <text class="symbol-mark" x={bounds.cx} y={bounds.cy}>{symbol.shape === "washer" ? "W" : "D"}</text>
+          {:else if symbol.shape === "refrigerator"}
+            <text class="symbol-mark" x={bounds.cx} y={bounds.cy}>REF</text>
+          {:else if symbol.shape === "oven"}
+            <circle cx={bounds.x + bounds.width * 0.3} cy={bounds.y + bounds.height * 0.32} r={Math.max(2, Math.min(bounds.width, bounds.height) * 0.12)} />
+            <circle cx={bounds.x + bounds.width * 0.7} cy={bounds.y + bounds.height * 0.32} r={Math.max(2, Math.min(bounds.width, bounds.height) * 0.12)} />
+            <circle cx={bounds.x + bounds.width * 0.3} cy={bounds.y + bounds.height * 0.68} r={Math.max(2.5, Math.min(bounds.width, bounds.height) * 0.17)} />
+            <circle cx={bounds.x + bounds.width * 0.7} cy={bounds.y + bounds.height * 0.68} r={Math.max(2.5, Math.min(bounds.width, bounds.height) * 0.17)} />
+            <line x1={bounds.x} y1={bounds.y + bounds.height * 0.92} x2={bounds.x + bounds.width} y2={bounds.y + bounds.height * 0.92} />
+          {:else if symbol.shape === "island"}
+            <rect x={bounds.x + bounds.width * 0.08} y={bounds.y + bounds.height * 0.08} width={bounds.width * 0.84} height={bounds.height * 0.84} rx={Math.min(bounds.width, bounds.height) * 0.16} />
           {:else if symbol.shape === "bedside-table"}
             <rect x={bounds.x + bounds.width * 0.18} y={bounds.y + bounds.height * 0.18} width={bounds.width * 0.64} height={bounds.height * 0.64} rx="2" />
             <circle cx={bounds.cx} cy={bounds.y + bounds.height * 0.58} r={Math.max(1.5, Math.min(bounds.width, bounds.height) * 0.08)} />
@@ -658,9 +717,22 @@
             <line x1={bounds.x} y1={bounds.y + bounds.height * 0.72} x2={bounds.x + bounds.width} y2={bounds.y + bounds.height * 0.72} />
           {:else if symbol.shape === "table"}
             <ellipse cx={bounds.cx} cy={bounds.cy} rx={Math.max(3, bounds.width * 0.42)} ry={Math.max(3, bounds.height * 0.38)} />
+          {:else if symbol.shape === "table-and-chairs"}
+            <rect x={bounds.x + bounds.width * 0.08} y={bounds.y + bounds.height * 0.24} width={bounds.width * 0.84} height={bounds.height * 0.52} />
+            <ellipse class="table-chair top" cx={bounds.x + bounds.width * 0.28} cy={bounds.y + bounds.height * 0.12} rx={bounds.width * 0.09} ry={bounds.height * 0.08} />
+            <ellipse class="table-chair top" cx={bounds.cx} cy={bounds.y + bounds.height * 0.12} rx={bounds.width * 0.09} ry={bounds.height * 0.08} />
+            <ellipse class="table-chair top" cx={bounds.x + bounds.width * 0.72} cy={bounds.y + bounds.height * 0.12} rx={bounds.width * 0.09} ry={bounds.height * 0.08} />
+            <ellipse class="table-chair bottom" cx={bounds.x + bounds.width * 0.28} cy={bounds.y + bounds.height * 0.88} rx={bounds.width * 0.09} ry={bounds.height * 0.08} />
+            <ellipse class="table-chair bottom" cx={bounds.cx} cy={bounds.y + bounds.height * 0.88} rx={bounds.width * 0.09} ry={bounds.height * 0.08} />
+            <ellipse class="table-chair bottom" cx={bounds.x + bounds.width * 0.72} cy={bounds.y + bounds.height * 0.88} rx={bounds.width * 0.09} ry={bounds.height * 0.08} />
           {:else if symbol.shape === "chair"}
-            <line x1={bounds.x + bounds.width * 0.25} y1={bounds.y + bounds.height * 0.2} x2={bounds.x + bounds.width * 0.25} y2={bounds.y + bounds.height * 0.85} />
-            <line x1={bounds.x + bounds.width * 0.75} y1={bounds.y + bounds.height * 0.2} x2={bounds.x + bounds.width * 0.75} y2={bounds.y + bounds.height * 0.85} />
+            <rect x={bounds.x + bounds.width * 0.18} y={bounds.y + bounds.height * 0.2} width={bounds.width * 0.64} height={bounds.height * 0.64} rx="2" />
+            <line x1={bounds.x + bounds.width * 0.22} y1={bounds.y + bounds.height * 0.18} x2={bounds.x + bounds.width * 0.78} y2={bounds.y + bounds.height * 0.18} />
+          {:else if symbol.shape === "armchair"}
+            <rect x={bounds.x + bounds.width * 0.22} y={bounds.y + bounds.height * 0.22} width={bounds.width * 0.56} height={bounds.height * 0.58} rx="2" />
+            <rect class="armchair-arm left" x={bounds.x} y={bounds.y + bounds.height * 0.32} width={bounds.width * 0.18} height={bounds.height * 0.38} rx="2" />
+            <rect class="armchair-arm right" x={bounds.x + bounds.width * 0.82} y={bounds.y + bounds.height * 0.32} width={bounds.width * 0.18} height={bounds.height * 0.38} rx="2" />
+            <rect x={bounds.x + bounds.width * 0.24} y={bounds.y} width={bounds.width * 0.52} height={bounds.height * 0.14} rx="3" />
           {:else if symbol.shape === "drawers"}
             <line x1={bounds.x} y1={bounds.y + bounds.height * 0.33} x2={bounds.x + bounds.width} y2={bounds.y + bounds.height * 0.33} />
             <line x1={bounds.x} y1={bounds.y + bounds.height * 0.66} x2={bounds.x + bounds.width} y2={bounds.y + bounds.height * 0.66} />
@@ -693,6 +765,10 @@
               width={bounds.width * 0.58}
               height={bounds.height * 0.34}
             />
+          {:else if symbol.shape === "wardrobe"}
+            <line class="wardrobe-base-line" x1={bounds.x} y1={bounds.y + bounds.height * 0.78} x2={bounds.x + bounds.width} y2={bounds.y + bounds.height * 0.78} />
+            <circle cx={bounds.x + bounds.width * 0.24} cy={bounds.y + bounds.height * 0.9} r={Math.max(1, Math.min(bounds.width, bounds.height) * 0.04)} />
+            <circle cx={bounds.x + bounds.width * 0.76} cy={bounds.y + bounds.height * 0.9} r={Math.max(1, Math.min(bounds.width, bounds.height) * 0.04)} />
           {:else if symbol.shape === "storage"}
             <line x1={bounds.x} y1={bounds.y + bounds.height * 0.5} x2={bounds.x + bounds.width} y2={bounds.y + bounds.height * 0.5} />
           {:else if symbol.shape === "appliance" || symbol.shape === "fixture"}
@@ -700,7 +776,9 @@
           {/if}
 
           {#if showLabels && symbol.abbreviation}
-            <text x={bounds.cx} y={bounds.cy}>{symbol.abbreviation}</text>
+            {#if !symbolShowsIntrinsicText(symbol.shape)}
+              <text x={bounds.cx} y={bounds.cy}>{symbol.abbreviation}</text>
+            {/if}
           {/if}
 
           {#if selectedObjectId === object.id}
@@ -841,6 +919,7 @@
   line:not(.rotate-stem),
   ellipse,
   circle,
+  path:not(.symbol-body),
   .furniture-object rect:not(.symbol-body):not(.resize-handle):not(.wardrobe-door-panel) {
     fill: none;
     stroke: #203139;

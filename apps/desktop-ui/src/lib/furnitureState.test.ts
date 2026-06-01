@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
   addCatalogItem,
-  catalogItemTopLeftForViewportCenter,
   changeObjectLayer,
   deleteObject,
   duplicateObject,
@@ -98,13 +97,7 @@ describe("furniture state reducers", () => {
     expect(updated.objects).toHaveLength(3);
     expect(updated.objects[2].id).toMatch(/^custom_rectangle-/);
     expect(updated.objects[2].x_m).toBe(3);
-  });
-
-  it("calculates the top-left point needed to centre a new catalog item in the viewport", () => {
-    expect(catalogItemTopLeftForViewportCenter(catalogItem, { x: 8, y: 5 })).toEqual({
-      x: 7.4,
-      y: 4.7,
-    });
+    expect(updated.objects[2].y_m).toBe(4);
   });
 
   it("adds L-shaped catalog items with adjustable arm dimensions", () => {

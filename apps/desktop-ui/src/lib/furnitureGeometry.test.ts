@@ -16,6 +16,7 @@ import {
   resizeObjectFromCorner,
   rotateDeltaIntoObjectSpace,
   screenPixelsToSvgUnits,
+  visibleCanvasCenterOffset,
   viewOriginAfterPan,
   svgToMetres,
 } from "./furnitureGeometry";
@@ -81,6 +82,16 @@ describe("furniture geometry", () => {
 
   it("formats live dimensions in metres", () => {
     expect(dimensionLabel(object)).toBe("2.00 m x 0.90 m");
+  });
+
+  it("uses the visible clipped canvas area when finding the screen centre", () => {
+    const centre = visibleCanvasCenterOffset(
+      { left: 458, top: 134, width: 1356, height: 2712 },
+      { width: 2048, height: 640 },
+    );
+
+    expect(centre.x).toBeCloseTo(678);
+    expect(centre.y).toBeCloseTo(253);
   });
 
   it("resizes from a corner with minimum positive dimensions", () => {
