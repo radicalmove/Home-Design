@@ -168,6 +168,36 @@ describe("furniture geometry", () => {
     });
   });
 
+  it("measures wall distances to the inside face instead of the wall centreline", () => {
+    const guides = nearestWallDistanceGuides(
+      { x: 10, y: 10, width: 20, height: 10 },
+      [
+        { id: "top", x1: 0, y1: 0, x2: 40, y2: 0, thickness_px: 4 },
+        { id: "bottom", x1: 0, y1: 30, x2: 40, y2: 30, thickness_px: 4 },
+        { id: "left", x1: 0, y1: 0, x2: 0, y2: 40, thickness_px: 4 },
+        { id: "right", x1: 40, y1: 0, x2: 40, y2: 40, thickness_px: 4 },
+      ],
+      { px_per_m: 10 },
+    );
+
+    expect(guides.find((guide) => guide.side === "top")).toMatchObject({
+      distance_m: 0.8,
+      label: "0.80 m",
+      x1: 20,
+      y1: 10,
+      x2: 20,
+      y2: 2,
+    });
+    expect(guides.find((guide) => guide.side === "right")).toMatchObject({
+      distance_m: 0.8,
+      label: "0.80 m",
+      x1: 30,
+      y1: 15,
+      x2: 38,
+      y2: 15,
+    });
+  });
+
   it("uses viewBox maths for a portrait furniture field of view", () => {
     const canvasSize = { width: 300, height: 600 };
     const fullView = planViewBoxSize(canvasSize, 1);

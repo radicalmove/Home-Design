@@ -84,6 +84,12 @@ describe("furniture canvas interaction layout", () => {
     expect(planCanvasSource).toContain("REFERENCE_WALL_SEGMENTS");
   });
 
+  it("passes reference wall stroke widths into wall-distance guide geometry", () => {
+    expect(planCanvasSource).toContain("WALL_THICKNESS_PX");
+    expect(planCanvasSource).toContain("withWallThickness");
+    expect(planCanvasSource).toContain("thickness_px");
+  });
+
   it("sizes wall-distance labels from screen pixels instead of fixed SVG text", () => {
     expect(planCanvasSource).toContain("wallDistanceLabelFontSize");
     expect(planCanvasSource).toContain("wallDistanceLabelStrokeWidth");

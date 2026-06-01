@@ -96,7 +96,76 @@
     { id: "bedroom-2", x: 838.4, y: 592.0, lines: ["Bedroom 2"] },
   ];
 
-  const REFERENCE_WALL_SEGMENTS: WallSegment[] = [
+  const WALL_THICKNESS_PX = {
+    exterior: 8,
+    thinExterior: 3.7,
+    toiletExterior: 7.2,
+    interior: 3.7,
+    thinInterior: 3.3,
+  } as const;
+
+  const EXTERIOR_WALL_SEGMENT_IDS = new Set([
+    "lounge-exterior",
+    "lounge-sunroom-wall",
+    "lounge-sunroom-lower-wall",
+    "master-sunroom-old-external-wall",
+    "hallway-north-wall",
+    "hallway-sunroom-right-jamb",
+    "kitchen-dining-west-wall",
+    "kitchen-dining-north-wall",
+    "kitchen-dining-east-wall",
+    "private-rooms-south-wall",
+    "master-west-wall",
+    "laundry-toilet-exterior",
+  ]);
+
+  const THIN_EXTERIOR_WALL_SEGMENT_IDS = new Set([
+    "entrance-deck-wall-west",
+    "entrance-deck-wall-east",
+  ]);
+
+  const TOILET_EXTERIOR_WALL_SEGMENT_IDS = new Set(["toilet-south-external-wall"]);
+
+  const THIN_INTERIOR_WALL_SEGMENT_IDS = new Set([
+    "kitchen-entrance-return-wall",
+    "entrance-north-return-wall",
+    "bedroom2-north-wall-west",
+    "bedroom2-north-wall-east",
+    "master-office-wall-upper",
+    "master-office-wall-mid-upper",
+    "master-office-wall-mid-lower",
+    "master-office-wall-lower",
+    "wardrobe-office-wall",
+    "office-bathroom-wall",
+    "bathroom-bedroom2-wall",
+    "laundry-toilet-wall-west",
+    "laundry-toilet-wall-east",
+  ]);
+
+  function wallThicknessForSegment(segmentId: string): number {
+    if (EXTERIOR_WALL_SEGMENT_IDS.has(segmentId)) {
+      return WALL_THICKNESS_PX.exterior;
+    }
+    if (THIN_EXTERIOR_WALL_SEGMENT_IDS.has(segmentId)) {
+      return WALL_THICKNESS_PX.thinExterior;
+    }
+    if (TOILET_EXTERIOR_WALL_SEGMENT_IDS.has(segmentId)) {
+      return WALL_THICKNESS_PX.toiletExterior;
+    }
+    if (THIN_INTERIOR_WALL_SEGMENT_IDS.has(segmentId)) {
+      return WALL_THICKNESS_PX.thinInterior;
+    }
+    return WALL_THICKNESS_PX.interior;
+  }
+
+  function withWallThickness(segments: Array<Omit<WallSegment, "thickness_px">>): WallSegment[] {
+    return segments.map((segment) => ({
+      ...segment,
+      thickness_px: wallThicknessForSegment(segment.id),
+    }));
+  }
+
+  const REFERENCE_WALL_SEGMENTS: WallSegment[] = withWallThickness([
     { id: "sunroom-west-frame", x1: 549.2, y1: 483.4, x2: 549.2, y2: 442.3 },
     { id: "sunroom-front-frame", x1: 549.2, y1: 442.3, x2: 568, y2: 442.3 },
     { id: "sunroom-east-frame", x1: 606, y1: 401.6, x2: 606, y2: 346.7 },
@@ -141,7 +210,7 @@
     { id: "kitchen-entrance-door-wall-upper", x1: 803.7, y1: 495.9, x2: 803.7, y2: 499.7 },
     { id: "kitchen-entrance-door-wall-lower", x1: 803.7, y1: 519.5, x2: 803.7, y2: 523.3 },
     { id: "laundry-toilet-exterior", x1: 956.4, y1: 487.3, x2: 956.4, y2: 602.2 },
-  ];
+  ]);
 
   let {
     layout,

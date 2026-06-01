@@ -20,6 +20,7 @@ export type WallSegment = {
   y1: number;
   x2: number;
   y2: number;
+  thickness_px?: number;
 };
 
 export type WallDistanceGuideSide = "top" | "right" | "bottom" | "left";
@@ -167,6 +168,7 @@ export function nearestWallDistanceGuides(
   for (const wall of wallSegments) {
     const isHorizontal = wall.y1 === wall.y2;
     const isVertical = wall.x1 === wall.x2;
+    const halfThickness = (wall.thickness_px ?? 0) / 2;
 
     if (isHorizontal) {
       const wallY = wall.y1;
@@ -178,7 +180,8 @@ export function nearestWallDistanceGuides(
 
       const x = clamp(objectCenterX, Math.max(objectLeft, wallLeft), Math.min(objectRight, wallRight));
       if (wallY <= objectTop) {
-        const distanceM = (objectTop - wallY) / transform.px_per_m;
+        const wallFaceY = Math.min(objectTop, wallY + halfThickness);
+        const distanceM = (objectTop - wallFaceY) / transform.px_per_m;
         addNearestGuide(nearest, {
           side: "top",
           wallId: wall.id,
@@ -187,13 +190,14 @@ export function nearestWallDistanceGuides(
           x1: x,
           y1: objectTop,
           x2: x,
-          y2: wallY,
+          y2: wallFaceY,
           labelX: x,
-          labelY: (objectTop + wallY) / 2,
+          labelY: (objectTop + wallFaceY) / 2,
         });
       }
       if (wallY >= objectBottom) {
-        const distanceM = (wallY - objectBottom) / transform.px_per_m;
+        const wallFaceY = Math.max(objectBottom, wallY - halfThickness);
+        const distanceM = (wallFaceY - objectBottom) / transform.px_per_m;
         addNearestGuide(nearest, {
           side: "bottom",
           wallId: wall.id,
@@ -202,9 +206,9 @@ export function nearestWallDistanceGuides(
           x1: x,
           y1: objectBottom,
           x2: x,
-          y2: wallY,
+          y2: wallFaceY,
           labelX: x,
-          labelY: (objectBottom + wallY) / 2,
+          labelY: (objectBottom + wallFaceY) / 2,
         });
       }
     }
@@ -219,7 +223,8 @@ export function nearestWallDistanceGuides(
 
       const y = clamp(objectCenterY, Math.max(objectTop, wallTop), Math.min(objectBottom, wallBottom));
       if (wallX <= objectLeft) {
-        const distanceM = (objectLeft - wallX) / transform.px_per_m;
+        const wallFaceX = Math.min(objectLeft, wallX + halfThickness);
+        const distanceM = (objectLeft - wallFaceX) / transform.px_per_m;
         addNearestGuide(nearest, {
           side: "left",
           wallId: wall.id,
@@ -227,14 +232,15 @@ export function nearestWallDistanceGuides(
           label: distanceLabel(distanceM),
           x1: objectLeft,
           y1: y,
-          x2: wallX,
+          x2: wallFaceX,
           y2: y,
-          labelX: (objectLeft + wallX) / 2,
+          labelX: (objectLeft + wallFaceX) / 2,
           labelY: y,
         });
       }
       if (wallX >= objectRight) {
-        const distanceM = (wallX - objectRight) / transform.px_per_m;
+        const wallFaceX = Math.max(objectRight, wallX - halfThickness);
+        const distanceM = (wallFaceX - objectRight) / transform.px_per_m;
         addNearestGuide(nearest, {
           side: "right",
           wallId: wall.id,
@@ -242,9 +248,9 @@ export function nearestWallDistanceGuides(
           label: distanceLabel(distanceM),
           x1: objectRight,
           y1: y,
-          x2: wallX,
+          x2: wallFaceX,
           y2: y,
-          labelX: (objectRight + wallX) / 2,
+          labelX: (objectRight + wallFaceX) / 2,
           labelY: y,
         });
       }
