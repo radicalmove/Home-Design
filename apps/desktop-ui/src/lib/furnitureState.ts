@@ -23,8 +23,40 @@ export const MIN_FURNITURE_SIZE_M = 0.2;
 export const PARTITION_WALL_THICKNESS_M = 0.03;
 export const WARDROBE_DOOR_THICKNESS_M = 0.06;
 
+export type FurnitureOrderAction = "back" | "backward" | "forward" | "front";
+
 function roundMetres(value: number): number {
   return Math.round(value * 100) / 100;
+}
+
+function zIndexForObject(object: Partial<Pick<FurnitureObject, "z_index">>, fallback: number): number {
+  return Number.isFinite(object.z_index) ? Number(object.z_index) : fallback;
+}
+
+function nextZIndex(layout: FurnitureLayout): number {
+  if (layout.objects.length === 0) {
+    return 0;
+  }
+  return Math.max(...layout.objects.map((object, index) => zIndexForObject(object, index))) + 1;
+}
+
+function withCompactedZIndexes(objects: FurnitureObject[]): FurnitureObject[] {
+  const orderedIds = sortedFurnitureObjects(objects).map((object) => object.id);
+  const orderById = new Map(orderedIds.map((id, index) => [id, index]));
+  return objects.map((object) => ({
+    ...object,
+    z_index: orderById.get(object.id) ?? 0,
+  }));
+}
+
+export function sortedFurnitureObjects(objects: FurnitureObject[]): FurnitureObject[] {
+  return objects
+    .map((object, index) => ({ object, index }))
+    .sort((a, b) => {
+      const zDiff = zIndexForObject(a.object, a.index) - zIndexForObject(b.object, b.index);
+      return zDiff === 0 ? a.index - b.index : zDiff;
+    })
+    .map(({ object }) => object);
 }
 
 export function isPartitionWallObject(
@@ -134,7 +166,7 @@ function withLegacyLShapeDefaults(object: FurnitureObject): FurnitureObject {
   return object;
 }
 
-function normaliseFurnitureObject(object: FurnitureObject): FurnitureObject {
+function normaliseFurnitureObject(object: FurnitureObject, index = 0): FurnitureObject {
   const objectWithDefaults = withLegacyLShapeDefaults(object);
   const widthM = normaliseObjectWidth(objectWithDefaults.width_m);
   const depthM = normaliseObjectDepth(objectWithDefaults, objectWithDefaults.depth_m);
@@ -146,13 +178,16 @@ function normaliseFurnitureObject(object: FurnitureObject): FurnitureObject {
     width_m: widthM,
     depth_m: depthM,
     l_shape: normaliseLShapeDimensions(objectWithDefaults.l_shape, widthM, depthM),
+    z_index: zIndexForObject(objectWithDefaults, index),
   };
 }
 
 export function normaliseFurnitureLayout(layout: FurnitureLayout): FurnitureLayout {
   return {
     ...layout,
-    objects: layout.objects.map(normaliseFurnitureObject),
+    objects: withCompactedZIndexes(
+      layout.objects.map((object, index) => normaliseFurnitureObject(object, index)),
+    ),
   };
 }
 
@@ -177,6 +212,7 @@ export function addCatalogItem(
       item.default_width_m,
       item.default_depth_m,
     ),
+    z_index: nextZIndex(layout),
     rotation_deg: 0,
     colour: item.colour,
     locked: false,
@@ -260,6 +296,7 @@ export function duplicateObject(layout: FurnitureLayout, objectId: string): Furn
     id: nextObjectId(new Set(layout.objects.map(({ id }) => id)), `${source.id}-copy`),
     x_m: source.x_m + 0.25,
     y_m: source.y_m + 0.25,
+    z_index: nextZIndex(layout),
     locked: false,
   };
 
@@ -273,5 +310,44 @@ export function deleteObject(layout: FurnitureLayout, objectId: string): Furnitu
   return {
     ...layout,
     objects: layout.objects.filter((object) => object.id !== objectId),
+  };
+}
+
+export function reorderObject(
+  layout: FurnitureLayout,
+  objectId: string,
+  action: FurnitureOrderAction,
+): FurnitureLayout {
+  const sorted = sortedFurnitureObjects(layout.objects);
+  const currentIndex = sorted.findIndex((object) => object.id === objectId);
+  if (currentIndex === -1) {
+    return layout;
+  }
+
+  const nextSorted = [...sorted];
+  const [selected] = nextSorted.splice(currentIndex, 1);
+  let nextIndex = currentIndex;
+  if (action === "back") {
+    nextIndex = 0;
+  } else if (action === "backward") {
+    nextIndex = Math.max(0, currentIndex - 1);
+  } else if (action === "forward") {
+    nextIndex = Math.min(nextSorted.length, currentIndex + 1);
+  } else {
+    nextIndex = nextSorted.length;
+  }
+
+  if (nextIndex === currentIndex) {
+    return layout;
+  }
+
+  nextSorted.splice(nextIndex, 0, selected);
+  const zIndexById = new Map(nextSorted.map((object, index) => [object.id, index]));
+  return {
+    ...layout,
+    objects: layout.objects.map((object) => ({
+      ...object,
+      z_index: zIndexById.get(object.id) ?? object.z_index,
+    })),
   };
 }

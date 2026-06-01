@@ -41,6 +41,7 @@ const object: FurnitureObject = {
   y_m: 3,
   width_m: 2,
   depth_m: 0.9,
+  z_index: 0,
   rotation_deg: 0,
   colour: "#33312e",
   locked: false,

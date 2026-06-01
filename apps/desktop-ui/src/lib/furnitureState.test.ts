@@ -8,8 +8,10 @@ import {
   normaliseFurnitureLayout,
   PARTITION_WALL_THICKNESS_M,
   recolourObject,
+  reorderObject,
   resizeObject,
   rotateObject,
+  sortedFurnitureObjects,
   WARDROBE_DOOR_THICKNESS_M,
 } from "./furnitureState";
 import type { FurnitureCatalogItem, FurnitureLayout } from "../types";
@@ -36,6 +38,7 @@ const layout: FurnitureLayout = {
       y_m: 2,
       width_m: 2,
       depth_m: 1,
+      z_index: 0,
       rotation_deg: 0,
       colour: "#33312e",
       locked: false,
@@ -53,6 +56,7 @@ const layout: FurnitureLayout = {
       y_m: 4,
       width_m: 2.8,
       depth_m: 1.85,
+      z_index: 1,
       rotation_deg: 0,
       colour: "#33312e",
       locked: false,
@@ -173,6 +177,7 @@ describe("furniture state reducers", () => {
           y_m: 7,
           width_m: 1.2,
           depth_m: PARTITION_WALL_THICKNESS_M,
+          z_index: 2,
           rotation_deg: 0,
           colour: "#4e555e",
           locked: false,
@@ -234,6 +239,7 @@ describe("furniture state reducers", () => {
           y_m: 7,
           width_m: 1.6,
           depth_m: WARDROBE_DOOR_THICKNESS_M,
+          z_index: 2,
           rotation_deg: 0,
           colour: "#f7f8f6",
           locked: false,
@@ -324,6 +330,98 @@ describe("furniture state reducers", () => {
         return_width_m: 1.05,
       },
     });
+  });
+
+  it("normalises legacy layouts with missing z-indexes from existing order", () => {
+    const legacyLayout = {
+      ...layout,
+      objects: layout.objects.map(({ z_index: _zIndex, ...object }) => object),
+    } as FurnitureLayout;
+
+    const normalised = normaliseFurnitureLayout(legacyLayout);
+
+    expect(normalised.objects.map((object) => object.z_index)).toEqual([0, 1]);
+  });
+
+  it("normalises mixed missing z-indexes using the existing array order", () => {
+    const mixedLayout = {
+      ...layout,
+      objects: [
+        { ...layout.objects[0], id: "A", z_index: 1 },
+        (({ z_index: _zIndex, ...object }) => ({ ...object, id: "B" }))(layout.objects[1]),
+        { ...layout.objects[0], id: "C", z_index: 2 },
+      ],
+    } as FurnitureLayout;
+
+    const normalised = normaliseFurnitureLayout(mixedLayout);
+
+    expect(sortedFurnitureObjects(normalised.objects).map((object) => object.id)).toEqual([
+      "A",
+      "B",
+      "C",
+    ]);
+    expect(normalised.objects.map((object) => object.z_index)).toEqual([0, 1, 2]);
+  });
+
+  it("adds and duplicates objects at the front of the global furniture order", () => {
+    const added = addCatalogItem(layout, catalogItem, { x: 3, y: 4 });
+    expect(added.objects.at(-1)?.z_index).toBe(2);
+
+    const duplicated = duplicateObject(layout, "sofa");
+    expect(duplicated.objects.at(-1)).toMatchObject({
+      z_index: 2,
+      locked: false,
+    });
+  });
+
+  it("sorts furniture objects by z-index with array order as the tie breaker", () => {
+    const unordered = {
+      ...layout,
+      objects: [
+        { ...layout.objects[0], id: "front", z_index: 10 },
+        { ...layout.objects[1], id: "back", z_index: 2 },
+        { ...layout.objects[0], id: "middle", z_index: 2 },
+      ],
+    };
+
+    expect(sortedFurnitureObjects(unordered.objects).map((object) => object.id)).toEqual([
+      "back",
+      "middle",
+      "front",
+    ]);
+  });
+
+  it("reorders objects globally without changing geometry or layer", () => {
+    const orderedLayout = {
+      ...layout,
+      objects: [
+        { ...layout.objects[0], id: "desk", z_index: 0, x_m: 1, layer: "fixed" as const },
+        { ...layout.objects[1], id: "chair", z_index: 1, x_m: 2, layer: "moveable" as const },
+        { ...layout.objects[0], id: "lamp", z_index: 2, x_m: 3, layer: "moveable" as const },
+      ],
+    };
+
+    const sentBackward = reorderObject(orderedLayout, "chair", "backward");
+    expect(sortedFurnitureObjects(sentBackward.objects).map((object) => object.id)).toEqual([
+      "chair",
+      "desk",
+      "lamp",
+    ]);
+    expect(sentBackward.objects.find((object) => object.id === "chair")).toMatchObject({
+      x_m: 2,
+      layer: "moveable",
+    });
+
+    const broughtToFront = reorderObject(sentBackward, "chair", "front");
+    expect(sortedFurnitureObjects(broughtToFront.objects).at(-1)?.id).toBe("chair");
+
+    const sentToBack = reorderObject(broughtToFront, "chair", "back");
+    expect(sortedFurnitureObjects(sentToBack.objects)[0].id).toBe("chair");
+  });
+
+  it("leaves boundary and missing-object reorders harmless", () => {
+    expect(reorderObject(layout, "sofa", "back")).toEqual(layout);
+    expect(reorderObject(layout, "missing", "front")).toEqual(layout);
   });
 
   it("resizes L-shaped arm dimensions separately from the outer footprint", () => {

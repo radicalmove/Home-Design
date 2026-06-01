@@ -85,6 +85,7 @@ export type FurnitureObject = {
   width_m: number;
   depth_m: number;
   l_shape?: FurnitureLShapeDimensions | null;
+  z_index: number;
   rotation_deg: number;
   colour: string;
   locked: boolean;

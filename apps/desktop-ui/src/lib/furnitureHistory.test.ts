@@ -30,6 +30,7 @@ function layoutWithObjectCount(count: number): FurnitureLayout {
       y_m: index,
       width_m: 1,
       depth_m: 1,
+      z_index: index,
       rotation_deg: 0,
       colour: "#ffffff",
       locked: false,
