@@ -1,6 +1,6 @@
 use home_design_core::{
-    FurnitureCatalog, FurnitureLayout, default_furniture_catalog, seed_current_furniture_layout,
-    validate_furniture_layout,
+    FurnitureCatalog, FurnitureLayout, default_furniture_catalog, normalise_furniture_z_order,
+    seed_current_furniture_layout, validate_furniture_layout,
 };
 use serde::{Deserialize, Serialize};
 use std::fs;
@@ -42,8 +42,9 @@ pub fn load_furniture_layout_from_root(
 
     let raw = fs::read_to_string(&path)
         .map_err(|error| format!("could not read furniture layout: {error}"))?;
-    let layout: FurnitureLayout = serde_json::from_str(&raw)
+    let mut layout: FurnitureLayout = serde_json::from_str(&raw)
         .map_err(|error| format!("could not parse furniture layout: {error}"))?;
+    normalise_furniture_z_order(&mut layout);
     let validation = validate_furniture_layout(&layout);
     if !validation.ok() {
         return Err(format!(

@@ -180,6 +180,45 @@ fn seed_layout_contains_fixed_and_moveable_current_house_objects() {
 }
 
 #[test]
+fn seed_layout_assigns_sequential_furniture_z_index() {
+    let layout = seed_current_furniture_layout();
+
+    let z_indexes: Vec<_> = layout.objects.iter().map(|object| object.z_index).collect();
+
+    assert_eq!(z_indexes.first(), Some(&0));
+    assert_eq!(z_indexes.last(), Some(&((layout.objects.len() as i32) - 1)));
+    assert_eq!(
+        z_indexes,
+        (0..layout.objects.len() as i32).collect::<Vec<_>>()
+    );
+}
+
+#[test]
+fn furniture_object_deserializes_when_legacy_json_omits_z_index() {
+    let json = serde_json::json!({
+        "id": "legacy-chair",
+        "catalog_id": "chair",
+        "layer": "moveable",
+        "type": "chair",
+        "label": "Legacy chair",
+        "abbreviation": null,
+        "x_m": 1.0,
+        "y_m": 2.0,
+        "width_m": 0.5,
+        "depth_m": 0.5,
+        "rotation_deg": 0.0,
+        "colour": "#ffffff",
+        "locked": false,
+        "notes": null,
+        "evidence": null
+    });
+
+    let parsed: FurnitureObject = serde_json::from_value(json).expect("legacy object parses");
+
+    assert_eq!(parsed.z_index, 0);
+}
+
+#[test]
 fn furniture_layout_validation_rejects_duplicate_ids_and_invalid_dimensions() {
     let mut layout = seed_current_furniture_layout();
     let duplicate = layout.objects[0].clone();
@@ -227,6 +266,7 @@ fn furniture_layout_validation_allows_thin_partition_wall_depth() {
         id: "test_partition_wall".to_string(),
         catalog_id: Some("partition_wall".to_string()),
         layer: FurnitureLayerKind::Fixed,
+        z_index: 0,
         object_type: "partition_wall".to_string(),
         label: "Partition wall".to_string(),
         abbreviation: None,
@@ -269,6 +309,7 @@ fn furniture_layout_round_trips_json_in_metres() {
     assert_eq!(parsed, layout);
     assert!(json.contains("\"width_m\""));
     assert!(json.contains("\"depth_m\""));
+    assert!(json.contains("\"z_index\""));
     assert!(json.contains("\"l_shape\""));
     assert!(json.contains("\"main_depth_m\""));
     assert!(json.contains("\"return_width_m\""));

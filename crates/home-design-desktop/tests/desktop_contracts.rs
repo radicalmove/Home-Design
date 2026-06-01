@@ -89,6 +89,38 @@ fn save_and_load_furniture_layout_persists_json() {
 }
 
 #[test]
+fn load_saved_furniture_layout_migrates_legacy_missing_z_index() {
+    let root = isolated_storage_root("legacy-z-index");
+    let path = root.join("projects/current-house/scenarios/current/furniture-layout.json");
+    fs::create_dir_all(path.parent().expect("parent")).expect("create parent");
+
+    let layout = home_design_core::seed_current_furniture_layout();
+    let mut json = serde_json::to_value(&layout).expect("layout json");
+    let objects = json
+        .get_mut("objects")
+        .and_then(|value| value.as_array_mut())
+        .expect("objects array");
+    for object in objects {
+        object.as_object_mut().expect("object").remove("z_index");
+    }
+    fs::write(&path, serde_json::to_string_pretty(&json).expect("json")).expect("write layout");
+
+    let loaded = load_furniture_layout_from_root(&root, "current-house", "current")
+        .expect("load legacy layout");
+
+    assert_eq!(loaded.source, "saved");
+    assert_eq!(
+        loaded
+            .layout
+            .objects
+            .iter()
+            .map(|object| object.z_index)
+            .collect::<Vec<_>>(),
+        (0..loaded.layout.objects.len() as i32).collect::<Vec<_>>()
+    );
+}
+
+#[test]
 fn invalid_saved_furniture_json_is_reported_without_overwriting() {
     let root = isolated_storage_root("invalid-json");
     let path = root.join("projects/current-house/scenarios/current/furniture-layout.json");

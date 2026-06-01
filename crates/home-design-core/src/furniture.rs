@@ -37,6 +37,8 @@ pub struct FurnitureObject {
     pub id: String,
     pub catalog_id: Option<String>,
     pub layer: FurnitureLayerKind,
+    #[serde(default)]
+    pub z_index: i32,
     #[serde(rename = "type")]
     pub object_type: String,
     pub label: String,
@@ -585,7 +587,7 @@ pub fn default_furniture_catalog() -> FurnitureCatalog {
 }
 
 pub fn seed_current_furniture_layout() -> FurnitureLayout {
-    FurnitureLayout {
+    let mut layout = FurnitureLayout {
         project_id: "current-house".to_string(),
         scenario_id: "current".to_string(),
         plan_transform: default_plan_transform(),
@@ -787,6 +789,34 @@ pub fn seed_current_furniture_layout() -> FurnitureLayout {
                 Some("room:office"),
             ),
         ],
+    };
+    normalise_furniture_z_order(&mut layout);
+    layout
+}
+
+pub fn normalise_furniture_z_order(layout: &mut FurnitureLayout) {
+    if layout.objects.is_empty() {
+        return;
+    }
+
+    let all_default_order = layout.objects.iter().all(|object| object.z_index == 0);
+    if all_default_order {
+        for (index, object) in layout.objects.iter_mut().enumerate() {
+            object.z_index = index as i32;
+        }
+        return;
+    }
+
+    let mut ordered: Vec<(usize, i32)> = layout
+        .objects
+        .iter()
+        .enumerate()
+        .map(|(index, object)| (index, object.z_index))
+        .collect();
+    ordered.sort_by_key(|(index, z_index)| (*z_index, *index));
+
+    for (new_index, (object_index, _)) in ordered.into_iter().enumerate() {
+        layout.objects[object_index].z_index = new_index as i32;
     }
 }
 
@@ -975,6 +1005,7 @@ fn furniture_object(
         id: id.to_string(),
         catalog_id: catalog_id.map(str::to_string),
         layer,
+        z_index: 0,
         object_type: object_type.to_string(),
         label: label.to_string(),
         abbreviation: abbreviation.map(str::to_string),
