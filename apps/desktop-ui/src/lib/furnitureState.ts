@@ -21,6 +21,7 @@ const DEFAULT_L_SHAPES: Record<string, FurnitureLShapeDimensions> = {
 
 export const MIN_FURNITURE_SIZE_M = 0.2;
 export const PARTITION_WALL_THICKNESS_M = 0.03;
+export const WARDROBE_DOOR_THICKNESS_M = 0.06;
 
 function roundMetres(value: number): number {
   return Math.round(value * 100) / 100;
@@ -32,13 +33,33 @@ export function isPartitionWallObject(
   return object.type === "partition_wall" || object.catalog_id === "partition_wall";
 }
 
+export function isWardrobeDoorsObject(
+  object: Pick<FurnitureObject, "type" | "catalog_id">,
+): boolean {
+  return object.type === "wardrobe_doors" || object.catalog_id === "wardrobe_doors";
+}
+
+export function fixedDepthForObject(
+  object: Pick<FurnitureObject, "type" | "catalog_id">,
+): number | null {
+  if (isPartitionWallObject(object)) {
+    return PARTITION_WALL_THICKNESS_M;
+  }
+  if (isWardrobeDoorsObject(object)) {
+    return WARDROBE_DOOR_THICKNESS_M;
+  }
+
+  return null;
+}
+
 function normaliseObjectWidth(widthM: number): number {
   return roundMetres(Math.max(MIN_FURNITURE_SIZE_M, widthM));
 }
 
 function normaliseObjectDepth(object: FurnitureObject, depthM: number): number {
-  if (isPartitionWallObject(object)) {
-    return PARTITION_WALL_THICKNESS_M;
+  const fixedDepth = fixedDepthForObject(object);
+  if (fixedDepth !== null) {
+    return fixedDepth;
   }
 
   return roundMetres(Math.max(MIN_FURNITURE_SIZE_M, depthM));

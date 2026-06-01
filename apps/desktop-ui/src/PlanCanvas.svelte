@@ -18,8 +18,7 @@
   } from "./lib/furnitureGeometry";
   import {
     MIN_FURNITURE_SIZE_M,
-    PARTITION_WALL_THICKNESS_M,
-    isPartitionWallObject,
+    fixedDepthForObject,
   } from "./lib/furnitureState";
   import { symbolForFurnitureObject } from "./lib/furnitureSymbols";
   import type { ResizeHandleName, WallDistanceGuide, WallSegment } from "./lib/furnitureGeometry";
@@ -171,7 +170,7 @@
   }
 
   function resizeHandlesForObject(object: FurnitureObject): typeof RESIZE_HANDLES {
-    return isPartitionWallObject(object)
+    return fixedDepthForObject(object) !== null
       ? RESIZE_HANDLES.filter((handle) => handle.y === 0.5)
       : RESIZE_HANDLES;
   }
@@ -519,19 +518,19 @@
       dragState.object.rotation_deg,
       layout.plan_transform,
     );
-    const isPartitionWall = isPartitionWallObject(dragState.object);
-    const resizeDelta = isPartitionWall ? { ...localDelta, deltaDepthM: 0 } : localDelta;
+    const fixedDepth = fixedDepthForObject(dragState.object);
+    const resizeDelta = fixedDepth !== null ? { ...localDelta, deltaDepthM: 0 } : localDelta;
     const resized = resizeObjectFromHandle(
       dragState.object,
       dragState.resizeHandle ?? "se",
       resizeDelta,
-      isPartitionWall
-        ? { widthM: MIN_FURNITURE_SIZE_M, depthM: PARTITION_WALL_THICKNESS_M }
+      fixedDepth !== null
+        ? { widthM: MIN_FURNITURE_SIZE_M, depthM: fixedDepth }
         : MIN_FURNITURE_SIZE_M,
     );
     const size = {
       width_m: resized.width_m,
-      depth_m: isPartitionWall ? PARTITION_WALL_THICKNESS_M : resized.depth_m,
+      depth_m: fixedDepth ?? resized.depth_m,
     };
     onResizeObject(dragState.object.id, size, { x: resized.x_m, y: resized.y_m });
     const local = localPointFromEvent(event);
@@ -661,10 +660,20 @@
           {:else if symbol.shape === "partition-wall"}
             <line x1={bounds.x} y1={bounds.cy} x2={bounds.x + bounds.width} y2={bounds.cy} />
           {:else if symbol.shape === "sliding-door"}
-            <line x1={bounds.x} y1={bounds.y + bounds.height * 0.25} x2={bounds.x + bounds.width} y2={bounds.y + bounds.height * 0.25} />
-            <line x1={bounds.x} y1={bounds.y + bounds.height * 0.75} x2={bounds.x + bounds.width} y2={bounds.y + bounds.height * 0.75} />
-            <line x1={bounds.x + bounds.width * 0.12} y1={bounds.cy} x2={bounds.x + bounds.width * 0.58} y2={bounds.cy} />
-            <line x1={bounds.x + bounds.width * 0.42} y1={bounds.cy} x2={bounds.x + bounds.width * 0.88} y2={bounds.cy} />
+            <rect
+              class="wardrobe-door-panel fixed"
+              x={bounds.x + bounds.width * 0.12}
+              y={bounds.y + bounds.height * 0.52}
+              width={bounds.width * 0.46}
+              height={bounds.height * 0.34}
+            />
+            <rect
+              class="wardrobe-door-panel sliding"
+              x={bounds.x + bounds.width * 0.42}
+              y={bounds.y + bounds.height * 0.14}
+              width={bounds.width * 0.46}
+              height={bounds.height * 0.34}
+            />
           {:else if symbol.shape === "storage"}
             <line x1={bounds.x} y1={bounds.y + bounds.height * 0.5} x2={bounds.x + bounds.width} y2={bounds.y + bounds.height * 0.5} />
           {:else if symbol.shape === "appliance" || symbol.shape === "fixture"}
@@ -813,10 +822,22 @@
   line:not(.rotate-stem),
   ellipse,
   circle,
-  .furniture-object rect:not(.symbol-body):not(.resize-handle) {
+  .furniture-object rect:not(.symbol-body):not(.resize-handle):not(.wardrobe-door-panel) {
     fill: none;
     stroke: #203139;
     stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .furniture-object.sliding-door .symbol-body {
+    fill-opacity: 0.45;
+    stroke-dasharray: none;
+  }
+
+  .wardrobe-door-panel {
+    fill: #fffdf8;
+    stroke: #111;
+    stroke-width: 0.45;
     vector-effect: non-scaling-stroke;
   }
 

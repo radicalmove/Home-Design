@@ -10,6 +10,7 @@ import {
   recolourObject,
   resizeObject,
   rotateObject,
+  WARDROBE_DOOR_THICKNESS_M,
 } from "./furnitureState";
 import type { FurnitureCatalogItem, FurnitureLayout } from "../types";
 
@@ -213,6 +214,67 @@ describe("furniture state reducers", () => {
     expect(normalised.objects[0]).toMatchObject({
       width_m: 1.23,
       depth_m: PARTITION_WALL_THICKNESS_M,
+    });
+  });
+
+  it("keeps wardrobe door depth locked when resizing", () => {
+    const withWardrobeDoors: FurnitureLayout = {
+      ...layout,
+      objects: [
+        ...layout.objects,
+        {
+          id: "wardrobe-doors",
+          catalog_id: "wardrobe_doors",
+          layer: "fixed",
+          type: "wardrobe_doors",
+          label: "Wardrobe doors",
+          abbreviation: null,
+          x_m: 6,
+          y_m: 7,
+          width_m: 1.6,
+          depth_m: WARDROBE_DOOR_THICKNESS_M,
+          rotation_deg: 0,
+          colour: "#f7f8f6",
+          locked: false,
+          notes: null,
+          evidence: null,
+        },
+      ],
+    };
+
+    const resized = resizeObject(withWardrobeDoors, "wardrobe-doors", {
+      width_m: 2.1,
+      depth_m: 0.6,
+    });
+
+    expect(resized.objects.at(-1)).toMatchObject({
+      width_m: 2.1,
+      depth_m: WARDROBE_DOOR_THICKNESS_M,
+    });
+  });
+
+  it("repairs saved wardrobe doors that were accidentally deepened", () => {
+    const loaded: FurnitureLayout = {
+      ...layout,
+      objects: [
+        {
+          ...layout.objects[0],
+          id: "wardrobe-doors",
+          catalog_id: "wardrobe_doors",
+          layer: "fixed",
+          type: "wardrobe_doors",
+          label: "Wardrobe doors",
+          width_m: 1.638,
+          depth_m: 0.4,
+        },
+      ],
+    };
+
+    const normalised = normaliseFurnitureLayout(loaded);
+
+    expect(normalised.objects[0]).toMatchObject({
+      width_m: 1.64,
+      depth_m: WARDROBE_DOOR_THICKNESS_M,
     });
   });
 

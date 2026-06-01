@@ -1,8 +1,7 @@
 <script lang="ts">
   import {
     MIN_FURNITURE_SIZE_M,
-    PARTITION_WALL_THICKNESS_M,
-    isPartitionWallObject,
+    fixedDepthForObject,
   } from "./lib/furnitureState";
   import type { FurnitureLShapeDimensions, FurnitureLayerKind, FurnitureObject, PlanPoint } from "./types";
 
@@ -34,10 +33,11 @@
     onDelete,
   }: Props = $props();
 
-  let isPartitionWall = $derived(Boolean(object && isPartitionWallObject(object)));
-  let depthInputMin = $derived(isPartitionWall ? PARTITION_WALL_THICKNESS_M : MIN_FURNITURE_SIZE_M);
-  let depthInputStep = $derived(isPartitionWall ? 0.01 : 0.05);
-  let depthInputValue = $derived(isPartitionWall ? PARTITION_WALL_THICKNESS_M : object?.depth_m);
+  let fixedDepth = $derived(object ? fixedDepthForObject(object) : null);
+  let hasFixedDepth = $derived(fixedDepth !== null);
+  let depthInputMin = $derived(fixedDepth ?? MIN_FURNITURE_SIZE_M);
+  let depthInputStep = $derived(hasFixedDepth ? 0.01 : 0.05);
+  let depthInputValue = $derived(fixedDepth ?? object?.depth_m);
 
   function numberValue(event: Event): number {
     return Number((event.currentTarget as HTMLInputElement).value);
@@ -65,7 +65,7 @@
     if (object) {
       onResize(object.id, {
         width_m: object.width_m,
-        depth_m: isPartitionWall ? PARTITION_WALL_THICKNESS_M : numberValue(event),
+        depth_m: fixedDepth ?? numberValue(event),
       });
     }
   }
@@ -156,7 +156,7 @@
           min={depthInputMin}
           step={depthInputStep}
           value={depthInputValue}
-          readonly={isPartitionWall}
+          readonly={hasFixedDepth}
           oninput={updateDepth}
         />
       </label>

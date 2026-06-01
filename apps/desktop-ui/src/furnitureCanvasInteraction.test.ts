@@ -77,13 +77,20 @@ describe("furniture canvas interaction layout", () => {
     expect(planCanvasSource).toContain('symbol.shape === "sliding-door"');
   });
 
-  it("locks partition wall thickness in canvas and inspector resizing controls", () => {
-    expect(planCanvasSource).toContain("isPartitionWallObject");
+  it("locks thin linear object thickness in canvas and inspector resizing controls", () => {
+    expect(planCanvasSource).toContain("fixedDepthForObject");
     expect(planCanvasSource).toContain("resizeHandlesForObject(object)");
     expect(planCanvasSource).toContain("deltaDepthM: 0");
-    expect(planCanvasSource).toContain("PARTITION_WALL_THICKNESS_M");
-    expect(inspectorSource).toContain("PARTITION_WALL_THICKNESS_M");
-    expect(inspectorSource).toContain("readonly={isPartitionWall}");
+    expect(inspectorSource).toContain("fixedDepthForObject");
+    expect(inspectorSource).toContain("readonly={hasFixedDepth}");
+  });
+
+  it("draws wardrobe doors as white sliding panels like the reference wardrobe doors", () => {
+    expect(planCanvasSource).toContain('class="wardrobe-door-panel fixed"');
+    expect(planCanvasSource).toContain('class="wardrobe-door-panel sliding"');
+    expect(planCanvasSource).toMatch(/\.wardrobe-door-panel\s*{[\s\S]*fill:\s*#fffdf8;/);
+    expect(planCanvasSource).toMatch(/\.wardrobe-door-panel\s*{[\s\S]*stroke:\s*#111;/);
+    expect(planCanvasSource).toMatch(/\.wardrobe-door-panel\s*{[\s\S]*stroke-width:\s*0\.45;/);
   });
 
   it("renders live wall-distance guides while furniture is moving", () => {
