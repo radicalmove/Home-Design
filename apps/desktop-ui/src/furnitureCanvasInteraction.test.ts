@@ -9,6 +9,11 @@ import furnitureBackgroundSource from "../public/views/reference_plan.svg?raw";
 
 const appStylesSource = readFileSync(new URL("./styles.css", import.meta.url), "utf8");
 
+function cssBlock(source: string, selector: string): string {
+  const escapedSelector = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return source.match(new RegExp(`${escapedSelector}\\s*{(?<body>[\\s\\S]*?)}`))?.groups?.body ?? "";
+}
+
 describe("furniture canvas interaction layout", () => {
   it("uses a crisp SVG viewBox canvas with a tall editing viewport", () => {
     expect(planCanvasSource).toContain("viewBox={viewBoxValue}");
@@ -73,7 +78,7 @@ describe("furniture canvas interaction layout", () => {
     expect(planCanvasSource).toContain('symbol.shape === "bedside-table"');
     expect(planCanvasSource).toContain('symbol.shape === "drawers"');
     expect(planCanvasSource).toContain('symbol.shape === "partition-wall"');
-    expect(planCanvasSource).toContain('rx={symbol.shape === "partition-wall" || symbol.shape === "sliding-door" ? 0 : 2}');
+    expect(planCanvasSource).toContain("rx={symbolCornerRadius(symbol.shape)}");
     expect(planCanvasSource).toContain('symbol.shape === "sliding-door"');
   });
 
@@ -88,7 +93,7 @@ describe("furniture canvas interaction layout", () => {
   it("draws wardrobe doors as white sliding panels like the reference wardrobe doors", () => {
     expect(planCanvasSource).toContain('class="wardrobe-door-panel fixed"');
     expect(planCanvasSource).toContain('class="wardrobe-door-panel sliding"');
-    expect(planCanvasSource).toContain('rx={symbol.shape === "partition-wall" || symbol.shape === "sliding-door" ? 0 : 2}');
+    expect(planCanvasSource).toContain("rx={symbolCornerRadius(symbol.shape)}");
     expect(planCanvasSource).toContain("x={bounds.x}");
     expect(planCanvasSource).toContain("width={bounds.width * 0.58}");
     expect(planCanvasSource).toMatch(/\.wardrobe-door-panel\s*{[\s\S]*fill:\s*#fffdf8;/);
@@ -149,6 +154,26 @@ describe("furniture canvas interaction layout", () => {
     expect(planCanvasSource).toContain('class="wardrobe-base-line"');
     expect(planCanvasSource).toContain('class="bed-blanket-fold"');
     expect(planCanvasSource).toContain('class="sofa-cushion-divider"');
+  });
+
+  it("uses solid outlines for all fixed furniture symbol bodies", () => {
+    const fixedSymbolStyle = cssBlock(planCanvasSource, ".furniture-object.fixed .symbol-body");
+
+    expect(fixedSymbolStyle).toContain("stroke-dasharray: none;");
+    expect(fixedSymbolStyle).not.toContain("stroke-dasharray: 4 2;");
+  });
+
+  it("keeps desk and cabinet-style symbol bodies square-cornered", () => {
+    expect(planCanvasSource).toContain("const SQUARE_CORNER_SYMBOLS");
+    expect(planCanvasSource).toContain('"bedside-table"');
+    expect(planCanvasSource).toContain('"desk"');
+    expect(planCanvasSource).toContain('"drawers"');
+    expect(planCanvasSource).toContain('"storage"');
+    expect(planCanvasSource).toContain('"wardrobe"');
+    expect(planCanvasSource).toContain("function symbolCornerRadius");
+    expect(planCanvasSource).toContain("rx={symbolCornerRadius(symbol.shape)}");
+    expect(planCanvasSource).toContain('class="bedside-table-top"');
+    expect(planCanvasSource).toContain('rx="0"');
   });
 
   it("sizes edit handles from screen pixels instead of fixed SVG units", () => {

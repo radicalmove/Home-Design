@@ -180,6 +180,15 @@
 
   const OUTLINE_ONLY_SYMBOLS = new Set(["armchair", "table-and-chairs", "toilet"]);
   const INTRINSIC_TEXT_SYMBOLS = new Set(["dryer", "refrigerator", "washer"]);
+  const SQUARE_CORNER_SYMBOLS = new Set([
+    "bedside-table",
+    "desk",
+    "drawers",
+    "partition-wall",
+    "sliding-door",
+    "storage",
+    "wardrobe",
+  ]);
 
   function symbolUsesBaseRect(shape: string): boolean {
     return !OUTLINE_ONLY_SYMBOLS.has(shape);
@@ -187,6 +196,10 @@
 
   function symbolShowsIntrinsicText(shape: string): boolean {
     return INTRINSIC_TEXT_SYMBOLS.has(shape);
+  }
+
+  function symbolCornerRadius(shape: string): number {
+    return SQUARE_CORNER_SYMBOLS.has(shape) ? 0 : 2;
   }
 
   const REFERENCE_WALL_SEGMENTS: WallSegment[] = withWallThickness([
@@ -661,7 +674,7 @@
               y={bounds.y}
               width={bounds.width}
               height={bounds.height}
-              rx={symbol.shape === "partition-wall" || symbol.shape === "sliding-door" ? 0 : 2}
+              rx={symbolCornerRadius(symbol.shape)}
               fill={object.colour}
             />
           {/if}
@@ -711,7 +724,7 @@
           {:else if symbol.shape === "island"}
             <rect x={bounds.x + bounds.width * 0.08} y={bounds.y + bounds.height * 0.08} width={bounds.width * 0.84} height={bounds.height * 0.84} rx={Math.min(bounds.width, bounds.height) * 0.16} />
           {:else if symbol.shape === "bedside-table"}
-            <rect x={bounds.x + bounds.width * 0.18} y={bounds.y + bounds.height * 0.18} width={bounds.width * 0.64} height={bounds.height * 0.64} rx="2" />
+            <rect class="bedside-table-top" x={bounds.x + bounds.width * 0.18} y={bounds.y + bounds.height * 0.18} width={bounds.width * 0.64} height={bounds.height * 0.64} rx="0" />
             <circle cx={bounds.cx} cy={bounds.y + bounds.height * 0.58} r={Math.max(1.5, Math.min(bounds.width, bounds.height) * 0.08)} />
           {:else if symbol.shape === "desk"}
             <line x1={bounds.x} y1={bounds.y + bounds.height * 0.72} x2={bounds.x + bounds.width} y2={bounds.y + bounds.height * 0.72} />
@@ -899,7 +912,7 @@
 
   .furniture-object.fixed .symbol-body {
     fill-opacity: 0.92;
-    stroke-dasharray: 4 2;
+    stroke-dasharray: none;
   }
 
   .furniture-object.moveable .symbol-body {
