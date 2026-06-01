@@ -5,9 +5,9 @@ mod model;
 mod validation;
 
 pub use furniture::{
-    FurnitureCatalog, FurnitureCatalogGroup, FurnitureCatalogItem, FurnitureLayerKind,
-    FurnitureLShapeDimensions, FurnitureLayout, FurnitureObject, FurnitureValidationResult,
-    PlanPoint, PlanTransform, default_furniture_catalog, default_plan_transform,
+    FurnitureCatalog, FurnitureCatalogGroup, FurnitureCatalogItem, FurnitureLShapeDimensions,
+    FurnitureLayerKind, FurnitureLayout, FurnitureObject, FurnitureValidationResult, PlanPoint,
+    PlanTransform, default_furniture_catalog, default_plan_transform,
     seed_current_furniture_layout, validate_furniture_layout,
 };
 pub use model::{

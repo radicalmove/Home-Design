@@ -16,6 +16,11 @@
     svgPointInViewBox,
     viewOriginAfterPan,
   } from "./lib/furnitureGeometry";
+  import {
+    MIN_FURNITURE_SIZE_M,
+    PARTITION_WALL_THICKNESS_M,
+    isPartitionWallObject,
+  } from "./lib/furnitureState";
   import { symbolForFurnitureObject } from "./lib/furnitureSymbols";
   import type { ResizeHandleName, WallDistanceGuide, WallSegment } from "./lib/furnitureGeometry";
   import type { FurnitureLShapeDimensions, FurnitureLayout, FurnitureObject, PlanPoint } from "./types";
@@ -163,6 +168,12 @@
       ...segment,
       thickness_px: wallThicknessForSegment(segment.id),
     }));
+  }
+
+  function resizeHandlesForObject(object: FurnitureObject): typeof RESIZE_HANDLES {
+    return isPartitionWallObject(object)
+      ? RESIZE_HANDLES.filter((handle) => handle.y === 0.5)
+      : RESIZE_HANDLES;
   }
 
   const REFERENCE_WALL_SEGMENTS: WallSegment[] = withWallThickness([
@@ -508,14 +519,19 @@
       dragState.object.rotation_deg,
       layout.plan_transform,
     );
+    const isPartitionWall = isPartitionWallObject(dragState.object);
+    const resizeDelta = isPartitionWall ? { ...localDelta, deltaDepthM: 0 } : localDelta;
     const resized = resizeObjectFromHandle(
       dragState.object,
       dragState.resizeHandle ?? "se",
-      localDelta,
+      resizeDelta,
+      isPartitionWall
+        ? { widthM: MIN_FURNITURE_SIZE_M, depthM: PARTITION_WALL_THICKNESS_M }
+        : MIN_FURNITURE_SIZE_M,
     );
     const size = {
       width_m: resized.width_m,
-      depth_m: resized.depth_m,
+      depth_m: isPartitionWall ? PARTITION_WALL_THICKNESS_M : resized.depth_m,
     };
     onResizeObject(dragState.object.id, size, { x: resized.x_m, y: resized.y_m });
     const local = localPointFromEvent(event);
@@ -677,7 +693,7 @@
               tabindex="0"
               onpointerdown={(event) => startRotate(event, object)}
             />
-            {#each RESIZE_HANDLES as handle}
+            {#each resizeHandlesForObject(object) as handle}
               <rect
                 class={`resize-handle ${handle.name}`}
                 data-resize-handle={handle.name}

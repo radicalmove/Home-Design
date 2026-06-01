@@ -6,6 +6,7 @@ import {
   duplicateObject,
   moveObject,
   normaliseFurnitureLayout,
+  PARTITION_WALL_THICKNESS_M,
   recolourObject,
   resizeObject,
   rotateObject,
@@ -151,6 +152,67 @@ describe("furniture state reducers", () => {
       y_m: 7.47,
       width_m: 1.7,
       depth_m: 0.67,
+    });
+  });
+
+  it("keeps partition wall depth locked when resizing", () => {
+    const withPartitionWall: FurnitureLayout = {
+      ...layout,
+      objects: [
+        ...layout.objects,
+        {
+          id: "partition",
+          catalog_id: "partition_wall",
+          layer: "fixed",
+          type: "partition_wall",
+          label: "Partition wall",
+          abbreviation: null,
+          x_m: 6,
+          y_m: 7,
+          width_m: 1.2,
+          depth_m: PARTITION_WALL_THICKNESS_M,
+          rotation_deg: 0,
+          colour: "#4e555e",
+          locked: false,
+          notes: null,
+          evidence: null,
+        },
+      ],
+    };
+
+    const resized = resizeObject(withPartitionWall, "partition", {
+      width_m: 2.4,
+      depth_m: 0.8,
+    });
+
+    expect(resized.objects.at(-1)).toMatchObject({
+      width_m: 2.4,
+      depth_m: PARTITION_WALL_THICKNESS_M,
+    });
+  });
+
+  it("repairs saved partition walls that were accidentally widened", () => {
+    const loaded: FurnitureLayout = {
+      ...layout,
+      objects: [
+        {
+          ...layout.objects[0],
+          id: "partition",
+          catalog_id: "partition_wall",
+          layer: "fixed",
+          type: "partition_wall",
+          label: "Partition wall",
+          width_m: 1.234,
+          depth_m: 0.8,
+        },
+      ],
+    };
+
+    const normalised = normaliseFurnitureLayout(loaded);
+
+    expect(normalised.objects[0]).toMatchObject({
+      width_m: 1.23,
+      depth_m: PARTITION_WALL_THICKNESS_M,
     });
   });
 

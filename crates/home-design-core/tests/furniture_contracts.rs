@@ -1,5 +1,5 @@
 use home_design_core::{
-    FurnitureLayerKind, default_furniture_catalog, seed_current_furniture_layout,
+    FurnitureLayerKind, FurnitureObject, default_furniture_catalog, seed_current_furniture_layout,
     validate_furniture_layout,
 };
 use std::collections::BTreeSet;
@@ -217,6 +217,44 @@ fn furniture_layout_validation_rejects_duplicate_ids_and_invalid_dimensions() {
             .errors
             .iter()
             .any(|error| error.contains("l_shape.main_depth_m must fit within depth_m"))
+    );
+}
+
+#[test]
+fn furniture_layout_validation_allows_thin_partition_wall_depth() {
+    let mut layout = seed_current_furniture_layout();
+    layout.objects.push(FurnitureObject {
+        id: "test_partition_wall".to_string(),
+        catalog_id: Some("partition_wall".to_string()),
+        layer: FurnitureLayerKind::Fixed,
+        object_type: "partition_wall".to_string(),
+        label: "Partition wall".to_string(),
+        abbreviation: None,
+        x_m: 6.0,
+        y_m: 7.0,
+        width_m: 1.2,
+        depth_m: 0.03,
+        l_shape: None,
+        rotation_deg: 0.0,
+        colour: "#4e555e".to_string(),
+        locked: false,
+        notes: None,
+        evidence: None,
+    });
+
+    let result = validate_furniture_layout(&layout);
+
+    assert!(result.ok(), "{:?}", result.errors);
+
+    let mut non_partition_layout = seed_current_furniture_layout();
+    non_partition_layout.objects[0].depth_m = 0.03;
+    let non_partition_result = validate_furniture_layout(&non_partition_layout);
+
+    assert!(
+        non_partition_result
+            .errors
+            .iter()
+            .any(|error| error.contains("depth_m must be positive"))
     );
 }
 

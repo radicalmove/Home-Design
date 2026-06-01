@@ -45,6 +45,13 @@ type ResizeHandleDirection = {
   y: -1 | 0 | 1;
 };
 
+type ResizeMinimums =
+  | number
+  | {
+      widthM: number;
+      depthM: number;
+    };
+
 const RESIZE_HANDLE_DIRECTIONS: Record<ResizeHandleName, ResizeHandleDirection> = {
   n: { x: 0, y: -1 },
   ne: { x: 1, y: -1 },
@@ -371,6 +378,12 @@ export function normaliseDegrees(degrees: number): number {
   return Math.round(((degrees % 360) + 360) % 360);
 }
 
+function resizeMinimums(minimums: ResizeMinimums): { widthM: number; depthM: number } {
+  return typeof minimums === "number"
+    ? { widthM: minimums, depthM: minimums }
+    : minimums;
+}
+
 export function rotateDeltaIntoObjectSpace(
   deltaSvg: PlanPoint,
   rotationDeg: number,
@@ -389,12 +402,14 @@ export function rotateDeltaIntoObjectSpace(
 export function resizeObjectFromCorner<T extends FurnitureObject>(
   object: T,
   delta: { deltaWidthM: number; deltaDepthM: number },
-  minimumM = 0.2,
+  minimumM: ResizeMinimums = 0.2,
 ): T {
+  const minimums = resizeMinimums(minimumM);
+
   return {
     ...object,
-    width_m: Math.max(minimumM, object.width_m + delta.deltaWidthM),
-    depth_m: Math.max(minimumM, object.depth_m + delta.deltaDepthM),
+    width_m: Math.max(minimums.widthM, object.width_m + delta.deltaWidthM),
+    depth_m: Math.max(minimums.depthM, object.depth_m + delta.deltaDepthM),
   };
 }
 
@@ -420,11 +435,12 @@ export function resizeObjectFromHandle<T extends FurnitureObject>(
   object: T,
   handle: ResizeHandleName,
   delta: { deltaWidthM: number; deltaDepthM: number },
-  minimumM = 0.2,
+  minimumM: ResizeMinimums = 0.2,
 ): T {
   const direction = RESIZE_HANDLE_DIRECTIONS[handle];
-  const width = resizedAxis(object.width_m, delta.deltaWidthM, direction.x, minimumM);
-  const depth = resizedAxis(object.depth_m, delta.deltaDepthM, direction.y, minimumM);
+  const minimums = resizeMinimums(minimumM);
+  const width = resizedAxis(object.width_m, delta.deltaWidthM, direction.x, minimums.widthM);
+  const depth = resizedAxis(object.depth_m, delta.deltaDepthM, direction.y, minimums.depthM);
   const radians = (object.rotation_deg * Math.PI) / 180;
   const cos = Math.cos(radians);
   const sin = Math.sin(radians);

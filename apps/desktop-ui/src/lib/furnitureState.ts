@@ -19,8 +19,29 @@ const DEFAULT_L_SHAPES: Record<string, FurnitureLShapeDimensions> = {
   l_desk: { main_depth_m: 0.65, return_width_m: 0.65 },
 };
 
+export const MIN_FURNITURE_SIZE_M = 0.2;
+export const PARTITION_WALL_THICKNESS_M = 0.03;
+
 function roundMetres(value: number): number {
   return Math.round(value * 100) / 100;
+}
+
+export function isPartitionWallObject(
+  object: Pick<FurnitureObject, "type" | "catalog_id">,
+): boolean {
+  return object.type === "partition_wall" || object.catalog_id === "partition_wall";
+}
+
+function normaliseObjectWidth(widthM: number): number {
+  return roundMetres(Math.max(MIN_FURNITURE_SIZE_M, widthM));
+}
+
+function normaliseObjectDepth(object: FurnitureObject, depthM: number): number {
+  if (isPartitionWallObject(object)) {
+    return PARTITION_WALL_THICKNESS_M;
+  }
+
+  return roundMetres(Math.max(MIN_FURNITURE_SIZE_M, depthM));
 }
 
 function nextObjectId(existingIds: Set<string>, baseId: string): string {
@@ -54,8 +75,8 @@ function normaliseLShapeDimensions(
   }
 
   return {
-    main_depth_m: roundMetres(Math.min(depthM, Math.max(0.2, lShape.main_depth_m))),
-    return_width_m: roundMetres(Math.min(widthM, Math.max(0.2, lShape.return_width_m))),
+    main_depth_m: roundMetres(Math.min(depthM, Math.max(MIN_FURNITURE_SIZE_M, lShape.main_depth_m))),
+    return_width_m: roundMetres(Math.min(widthM, Math.max(MIN_FURNITURE_SIZE_M, lShape.return_width_m))),
   };
 }
 
@@ -94,8 +115,8 @@ function withLegacyLShapeDefaults(object: FurnitureObject): FurnitureObject {
 
 function normaliseFurnitureObject(object: FurnitureObject): FurnitureObject {
   const objectWithDefaults = withLegacyLShapeDefaults(object);
-  const widthM = roundMetres(Math.max(0.2, objectWithDefaults.width_m));
-  const depthM = roundMetres(Math.max(0.2, objectWithDefaults.depth_m));
+  const widthM = normaliseObjectWidth(objectWithDefaults.width_m);
+  const depthM = normaliseObjectDepth(objectWithDefaults, objectWithDefaults.depth_m);
 
   return {
     ...objectWithDefaults,
@@ -161,16 +182,17 @@ export function resizeObject(
   objectId: string,
   size: FurnitureSize,
 ): FurnitureLayout {
-  return updateObject(layout, objectId, (object) => ({
-    ...object,
-    width_m: roundMetres(Math.max(0.2, size.width_m)),
-    depth_m: roundMetres(Math.max(0.2, size.depth_m)),
-    l_shape: normaliseLShapeDimensions(
-      size.l_shape ?? object.l_shape,
-      roundMetres(Math.max(0.2, size.width_m)),
-      roundMetres(Math.max(0.2, size.depth_m)),
-    ),
-  }));
+  return updateObject(layout, objectId, (object) => {
+    const widthM = normaliseObjectWidth(size.width_m);
+    const depthM = normaliseObjectDepth(object, size.depth_m);
+
+    return {
+      ...object,
+      width_m: widthM,
+      depth_m: depthM,
+      l_shape: normaliseLShapeDimensions(size.l_shape ?? object.l_shape, widthM, depthM),
+    };
+  });
 }
 
 export function rotateObject(

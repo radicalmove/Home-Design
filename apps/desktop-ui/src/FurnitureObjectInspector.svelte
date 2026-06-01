@@ -1,4 +1,9 @@
 <script lang="ts">
+  import {
+    MIN_FURNITURE_SIZE_M,
+    PARTITION_WALL_THICKNESS_M,
+    isPartitionWallObject,
+  } from "./lib/furnitureState";
   import type { FurnitureLShapeDimensions, FurnitureLayerKind, FurnitureObject, PlanPoint } from "./types";
 
   type FurnitureSize = {
@@ -29,6 +34,11 @@
     onDelete,
   }: Props = $props();
 
+  let isPartitionWall = $derived(Boolean(object && isPartitionWallObject(object)));
+  let depthInputMin = $derived(isPartitionWall ? PARTITION_WALL_THICKNESS_M : MIN_FURNITURE_SIZE_M);
+  let depthInputStep = $derived(isPartitionWall ? 0.01 : 0.05);
+  let depthInputValue = $derived(isPartitionWall ? PARTITION_WALL_THICKNESS_M : object?.depth_m);
+
   function numberValue(event: Event): number {
     return Number((event.currentTarget as HTMLInputElement).value);
   }
@@ -53,7 +63,10 @@
 
   function updateDepth(event: Event) {
     if (object) {
-      onResize(object.id, { width_m: object.width_m, depth_m: numberValue(event) });
+      onResize(object.id, {
+        width_m: object.width_m,
+        depth_m: isPartitionWall ? PARTITION_WALL_THICKNESS_M : numberValue(event),
+      });
     }
   }
 
@@ -138,7 +151,14 @@
       </label>
       <label>
         D m
-        <input type="number" min="0.2" step="0.05" value={object.depth_m} oninput={updateDepth} />
+        <input
+          type="number"
+          min={depthInputMin}
+          step={depthInputStep}
+          value={depthInputValue}
+          readonly={isPartitionWall}
+          oninput={updateDepth}
+        />
       </label>
       {#if object.l_shape}
         <label>

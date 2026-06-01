@@ -77,6 +77,15 @@ describe("furniture canvas interaction layout", () => {
     expect(planCanvasSource).toContain('symbol.shape === "sliding-door"');
   });
 
+  it("locks partition wall thickness in canvas and inspector resizing controls", () => {
+    expect(planCanvasSource).toContain("isPartitionWallObject");
+    expect(planCanvasSource).toContain("resizeHandlesForObject(object)");
+    expect(planCanvasSource).toContain("deltaDepthM: 0");
+    expect(planCanvasSource).toContain("PARTITION_WALL_THICKNESS_M");
+    expect(inspectorSource).toContain("PARTITION_WALL_THICKNESS_M");
+    expect(inspectorSource).toContain("readonly={isPartitionWall}");
+  });
+
   it("renders live wall-distance guides while furniture is moving", () => {
     expect(planCanvasSource).toContain("nearestWallDistanceGuides");
     expect(planCanvasSource).toContain("wallDistanceGuides");
@@ -137,5 +146,13 @@ describe("furniture canvas interaction layout", () => {
     expect(inspectorSource).toContain("<select");
     expect(inspectorSource).toContain('<option value="fixed">Fixed</option>');
     expect(inspectorSource).toContain('<option value="moveable">Moveable</option>');
+  });
+
+  it("deletes the selected object from the keyboard when focus is not in an editable field", () => {
+    expect(editorSource).toContain("<svelte:window onkeydown={handleEditorKeyDown}");
+    expect(editorSource).toContain("isEditableKeyboardTarget");
+    expect(editorSource).toContain('event.key !== "Delete"');
+    expect(editorSource).toContain('event.key !== "Backspace"');
+    expect(editorSource).toContain("handleDeleteObject(selectedObjectId)");
   });
 });

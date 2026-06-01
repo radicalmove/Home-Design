@@ -150,6 +150,25 @@
     }
   }
 
+  function isEditableKeyboardTarget(target: EventTarget | null): boolean {
+    return target instanceof Element
+      ? Boolean(target.closest("input, textarea, select, [contenteditable='true']"))
+      : false;
+  }
+
+  function handleEditorKeyDown(event: KeyboardEvent) {
+    if (
+      !selectedObjectId ||
+      isEditableKeyboardTarget(event.target) ||
+      (event.key !== "Delete" && event.key !== "Backspace")
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    handleDeleteObject(selectedObjectId);
+  }
+
   function handleResizePreview(label: string | null, x: number, y: number) {
     dimensionBadge = { label, x, y };
   }
@@ -205,6 +224,8 @@
     };
   });
 </script>
+
+<svelte:window onkeydown={handleEditorKeyDown} />
 
 {#if loading}
   <div class="state-panel">Loading furniture editor...</div>

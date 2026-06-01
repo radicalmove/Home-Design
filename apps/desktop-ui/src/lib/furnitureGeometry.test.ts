@@ -123,6 +123,34 @@ describe("furniture geometry", () => {
     expect(resized.y_m).toBeCloseTo(rotated.y_m + 0.5);
   });
 
+  it("supports separate width and depth minimums for thin partition wall resizing", () => {
+    const partitionWall = {
+      ...object,
+      id: "partition-wall",
+      catalog_id: "partition_wall",
+      type: "partition_wall",
+      width_m: 1.2,
+      depth_m: 0.03,
+    };
+
+    const resizedSouth = resizeObjectFromHandle(
+      partitionWall,
+      "s",
+      { deltaWidthM: 0, deltaDepthM: 0 },
+      { widthM: 0.2, depthM: 0.03 },
+    );
+    const resizedWest = resizeObjectFromHandle(
+      partitionWall,
+      "w",
+      { deltaWidthM: 2, deltaDepthM: 0 },
+      { widthM: 0.2, depthM: 0.03 },
+    );
+
+    expect(resizedSouth.depth_m).toBeCloseTo(0.03);
+    expect(resizedWest.width_m).toBeCloseTo(0.2);
+    expect(resizedWest.depth_m).toBeCloseTo(0.03);
+  });
+
   it("clamps and labels furniture plan zoom", () => {
     expect(clampPlanZoom(0.2)).toBe(0.5);
     expect(clampPlanZoom(12)).toBe(10);

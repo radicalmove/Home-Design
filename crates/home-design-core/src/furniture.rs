@@ -1,6 +1,9 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
+const MIN_FURNITURE_DIMENSION_M: f64 = 0.05;
+const PARTITION_WALL_TYPE: &str = "partition_wall";
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum FurnitureLayerKind {
@@ -62,6 +65,11 @@ pub struct FurnitureLayout {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct FurnitureCatalog {
     pub groups: Vec<FurnitureCatalogGroup>,
+}
+
+fn is_partition_wall_object(object: &FurnitureObject) -> bool {
+    object.object_type == PARTITION_WALL_TYPE
+        || object.catalog_id.as_deref() == Some(PARTITION_WALL_TYPE)
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -839,10 +847,12 @@ pub fn validate_furniture_layout(layout: &FurnitureLayout) -> FurnitureValidatio
             object.rotation_deg,
             &mut errors,
         );
-        if object.width_m <= 0.05 {
+        if object.width_m <= MIN_FURNITURE_DIMENSION_M {
             errors.push(format!("{} width_m must be positive", object.id));
         }
-        if object.depth_m <= 0.05 {
+        if object.depth_m <= 0.0
+            || (!is_partition_wall_object(object) && object.depth_m <= MIN_FURNITURE_DIMENSION_M)
+        {
             errors.push(format!("{} depth_m must be positive", object.id));
         }
         if let Some(l_shape) = &object.l_shape {
