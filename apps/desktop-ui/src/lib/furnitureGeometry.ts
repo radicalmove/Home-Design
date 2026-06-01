@@ -71,7 +71,7 @@ const RESIZE_HANDLE_DIRECTIONS: Record<ResizeHandleName, ResizeHandleDirection> 
 };
 
 export const MIN_PLAN_ZOOM = 0.5;
-export const MAX_PLAN_ZOOM = 10;
+export const MAX_PLAN_ZOOM = 20;
 export const PLAN_WHEEL_ZOOM_FACTOR = 1.1;
 export const DEFAULT_PLAN_VIEWBOX_WIDTH = 1600;
 

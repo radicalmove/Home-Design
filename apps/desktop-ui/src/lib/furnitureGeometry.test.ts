@@ -165,15 +165,15 @@ describe("furniture geometry", () => {
 
   it("clamps and labels furniture plan zoom", () => {
     expect(clampPlanZoom(0.2)).toBe(0.5);
-    expect(clampPlanZoom(12)).toBe(10);
+    expect(clampPlanZoom(24)).toBe(20);
     expect(planZoomLabel(1.25)).toBe("125%");
-    expect(planZoomLabel(10)).toBe("1000%");
+    expect(planZoomLabel(20)).toBe("2000%");
   });
 
-  it("computes wheel zoom up to 1000 percent", () => {
+  it("computes wheel zoom up to 2000 percent", () => {
     expect(nextWheelPlanZoom(1, -1)).toBe(1.1);
     expect(nextWheelPlanZoom(1, 1)).toBe(0.9);
-    expect(nextWheelPlanZoom(9.9, -1)).toBe(10);
+    expect(nextWheelPlanZoom(19.9, -1)).toBe(20);
   });
 
   it("finds nearest wall distances around an object footprint", () => {
