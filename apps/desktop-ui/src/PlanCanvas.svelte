@@ -14,6 +14,7 @@
     rotateDeltaIntoObjectSpace,
     screenPixelsToSvgUnits,
     svgPointInViewBox,
+    svgToMetres,
     viewOriginAfterPan,
   } from "./lib/furnitureGeometry";
   import {
@@ -68,6 +69,7 @@
     onRotateObject: (objectId: string, rotationDeg: number) => void;
     onZoomChange: (zoom: number) => void;
     onResizePreview: (label: string | null, x: number, y: number) => void;
+    onViewportCenterChange: (point: PlanPoint) => void;
   };
 
   const RESIZE_HANDLES: Array<{
@@ -237,6 +239,7 @@
     onRotateObject,
     onZoomChange,
     onResizePreview,
+    onViewportCenterChange,
   }: Props = $props();
 
   let canvasElement = $state<HTMLDivElement | null>(null);
@@ -311,6 +314,22 @@
       viewBoxSize,
     );
     previousZoom = zoom;
+  });
+
+  $effect(() => {
+    if (!viewOriginInitialised) {
+      return;
+    }
+
+    onViewportCenterChange(
+      svgToMetres(
+        {
+          x: viewOrigin.x + viewBoxSize.width / 2,
+          y: viewOrigin.y + viewBoxSize.height / 2,
+        },
+        layout.plan_transform,
+      ),
+    );
   });
 
   function svgPointFromEvent(event: PointerEvent): PlanPoint {
@@ -618,7 +637,7 @@
               y={bounds.y}
               width={bounds.width}
               height={bounds.height}
-              rx={symbol.shape === "partition-wall" ? 0 : 2}
+              rx={symbol.shape === "partition-wall" || symbol.shape === "sliding-door" ? 0 : 2}
               fill={object.colour}
             />
           {/if}
@@ -662,16 +681,16 @@
           {:else if symbol.shape === "sliding-door"}
             <rect
               class="wardrobe-door-panel fixed"
-              x={bounds.x + bounds.width * 0.12}
+              x={bounds.x}
               y={bounds.y + bounds.height * 0.52}
-              width={bounds.width * 0.46}
+              width={bounds.width * 0.58}
               height={bounds.height * 0.34}
             />
             <rect
               class="wardrobe-door-panel sliding"
               x={bounds.x + bounds.width * 0.42}
               y={bounds.y + bounds.height * 0.14}
-              width={bounds.width * 0.46}
+              width={bounds.width * 0.58}
               height={bounds.height * 0.34}
             />
           {:else if symbol.shape === "storage"}

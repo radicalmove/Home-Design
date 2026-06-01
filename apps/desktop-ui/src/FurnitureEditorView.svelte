@@ -6,9 +6,16 @@
   import FurnitureObjectInspector from "./FurnitureObjectInspector.svelte";
   import PlanCanvas from "./PlanCanvas.svelte";
   import { clampPlanZoom, planZoomLabel } from "./lib/furnitureGeometry";
+  import {
+    FURNITURE_HISTORY_LIMIT,
+    pushFurnitureHistory,
+    redoFurnitureHistory,
+    undoFurnitureHistory,
+  } from "./lib/furnitureHistory";
   import { loadFurnitureEditorData, persistFurnitureLayout } from "./lib/furnitureStore";
   import {
     addCatalogItem,
+    catalogItemTopLeftForViewportCenter,
     changeObjectLayer,
     deleteObject,
     duplicateObject,
@@ -26,6 +33,7 @@
     FurnitureLayout,
     PlanPoint,
   } from "./types";
+  import type { FurnitureHistoryState, FurnitureHistorySnapshot } from "./lib/furnitureHistory";
 
   type FurnitureSize = {
     width_m: number;
@@ -55,6 +63,8 @@
   let saveState = $state<SaveState>("idle");
   let dimensionBadge = $state({ label: null as string | null, x: 0, y: 0 });
   let planZoom = $state(1);
+  let currentViewportCenter = $state<PlanPoint | null>(null);
+  let history = $state<FurnitureHistoryState>({ undoStack: [], redoStack: [] });
 
   let saveTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -84,8 +94,24 @@
     }, 300);
   }
 
-  function commitLayout(nextLayout: FurnitureLayout) {
+  function currentHistorySnapshot(): FurnitureHistorySnapshot | null {
+    return layout ? { layout, selectedObjectId } : null;
+  }
+
+  function restoreHistorySnapshot(snapshot: FurnitureHistorySnapshot) {
+    layout = snapshot.layout;
+    selectedObjectId = snapshot.selectedObjectId;
+    dimensionBadge = { label: null, x: 0, y: 0 };
+    scheduleSave(snapshot.layout);
+  }
+
+  function commitLayout(nextLayout: FurnitureLayout, nextSelectedObjectId = selectedObjectId) {
+    const currentSnapshot = currentHistorySnapshot();
+    if (currentSnapshot) {
+      history = pushFurnitureHistory(history, currentSnapshot);
+    }
     layout = nextLayout;
+    selectedObjectId = nextSelectedObjectId;
     scheduleSave(nextLayout);
   }
 
@@ -94,12 +120,13 @@
       return;
     }
 
-    const anchor = selectedObject
-      ? { x: selectedObject.x_m + 0.35, y: selectedObject.y_m + 0.35 }
-      : { x: 7.5, y: 5.2 };
-    const nextLayout = addCatalogItem(layout, item, anchor);
-    selectedObjectId = nextLayout.objects[nextLayout.objects.length - 1]?.id ?? selectedObjectId;
-    commitLayout(nextLayout);
+    const nextLayout = addCatalogItem(
+      layout,
+      item,
+      catalogItemTopLeftForViewportCenter(item, currentViewportCenter ?? { x: 7.5, y: 5.2 }),
+    );
+    const nextSelectedObjectId = nextLayout.objects[nextLayout.objects.length - 1]?.id ?? selectedObjectId;
+    commitLayout(nextLayout, nextSelectedObjectId);
   }
 
   function handleMoveObject(objectId: string, point: PlanPoint) {
@@ -139,15 +166,44 @@
     }
 
     const nextLayout = duplicateObject(layout, objectId);
-    selectedObjectId = nextLayout.objects[nextLayout.objects.length - 1]?.id ?? selectedObjectId;
-    commitLayout(nextLayout);
+    const nextSelectedObjectId = nextLayout.objects[nextLayout.objects.length - 1]?.id ?? selectedObjectId;
+    commitLayout(nextLayout, nextSelectedObjectId);
   }
 
   function handleDeleteObject(objectId: string) {
     if (layout) {
-      selectedObjectId = null;
-      commitLayout(deleteObject(layout, objectId));
+      commitLayout(deleteObject(layout, objectId), null);
     }
+  }
+
+  function undoLayout() {
+    const currentSnapshot = currentHistorySnapshot();
+    if (!currentSnapshot) {
+      return;
+    }
+
+    const result = undoFurnitureHistory(history, currentSnapshot);
+    if (!result) {
+      return;
+    }
+
+    history = result.history;
+    restoreHistorySnapshot(result.snapshot);
+  }
+
+  function redoLayout() {
+    const currentSnapshot = currentHistorySnapshot();
+    if (!currentSnapshot) {
+      return;
+    }
+
+    const result = redoFurnitureHistory(history, currentSnapshot);
+    if (!result) {
+      return;
+    }
+
+    history = result.history;
+    restoreHistorySnapshot(result.snapshot);
   }
 
   function isEditableKeyboardTarget(target: EventTarget | null): boolean {
@@ -156,12 +212,33 @@
       : false;
   }
 
+  function isUndoKeyboardShortcut(event: KeyboardEvent): boolean {
+    return (event.ctrlKey || event.metaKey) && !event.shiftKey && event.key.toLowerCase() === "z";
+  }
+
+  function isRedoKeyboardShortcut(event: KeyboardEvent): boolean {
+    const key = event.key.toLowerCase();
+    return (event.ctrlKey || event.metaKey) && ((event.shiftKey && key === "z") || key === "y");
+  }
+
   function handleEditorKeyDown(event: KeyboardEvent) {
-    if (
-      !selectedObjectId ||
-      isEditableKeyboardTarget(event.target) ||
-      (event.key !== "Delete" && event.key !== "Backspace")
-    ) {
+    if (isEditableKeyboardTarget(event.target)) {
+      return;
+    }
+
+    if (isUndoKeyboardShortcut(event)) {
+      event.preventDefault();
+      undoLayout();
+      return;
+    }
+
+    if (isRedoKeyboardShortcut(event)) {
+      event.preventDefault();
+      redoLayout();
+      return;
+    }
+
+    if (!selectedObjectId || (event.key !== "Delete" && event.key !== "Backspace")) {
       return;
     }
 
@@ -199,6 +276,7 @@
         catalog = data.catalog;
         const normalisedLayout = normaliseFurnitureLayout(data.layoutResult.layout);
         layout = normalisedLayout;
+        history = { undoStack: [], redoStack: [] };
         saveState = data.layoutResult.source === "saved" ? "saved" : "idle";
         if (JSON.stringify(normalisedLayout) !== JSON.stringify(data.layoutResult.layout)) {
           scheduleSave(normalisedLayout);
@@ -250,6 +328,26 @@
         <button type="button" aria-label="Zoom in" onclick={() => zoomPlan(0.1)}>+</button>
         <button type="button" onclick={resetPlanZoom}>Reset</button>
       </div>
+      <div class="editor-history-controls" aria-label="Furniture edit history controls">
+        <button
+          type="button"
+          aria-label="Undo"
+          title={`Undo (${history.undoStack.length}/${FURNITURE_HISTORY_LIMIT})`}
+          disabled={history.undoStack.length === 0}
+          onclick={undoLayout}
+        >
+          Undo
+        </button>
+        <button
+          type="button"
+          aria-label="Redo"
+          title={`Redo (${history.redoStack.length}/${FURNITURE_HISTORY_LIMIT})`}
+          disabled={history.redoStack.length === 0}
+          onclick={redoLayout}
+        >
+          Redo
+        </button>
+      </div>
       <div class:error={saveState === "error"} class="save-status" aria-live="polite">
         {#if saveState === "saving"}
           Saving...
@@ -282,6 +380,7 @@
           onRotateObject={handleRotateObject}
           onZoomChange={handlePlanZoom}
           onResizePreview={handleResizePreview}
+          onViewportCenterChange={(point) => (currentViewportCenter = point)}
         />
         <DimensionBadge
           label={dimensionBadge.label}
@@ -338,7 +437,20 @@
     border-radius: 8px;
   }
 
-  .editor-zoom-controls button {
+  .editor-history-controls {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(58px, auto));
+    gap: 6px;
+    align-items: center;
+    min-width: 0;
+    padding: 4px;
+    background: #ffffff;
+    border: 1px solid #d4dde1;
+    border-radius: 8px;
+  }
+
+  .editor-zoom-controls button,
+  .editor-history-controls button {
     min-width: 34px;
     min-height: 32px;
     padding: 5px 8px;
@@ -351,10 +463,19 @@
   }
 
   .editor-zoom-controls button:hover,
-  .editor-zoom-controls button:focus-visible {
+  .editor-zoom-controls button:focus-visible,
+  .editor-history-controls button:hover,
+  .editor-history-controls button:focus-visible {
     background: #e9f4f1;
     border-color: #8fcabd;
     outline: none;
+  }
+
+  .editor-history-controls button:disabled {
+    color: #8a999f;
+    cursor: not-allowed;
+    background: #f1f4f5;
+    border-color: #d8e0e3;
   }
 
   .editor-zoom-controls span {

@@ -190,6 +190,16 @@ export function addCatalogItem(
   };
 }
 
+export function catalogItemTopLeftForViewportCenter(
+  item: FurnitureCatalogItem,
+  viewportCenter: PlanPoint,
+): PlanPoint {
+  return {
+    x: viewportCenter.x - item.default_width_m / 2,
+    y: viewportCenter.y - item.default_depth_m / 2,
+  };
+}
+
 export function moveObject(layout: FurnitureLayout, objectId: string, point: PlanPoint): FurnitureLayout {
   return updateObject(layout, objectId, (object) => ({
     ...object,

@@ -73,7 +73,7 @@ describe("furniture canvas interaction layout", () => {
     expect(planCanvasSource).toContain('symbol.shape === "bedside-table"');
     expect(planCanvasSource).toContain('symbol.shape === "drawers"');
     expect(planCanvasSource).toContain('symbol.shape === "partition-wall"');
-    expect(planCanvasSource).toContain('rx={symbol.shape === "partition-wall" ? 0 : 2}');
+    expect(planCanvasSource).toContain('rx={symbol.shape === "partition-wall" || symbol.shape === "sliding-door" ? 0 : 2}');
     expect(planCanvasSource).toContain('symbol.shape === "sliding-door"');
   });
 
@@ -88,6 +88,9 @@ describe("furniture canvas interaction layout", () => {
   it("draws wardrobe doors as white sliding panels like the reference wardrobe doors", () => {
     expect(planCanvasSource).toContain('class="wardrobe-door-panel fixed"');
     expect(planCanvasSource).toContain('class="wardrobe-door-panel sliding"');
+    expect(planCanvasSource).toContain('rx={symbol.shape === "partition-wall" || symbol.shape === "sliding-door" ? 0 : 2}');
+    expect(planCanvasSource).toContain("x={bounds.x}");
+    expect(planCanvasSource).toContain("width={bounds.width * 0.58}");
     expect(planCanvasSource).toMatch(/\.wardrobe-door-panel\s*{[\s\S]*fill:\s*#fffdf8;/);
     expect(planCanvasSource).toMatch(/\.wardrobe-door-panel\s*{[\s\S]*stroke:\s*#111;/);
     expect(planCanvasSource).toMatch(/\.wardrobe-door-panel\s*{[\s\S]*stroke-width:\s*0\.45;/);
@@ -153,6 +156,31 @@ describe("furniture canvas interaction layout", () => {
     expect(inspectorSource).toContain("<select");
     expect(inspectorSource).toContain('<option value="fixed">Fixed</option>');
     expect(inspectorSource).toContain('<option value="moveable">Moveable</option>');
+  });
+
+  it("adds catalog furniture at the centre of the current canvas viewport", () => {
+    expect(planCanvasSource).toContain("onViewportCenterChange");
+    expect(planCanvasSource).toContain("svgToMetres");
+    expect(planCanvasSource).toContain("viewOrigin.x + viewBoxSize.width / 2");
+    expect(planCanvasSource).toContain("viewOrigin.y + viewBoxSize.height / 2");
+    expect(editorSource).toContain("currentViewportCenter");
+    expect(editorSource).toContain("onViewportCenterChange={(point) => (currentViewportCenter = point)}");
+    expect(editorSource).toContain("catalogItemTopLeftForViewportCenter(item, currentViewportCenter ??");
+    expect(editorSource).not.toContain("selectedObject.x_m + 0.35");
+  });
+
+  it("provides bounded undo and redo controls plus keyboard shortcuts", () => {
+    expect(editorSource).toContain("FURNITURE_HISTORY_LIMIT");
+    expect(editorSource).toContain("pushFurnitureHistory");
+    expect(editorSource).toContain("undoFurnitureHistory");
+    expect(editorSource).toContain("redoFurnitureHistory");
+    expect(editorSource).toContain("undoStack");
+    expect(editorSource).toContain("redoStack");
+    expect(editorSource).toContain("aria-label=\"Undo\"");
+    expect(editorSource).toContain("aria-label=\"Redo\"");
+    expect(editorSource).toContain("isUndoKeyboardShortcut");
+    expect(editorSource).toContain("isRedoKeyboardShortcut");
+    expect(editorSource).toContain("event.ctrlKey || event.metaKey");
   });
 
   it("deletes the selected object from the keyboard when focus is not in an editable field", () => {
