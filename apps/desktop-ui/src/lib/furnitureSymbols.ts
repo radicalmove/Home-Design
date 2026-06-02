@@ -15,6 +15,7 @@ export type FurnitureSymbol = {
     | "bedside-table"
     | "bath"
     | "basin"
+    | "sink"
     | "toilet"
     | "shower"
     | "desk"
@@ -47,6 +48,8 @@ export function symbolForFurnitureObject(
       return { shape: "island", abbreviation };
     case "oven_cooktop":
       return { shape: "oven", abbreviation };
+    case "kitchen_sink":
+      return { shape: "sink", abbreviation };
     case "wardrobe":
       return { shape: "wardrobe", abbreviation };
   }
@@ -70,6 +73,8 @@ export function symbolForFurnitureObject(
       return { shape: "shower", abbreviation };
     case "vanity":
       return { shape: "basin", abbreviation };
+    case "sink":
+      return { shape: "sink", abbreviation };
     case "fixture":
       return { shape: "fixture", abbreviation };
     case "fireplace":
@@ -105,6 +110,7 @@ export function symbolForFurnitureObject(
       return { shape: "wardrobe", abbreviation };
     case "bookcase":
     case "cabinet":
+    case "pantry":
       return { shape: "storage", abbreviation };
     default:
       return { shape: "rectangle", abbreviation };

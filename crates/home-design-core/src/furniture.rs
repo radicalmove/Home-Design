@@ -170,6 +170,17 @@ pub fn default_furniture_catalog() -> FurnitureCatalog {
                         "storage",
                     ),
                     catalog_item(
+                        "kitchen_sink",
+                        "Kitchen sink",
+                        FurnitureLayerKind::Fixed,
+                        "sink",
+                        None,
+                        0.75,
+                        0.5,
+                        "#eef1f0",
+                        "sink",
+                    ),
+                    catalog_item(
                         "counter",
                         "Bench / counter",
                         FurnitureLayerKind::Fixed,

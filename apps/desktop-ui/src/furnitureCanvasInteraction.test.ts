@@ -48,6 +48,21 @@ describe("furniture canvas interaction layout", () => {
     expect(planCanvasSource).toContain("{#if showLabels && symbol.abbreviation}");
   });
 
+  it("hides appliance text marks behind the furniture labels toggle", () => {
+    const gatedIntrinsicTextBranch = sourceBetween(
+      planCanvasSource,
+      "{#if showLabels && symbolShowsIntrinsicText(symbol.shape)}",
+      "{#if showLabels && symbol.abbreviation}",
+    );
+    const totalSymbolMarks = planCanvasSource.match(/<text class="symbol-mark"/g)?.length ?? 0;
+    const gatedSymbolMarks = gatedIntrinsicTextBranch.match(/<text class="symbol-mark"/g)?.length ?? 0;
+
+    expect(gatedIntrinsicTextBranch).toContain('symbol.shape === "washer" || symbol.shape === "dryer"');
+    expect(gatedIntrinsicTextBranch).toContain('symbol.shape === "refrigerator"');
+    expect(gatedIntrinsicTextBranch).toContain(">REF</text>");
+    expect(gatedSymbolMarks).toBe(totalSymbolMarks);
+  });
+
   it("hides reference room labels by default behind a separate toggle", () => {
     expect(editorSource).toContain("let roomLabelsVisible = $state(false);");
     expect(editorSource).toContain("roomLabelsVisible={roomLabelsVisible}");
@@ -80,7 +95,12 @@ describe("furniture canvas interaction layout", () => {
 
   it("renders L-shaped furniture footprints and exposes arm dimension fields", () => {
     expect(planCanvasSource).toContain("lShapePath");
+    expect(planCanvasSource).toContain("isLShapedSofa");
     expect(planCanvasSource).toContain('symbol.shape === "l-shape"');
+    expect(planCanvasSource).toContain('symbol.shape === "l-shape" && object.l_shape && isLShapedSofa(object)');
+    expect(planCanvasSource).toContain('class="l-sofa-main symbol-body"');
+    expect(planCanvasSource).toContain('class="l-sofa-return symbol-body"');
+    expect(planCanvasSource).toContain('class="l-sofa-cushion-divider"');
     expect(planCanvasSource).toContain("object.l_shape");
     expect(inspectorSource).toContain("updateLShapeMainDepth");
     expect(inspectorSource).toContain("updateLShapeReturnWidth");
@@ -144,7 +164,15 @@ describe("furniture canvas interaction layout", () => {
   });
 
   it("renders fireplace, TV, and heat-pump furniture symbols", () => {
+    const fireplaceBranch = sourceBetween(
+      planCanvasSource,
+      '{:else if symbol.shape === "fireplace"}',
+      '{:else if symbol.shape === "bed"}',
+    );
+
     expect(planCanvasSource).toContain('symbol.shape === "fireplace"');
+    expect(fireplaceBranch).toContain('rx="0"');
+    expect(fireplaceBranch).not.toContain('rx="1.5"');
     expect(planCanvasSource).toContain('symbol.shape === "tv"');
     expect(planCanvasSource).toContain('symbol.shape === "heat-pump"');
   });
@@ -161,6 +189,8 @@ describe("furniture canvas interaction layout", () => {
     expect(planCanvasSource).toContain('class="bath-inner"');
     expect(planCanvasSource).toContain('symbol.shape === "basin"');
     expect(planCanvasSource).toContain('class="basin-bowl"');
+    expect(planCanvasSource).toContain('symbol.shape === "sink"');
+    expect(planCanvasSource).toContain('class="sink-bowl"');
     expect(planCanvasSource).toContain('symbol.shape === "toilet"');
     expect(planCanvasSource).toContain('class="toilet-tank"');
     expect(planCanvasSource).toContain('class="toilet-bowl"');
@@ -219,7 +249,9 @@ describe("furniture canvas interaction layout", () => {
     expect(planCanvasSource).toContain('"bedside-table"');
     expect(planCanvasSource).toContain('"desk"');
     expect(planCanvasSource).toContain('"drawers"');
+    expect(squareCornerSymbols).toContain('"fireplace"');
     expect(squareCornerSymbols).toContain('"shower"');
+    expect(squareCornerSymbols).toContain('"sink"');
     expect(planCanvasSource).toContain('"storage"');
     expect(planCanvasSource).toContain('"wardrobe"');
     expect(planCanvasSource).toContain("function symbolCornerRadius");

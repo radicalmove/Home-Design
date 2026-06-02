@@ -187,8 +187,10 @@
     "bedside-table",
     "desk",
     "drawers",
+    "fireplace",
     "partition-wall",
     "shower",
+    "sink",
     "sliding-door",
     "storage",
     "wardrobe",
@@ -204,6 +206,24 @@
 
   function symbolCornerRadius(shape: string): number {
     return SQUARE_CORNER_SYMBOLS.has(shape) ? 0 : 2;
+  }
+
+  function isLShapedSofa(object: FurnitureObject): boolean {
+    return object.type === "l_sofa" || object.catalog_id === "l_sofa";
+  }
+
+  function lShapeMainDepthSvg(
+    bounds: Pick<ReturnType<typeof objectBoundsSvg>, "height">,
+    lShape: FurnitureLShapeDimensions,
+  ): number {
+    return Math.min(bounds.height, Math.max(0, lShape.main_depth_m * layout.plan_transform.px_per_m));
+  }
+
+  function lShapeReturnWidthSvg(
+    bounds: Pick<ReturnType<typeof objectBoundsSvg>, "width">,
+    lShape: FurnitureLShapeDimensions,
+  ): number {
+    return Math.min(bounds.width, Math.max(0, lShape.return_width_m * layout.plan_transform.px_per_m));
   }
 
   const REFERENCE_WALL_SEGMENTS: WallSegment[] = withWallThickness([
@@ -678,7 +698,30 @@
             />
           {/if}
 
-          {#if symbol.shape === "l-shape" && object.l_shape}
+          {#if symbol.shape === "l-shape" && object.l_shape && isLShapedSofa(object)}
+            {@const sofaMainDepth = lShapeMainDepthSvg(bounds, object.l_shape)}
+            {@const sofaReturnWidth = lShapeReturnWidthSvg(bounds, object.l_shape)}
+            {@const sofaRadius = Math.max(2, Math.min(bounds.width, bounds.height) * 0.08)}
+            <rect
+              class="l-sofa-main symbol-body"
+              x={bounds.x}
+              y={bounds.y}
+              width={bounds.width}
+              height={sofaMainDepth}
+              rx={sofaRadius}
+              fill={object.colour}
+            />
+            <rect
+              class="l-sofa-return symbol-body"
+              x={bounds.x}
+              y={bounds.y}
+              width={sofaReturnWidth}
+              height={bounds.height}
+              rx={sofaRadius}
+              fill={object.colour}
+            />
+            <path class="l-sofa-outline" d={lShapePath(bounds, object.l_shape, layout.plan_transform)} />
+          {:else if symbol.shape === "l-shape" && object.l_shape}
             <path
               class="symbol-body"
               d={lShapePath(bounds, object.l_shape, layout.plan_transform)}
@@ -701,8 +744,39 @@
             <line class="sofa-cushion-divider" x1={bounds.x + bounds.width * 0.34} y1={bounds.y + bounds.height * 0.26} x2={bounds.x + bounds.width * 0.34} y2={bounds.y + bounds.height * 0.86} />
             <line class="sofa-cushion-divider" x1={bounds.x + bounds.width * 0.66} y1={bounds.y + bounds.height * 0.26} x2={bounds.x + bounds.width * 0.66} y2={bounds.y + bounds.height * 0.86} />
             <line x1={bounds.x + bounds.width * 0.1} y1={bounds.y + bounds.height * 0.86} x2={bounds.x + bounds.width * 0.9} y2={bounds.y + bounds.height * 0.86} />
+          {:else if symbol.shape === "l-shape" && object.l_shape && isLShapedSofa(object)}
+            {@const sofaMainDepth = lShapeMainDepthSvg(bounds, object.l_shape)}
+            {@const sofaReturnWidth = lShapeReturnWidthSvg(bounds, object.l_shape)}
+            <line
+              class="l-sofa-cushion-divider"
+              x1={bounds.x + bounds.width * 0.34}
+              y1={bounds.y + sofaMainDepth * 0.18}
+              x2={bounds.x + bounds.width * 0.34}
+              y2={bounds.y + sofaMainDepth * 0.88}
+            />
+            <line
+              class="l-sofa-cushion-divider"
+              x1={bounds.x + bounds.width * 0.67}
+              y1={bounds.y + sofaMainDepth * 0.18}
+              x2={bounds.x + bounds.width * 0.67}
+              y2={bounds.y + sofaMainDepth * 0.88}
+            />
+            <line
+              class="l-sofa-cushion-divider"
+              x1={bounds.x + sofaReturnWidth * 0.18}
+              y1={bounds.y + sofaMainDepth + (bounds.height - sofaMainDepth) * 0.5}
+              x2={bounds.x + sofaReturnWidth * 0.88}
+              y2={bounds.y + sofaMainDepth + (bounds.height - sofaMainDepth) * 0.5}
+            />
+            <line
+              class="l-sofa-cushion-divider"
+              x1={bounds.x + sofaReturnWidth * 0.2}
+              y1={bounds.y + sofaMainDepth * 0.14}
+              x2={bounds.x + sofaReturnWidth * 0.2}
+              y2={bounds.y + bounds.height * 0.9}
+            />
           {:else if symbol.shape === "fireplace"}
-            <rect x={bounds.x + bounds.width * 0.18} y={bounds.y + bounds.height * 0.2} width={bounds.width * 0.64} height={bounds.height * 0.52} rx="1.5" />
+            <rect x={bounds.x + bounds.width * 0.18} y={bounds.y + bounds.height * 0.2} width={bounds.width * 0.64} height={bounds.height * 0.52} rx="0" />
             <line x1={bounds.x + bounds.width * 0.28} y1={bounds.y + bounds.height * 0.72} x2={bounds.x + bounds.width * 0.72} y2={bounds.y + bounds.height * 0.72} />
             <line x1={bounds.cx} y1={bounds.y + bounds.height * 0.28} x2={bounds.cx} y2={bounds.y + bounds.height * 0.62} />
           {:else if symbol.shape === "bed"}
@@ -717,6 +791,17 @@
             <ellipse class="basin-bowl" cx={bounds.cx} cy={bounds.y + bounds.height * 0.58} rx={Math.max(3, bounds.width * 0.34)} ry={Math.max(3, bounds.height * 0.3)} />
             <line x1={bounds.cx} y1={bounds.y} x2={bounds.cx} y2={bounds.y + bounds.height * 0.3} />
             <circle cx={bounds.cx} cy={bounds.y + bounds.height * 0.38} r={Math.max(1.5, Math.min(bounds.width, bounds.height) * 0.06)} />
+          {:else if symbol.shape === "sink"}
+            <rect
+              class="sink-bowl"
+              x={bounds.x + bounds.width * 0.18}
+              y={bounds.y + bounds.height * 0.24}
+              width={bounds.width * 0.64}
+              height={bounds.height * 0.48}
+              rx={Math.max(1, Math.min(bounds.width, bounds.height) * 0.08)}
+            />
+            <line x1={bounds.cx} y1={bounds.y} x2={bounds.cx} y2={bounds.y + bounds.height * 0.24} />
+            <circle cx={bounds.cx} cy={bounds.y + bounds.height * 0.34} r={Math.max(1.5, Math.min(bounds.width, bounds.height) * 0.06)} />
           {:else if symbol.shape === "toilet"}
             <rect class="toilet-tank" x={bounds.x} y={bounds.y} width={bounds.width} height={bounds.height * 0.24} rx="2" fill={object.colour} />
             <circle cx={bounds.cx} cy={bounds.y + bounds.height * 0.1} r={Math.max(1.3, Math.min(bounds.width, bounds.height) * 0.05)} />
@@ -726,10 +811,6 @@
             <circle class="shower-head" cx={bounds.x + bounds.width * 0.18} cy={bounds.y + bounds.height * 0.2} r={Math.max(1.5, Math.min(bounds.width, bounds.height) * 0.05)} />
             <line class="shower-head-arm" x1={bounds.x + bounds.width * 0.22} y1={bounds.y + bounds.height * 0.22} x2={bounds.x + bounds.width * 0.42} y2={bounds.y + bounds.height * 0.22} />
             <line class="shower-head-arm" x1={bounds.x + bounds.width * 0.22} y1={bounds.y + bounds.height * 0.26} x2={bounds.x + bounds.width * 0.22} y2={bounds.y + bounds.height * 0.42} />
-          {:else if symbol.shape === "washer" || symbol.shape === "dryer"}
-            <text class="symbol-mark" x={bounds.cx} y={bounds.cy}>{symbol.shape === "washer" ? "W" : "D"}</text>
-          {:else if symbol.shape === "refrigerator"}
-            <text class="symbol-mark" x={bounds.cx} y={bounds.cy}>REF</text>
           {:else if symbol.shape === "oven"}
             <circle cx={bounds.x + bounds.width * 0.3} cy={bounds.y + bounds.height * 0.32} r={Math.max(2, Math.min(bounds.width, bounds.height) * 0.12)} />
             <circle cx={bounds.x + bounds.width * 0.7} cy={bounds.y + bounds.height * 0.32} r={Math.max(2, Math.min(bounds.width, bounds.height) * 0.12)} />
@@ -816,6 +897,14 @@
             <line x1={bounds.x} y1={bounds.y + bounds.height * 0.5} x2={bounds.x + bounds.width} y2={bounds.y + bounds.height * 0.5} />
           {:else if symbol.shape === "appliance" || symbol.shape === "fixture"}
             <rect x={bounds.x + 4} y={bounds.y + 4} width={Math.max(4, bounds.width - 8)} height={Math.max(4, bounds.height - 8)} rx="3" />
+          {/if}
+
+          {#if showLabels && symbolShowsIntrinsicText(symbol.shape)}
+            {#if symbol.shape === "washer" || symbol.shape === "dryer"}
+              <text class="symbol-mark" x={bounds.cx} y={bounds.cy}>{symbol.shape === "washer" ? "W" : "D"}</text>
+            {:else if symbol.shape === "refrigerator"}
+              <text class="symbol-mark" x={bounds.cx} y={bounds.cy}>REF</text>
+            {/if}
           {/if}
 
           {#if showLabels && symbol.abbreviation}
@@ -952,6 +1041,31 @@
   .furniture-object.selected .symbol-body {
     stroke: #d84d2a;
     stroke-width: 2.4;
+  }
+
+  .l-sofa-main,
+  .l-sofa-return {
+    stroke: none;
+  }
+
+  .l-sofa-outline {
+    fill: none;
+    stroke: #203139;
+    stroke-width: 1.3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .furniture-object.selected .l-sofa-outline {
+    stroke: #d84d2a;
+    stroke-width: 2.4;
+  }
+
+  .l-sofa-cushion-divider {
+    stroke: #203139;
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
   }
 
   .furniture-object.partition-wall .symbol-body {

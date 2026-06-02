@@ -16,11 +16,13 @@ describe("furniture symbols", () => {
   it("maps screenshot-specific kitchen, bathroom, and laundry symbols", () => {
     expect(symbolForFurnitureObject("bath", null).shape).toBe("bath");
     expect(symbolForFurnitureObject("vanity", "LAV").shape).toBe("basin");
+    expect(symbolForFurnitureObject("sink", null, "kitchen_sink").shape).toBe("sink");
     expect(symbolForFurnitureObject("shower", "SHWR").shape).toBe("shower");
     expect(symbolForFurnitureObject("washer", "W").shape).toBe("washer");
     expect(symbolForFurnitureObject("dryer", "D").shape).toBe("dryer");
     expect(symbolForFurnitureObject("appliance", "OV", "oven_cooktop").shape).toBe("oven");
     expect(symbolForFurnitureObject("island", null, "island").shape).toBe("island");
+    expect(symbolForFurnitureObject("pantry", "P", "pantry").shape).toBe("storage");
   });
 
   it("uses top-down furniture silhouettes for moveable furniture", () => {

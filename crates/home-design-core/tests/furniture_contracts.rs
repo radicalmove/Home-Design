@@ -25,6 +25,7 @@ fn default_catalog_groups_current_house_first_objects() {
         .flat_map(|group| group.items.iter().map(|item| item.id.as_str()))
         .collect();
     assert!(item_ids.contains("base_cabinet"));
+    assert!(item_ids.contains("kitchen_sink"));
     assert!(item_ids.contains("refrigerator"));
     assert!(item_ids.contains("sofa"));
     assert!(item_ids.contains("l_sofa"));
@@ -92,6 +93,16 @@ fn default_catalog_groups_current_house_first_objects() {
         .expect("fireplace catalog item");
     assert_eq!(fireplace.layer, FurnitureLayerKind::Fixed);
     assert_eq!(fireplace.symbol, "fireplace");
+
+    let kitchen_sink = catalog
+        .groups
+        .iter()
+        .flat_map(|group| group.items.iter())
+        .find(|item| item.id == "kitchen_sink")
+        .expect("kitchen sink catalog item");
+    assert_eq!(kitchen_sink.layer, FurnitureLayerKind::Fixed);
+    assert_eq!(kitchen_sink.object_type, "sink");
+    assert_eq!(kitchen_sink.symbol, "sink");
 
     let tv = catalog
         .groups
