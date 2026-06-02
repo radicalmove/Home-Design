@@ -718,10 +718,10 @@
             <line x1={bounds.cx} y1={bounds.y} x2={bounds.cx} y2={bounds.y + bounds.height * 0.3} />
             <circle cx={bounds.cx} cy={bounds.y + bounds.height * 0.38} r={Math.max(1.5, Math.min(bounds.width, bounds.height) * 0.06)} />
           {:else if symbol.shape === "toilet"}
-            <rect x={bounds.x + bounds.width * 0.18} y={bounds.y} width={bounds.width * 0.64} height={bounds.height * 0.22} rx="2" />
+            <rect class="toilet-tank" x={bounds.x + bounds.width * 0.18} y={bounds.y} width={bounds.width * 0.64} height={bounds.height * 0.22} rx="2" fill={object.colour} />
             <circle cx={bounds.cx} cy={bounds.y + bounds.height * 0.1} r={Math.max(1.3, Math.min(bounds.width, bounds.height) * 0.05)} />
-            <ellipse class="toilet-bowl" cx={bounds.cx} cy={bounds.y + bounds.height * 0.56} rx={Math.max(3, bounds.width * 0.3)} ry={Math.max(4, bounds.height * 0.36)} />
-            <ellipse cx={bounds.cx} cy={bounds.y + bounds.height * 0.55} rx={Math.max(2, bounds.width * 0.16)} ry={Math.max(3, bounds.height * 0.18)} />
+            <ellipse class="toilet-bowl" cx={bounds.cx} cy={bounds.y + bounds.height * 0.56} rx={Math.max(3, bounds.width * 0.3)} ry={Math.max(4, bounds.height * 0.36)} fill={object.colour} />
+            <ellipse class="toilet-inlay" cx={bounds.cx} cy={bounds.y + bounds.height * 0.55} rx={Math.max(2, bounds.width * 0.16)} ry={Math.max(3, bounds.height * 0.18)} />
           {:else if symbol.shape === "shower"}
             <circle class="shower-head" cx={bounds.x + bounds.width * 0.18} cy={bounds.y + bounds.height * 0.2} r={Math.max(1.5, Math.min(bounds.width, bounds.height) * 0.05)} />
             <line class="shower-head-arm" x1={bounds.x + bounds.width * 0.22} y1={bounds.y + bounds.height * 0.22} x2={bounds.x + bounds.width * 0.42} y2={bounds.y + bounds.height * 0.22} />
@@ -757,7 +757,15 @@
             <rect x={bounds.x + bounds.width * 0.18} y={bounds.y + bounds.height * 0.2} width={bounds.width * 0.64} height={bounds.height * 0.64} rx="2" />
             <line x1={bounds.x + bounds.width * 0.22} y1={bounds.y + bounds.height * 0.18} x2={bounds.x + bounds.width * 0.78} y2={bounds.y + bounds.height * 0.18} />
           {:else if symbol.shape === "stool"}
-            <ellipse class="stool-seat symbol-body" cx={bounds.cx} cy={bounds.cy} rx={Math.max(3, bounds.width * 0.38)} ry={Math.max(3, bounds.height * 0.38)} fill={object.colour} />
+            <rect
+              class="stool-seat symbol-body"
+              x={bounds.x + bounds.width * 0.16}
+              y={bounds.y + bounds.height * 0.16}
+              width={bounds.width * 0.68}
+              height={bounds.height * 0.68}
+              rx={Math.max(2, Math.min(bounds.width, bounds.height) * 0.14)}
+              fill={object.colour}
+            />
             <circle cx={bounds.cx} cy={bounds.cy} r={Math.max(1.4, Math.min(bounds.width, bounds.height) * 0.08)} />
             <line x1={bounds.x + bounds.width * 0.28} y1={bounds.y + bounds.height * 0.28} x2={bounds.x + bounds.width * 0.18} y2={bounds.y + bounds.height * 0.18} />
             <line x1={bounds.x + bounds.width * 0.72} y1={bounds.y + bounds.height * 0.28} x2={bounds.x + bounds.width * 0.82} y2={bounds.y + bounds.height * 0.18} />
@@ -952,14 +960,26 @@
   }
 
   line:not(.rotate-stem),
-  ellipse:not(.symbol-body),
+  ellipse:not(.symbol-body):not(.toilet-bowl):not(.toilet-inlay),
   circle:not(.symbol-body):not(.rotate-handle),
   path:not(.symbol-body),
-  .furniture-object rect:not(.symbol-body):not(.resize-handle):not(.symbol-hit-target):not(.wardrobe-door-panel) {
+  .furniture-object rect:not(.symbol-body):not(.resize-handle):not(.symbol-hit-target):not(.toilet-tank):not(.wardrobe-door-panel) {
     fill: none;
     stroke: #203139;
     stroke-width: 1;
     vector-effect: non-scaling-stroke;
+  }
+
+  .toilet-tank,
+  .toilet-bowl,
+  .toilet-inlay {
+    stroke: #203139;
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .toilet-inlay {
+    fill: #fffdf8;
   }
 
   .symbol-hit-target {

@@ -146,7 +146,11 @@ describe("furniture canvas interaction layout", () => {
     expect(planCanvasSource).toContain('symbol.shape === "basin"');
     expect(planCanvasSource).toContain('class="basin-bowl"');
     expect(planCanvasSource).toContain('symbol.shape === "toilet"');
+    expect(planCanvasSource).toContain('class="toilet-tank"');
     expect(planCanvasSource).toContain('class="toilet-bowl"');
+    expect(planCanvasSource).toContain('class="toilet-inlay"');
+    expect(planCanvasSource).toContain(":not(.toilet-tank)");
+    expect(planCanvasSource).toContain(":not(.toilet-bowl):not(.toilet-inlay)");
     expect(planCanvasSource).toContain('symbol.shape === "shower"');
     expect(planCanvasSource).toContain('class="shower-head"');
     expect(planCanvasSource).not.toContain('class="shower-door-swing"');
@@ -162,7 +166,8 @@ describe("furniture canvas interaction layout", () => {
     expect(planCanvasSource).toContain('symbol.shape === "table-and-chairs"');
     expect(planCanvasSource).toContain('class="table-chair top"');
     expect(planCanvasSource).toContain('symbol.shape === "stool"');
-    expect(planCanvasSource).toContain('class="stool-seat symbol-body"');
+    expect(planCanvasSource).toMatch(/<rect\s+class="stool-seat symbol-body"[\s\S]*rx=/);
+    expect(planCanvasSource).not.toContain('<ellipse class="stool-seat symbol-body"');
     expect(planCanvasSource).toContain('symbol.shape === "armchair"');
     expect(planCanvasSource).toContain('class="armchair-arm left"');
     expect(planCanvasSource).toContain('symbol.shape === "wardrobe"');
