@@ -1,5 +1,5 @@
 use home_design_core::{AppStatus, FurnitureCatalog, FurnitureLayout, ProjectManifest};
-use home_design_desktop::{BuiltInModelStatus, FurnitureLayoutLoadResult};
+use home_design_desktop::{BuiltInModelStatus, DesignReviewData, FurnitureLayoutLoadResult};
 use tauri::Manager;
 
 #[tauri::command]
@@ -44,6 +44,16 @@ fn save_furniture_layout(app: tauri::AppHandle, layout: FurnitureLayout) -> Resu
     home_design_desktop::save_furniture_layout_to_root(&root, &layout)
 }
 
+#[tauri::command]
+fn load_design_review_data(
+    app: tauri::AppHandle,
+    project_id: String,
+    scenario_id: String,
+) -> Result<DesignReviewData, String> {
+    let root = app_data_root(&app)?;
+    home_design_desktop::load_design_review_data_from_root(&root, &project_id, &scenario_id)
+}
+
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
@@ -53,6 +63,7 @@ fn main() {
             load_furniture_catalog,
             load_furniture_layout,
             save_furniture_layout,
+            load_design_review_data,
         ])
         .run(tauri::generate_context!())
         .expect("failed to run Home Design desktop app");

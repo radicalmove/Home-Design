@@ -7,7 +7,7 @@ fn built_in_project_manifest_exposes_current_house_views() {
     assert_eq!(manifest.id, "current-house");
     assert_eq!(manifest.name, "Current House");
     assert_eq!(manifest.model_source, "DATA/house_model.json");
-    assert_eq!(manifest.views.len(), 3);
+    assert_eq!(manifest.views.len(), 4);
 
     let base_view = manifest
         .views
@@ -38,6 +38,16 @@ fn built_in_project_manifest_exposes_current_house_views() {
     assert_eq!(furniture_view.mode, ViewMode::FurnitureEditor);
     assert_eq!(furniture_view.asset_path, "/views/reference_plan.svg");
     assert!(furniture_view.available);
+
+    let design_review_view = manifest
+        .views
+        .iter()
+        .find(|view| view.id == "design-review")
+        .expect("design review view");
+    assert_eq!(design_review_view.label, "Design Review");
+    assert_eq!(design_review_view.mode, ViewMode::DesignReview);
+    assert_eq!(design_review_view.asset_path, "");
+    assert!(design_review_view.available);
 
     assert!(manifest.scenarios.is_empty());
     assert!(manifest.layers.is_empty());

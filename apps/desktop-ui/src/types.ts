@@ -4,7 +4,7 @@ export type AppStatus = {
   built_in_project_count: number;
 };
 
-export type ViewMode = "base_plan" | "three_d_navigation" | "furniture_editor";
+export type ViewMode = "base_plan" | "three_d_navigation" | "furniture_editor" | "design_review";
 
 export type ViewDescriptor = {
   id: string;
@@ -103,6 +103,12 @@ export type FurnitureLayout = {
 export type FurnitureLayoutLoadResult = {
   source: "seed" | "saved";
   layout: FurnitureLayout;
+};
+
+export type DesignReviewData = {
+  model_source: string;
+  house_model: Record<string, unknown>;
+  furniture_layout: FurnitureLayoutLoadResult;
 };
 
 export type FurnitureCatalogItem = {

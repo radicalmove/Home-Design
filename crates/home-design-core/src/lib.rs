@@ -31,6 +31,7 @@ pub enum ViewMode {
     BasePlan,
     ThreeDNavigation,
     FurnitureEditor,
+    DesignReview,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -89,6 +90,13 @@ pub fn built_in_project_manifest() -> ProjectManifest {
                 label: "Furniture Editor".to_string(),
                 mode: ViewMode::FurnitureEditor,
                 asset_path: "/views/reference_plan.svg".to_string(),
+                available: true,
+            },
+            ViewDescriptor {
+                id: "design-review".to_string(),
+                label: "Design Review".to_string(),
+                mode: ViewMode::DesignReview,
+                asset_path: String::new(),
                 available: true,
             },
         ],

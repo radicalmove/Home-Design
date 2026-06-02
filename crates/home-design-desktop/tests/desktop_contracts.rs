@@ -1,6 +1,6 @@
 use home_design_desktop::{
-    get_app_status, load_builtin_model_status, load_builtin_project, load_furniture_catalog,
-    load_furniture_layout_from_root, save_furniture_layout_to_root,
+    get_app_status, load_builtin_model_status, load_builtin_project, load_design_review_data_from_root,
+    load_furniture_catalog, load_furniture_layout_from_root, save_furniture_layout_to_root,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -28,13 +28,35 @@ fn load_builtin_project_returns_packaged_view_manifest() {
     let manifest = load_builtin_project();
 
     assert_eq!(manifest.id, "current-house");
-    assert_eq!(manifest.views.len(), 3);
+    assert_eq!(manifest.views.len(), 4);
     assert!(manifest.views.iter().all(|view| view.available));
     assert!(
         manifest
             .views
             .iter()
             .any(|view| view.id == "furniture-editor")
+    );
+}
+
+#[test]
+fn load_design_review_data_returns_model_and_current_furniture_layout() {
+    let root = isolated_storage_root("design-review");
+
+    let review = load_design_review_data_from_root(&root, "current-house", "current")
+        .expect("load design review data");
+
+    assert_eq!(review.model_source, "DATA/house_model.json");
+    assert_eq!(review.house_model["units"], "metres");
+    assert_eq!(review.furniture_layout.source, "seed");
+    assert_eq!(review.furniture_layout.layout.project_id, "current-house");
+    assert_eq!(review.furniture_layout.layout.scenario_id, "current");
+    assert!(
+        review
+            .furniture_layout
+            .layout
+            .objects
+            .iter()
+            .any(|object| object.id == "lounge_sofa")
     );
 }
 

@@ -29,6 +29,13 @@ const project: ProjectManifest = {
       asset_path: "/views/reference_plan.svg",
       available: true,
     },
+    {
+      id: "design-review",
+      label: "Design Review",
+      mode: "design_review",
+      asset_path: "",
+      available: true,
+    },
   ],
   scenarios: [],
   layers: [],
@@ -57,6 +64,19 @@ describe("asset availability", () => {
     expect(checked.views[0].available).toBe(true);
     expect(checked.views[1].available).toBe(false);
     expect(checked.views[2].available).toBe(true);
+    expect(checked.views[3].available).toBe(true);
+  });
+
+  it("keeps native views available without trying to fetch an empty asset path", async () => {
+    const fetcher = vi.fn().mockRejectedValue(new Error("missing"));
+
+    const checked = await withCheckedViewAvailability(project, fetcher);
+
+    expect(fetcher).not.toHaveBeenCalledWith("", {
+      cache: "no-store",
+      method: "GET",
+    });
+    expect(checked.views.find((view) => view.id === "design-review")?.available).toBe(true);
   });
 
   it("marks a view unavailable when fetch fails", async () => {
@@ -64,6 +84,7 @@ describe("asset availability", () => {
 
     const checked = await withCheckedViewAvailability(project, fetcher);
 
-    expect(checked.views.every((view) => !view.available)).toBe(true);
+    expect(checked.views.filter((view) => view.asset_path).every((view) => !view.available)).toBe(true);
+    expect(checked.views.find((view) => view.id === "design-review")?.available).toBe(true);
   });
 });

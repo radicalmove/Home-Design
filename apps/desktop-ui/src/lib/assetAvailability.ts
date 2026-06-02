@@ -11,6 +11,10 @@ export async function withCheckedViewAvailability(
 ): Promise<ProjectManifest> {
   const views = await Promise.all(
     project.views.map(async (view) => {
+      if (!view.asset_path) {
+        return { ...view, available: true };
+      }
+
       try {
         const response = await fetcher(view.asset_path, {
           cache: "no-store",

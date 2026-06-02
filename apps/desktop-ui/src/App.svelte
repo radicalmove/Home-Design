@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import DesignReviewView from "./DesignReviewView.svelte";
   import FurnitureEditorView from "./FurnitureEditorView.svelte";
   import { withCheckedViewAvailability } from "./lib/assetAvailability";
   import {
@@ -191,6 +192,8 @@
       </header>
       {#if selectedView.mode === "furniture_editor" && project}
         <FurnitureEditorView projectId={project.id} backgroundAssetPath={selectedView.asset_path} />
+      {:else if selectedView.mode === "design_review" && project}
+        <DesignReviewView projectId={project.id} />
       {:else}
         <div class="view-frame">
           <iframe

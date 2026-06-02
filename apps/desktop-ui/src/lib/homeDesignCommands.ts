@@ -2,6 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import type {
   AppStatus,
   BuiltInModelStatus,
+  DesignReviewData,
   FurnitureCatalog,
   FurnitureLayout,
   FurnitureLayoutLoadResult,
@@ -33,4 +34,11 @@ export function loadFurnitureLayout(
 
 export function saveFurnitureLayout(layout: FurnitureLayout): Promise<void> {
   return invoke<void>("save_furniture_layout", { layout });
+}
+
+export function loadDesignReviewData(
+  projectId: string,
+  scenarioId = "current",
+): Promise<DesignReviewData> {
+  return invoke<DesignReviewData>("load_design_review_data", { projectId, scenarioId });
 }
