@@ -938,7 +938,7 @@
 
   line:not(.rotate-stem),
   ellipse:not(.symbol-body),
-  circle:not(.symbol-body),
+  circle:not(.symbol-body):not(.rotate-handle),
   path:not(.symbol-body),
   .furniture-object rect:not(.symbol-body):not(.resize-handle):not(.wardrobe-door-panel) {
     fill: none;
@@ -1046,6 +1046,7 @@
     stroke: #d84d2a;
     stroke-width: 2;
     vector-effect: non-scaling-stroke;
+    pointer-events: all;
   }
 
   .rotate-handle:active {

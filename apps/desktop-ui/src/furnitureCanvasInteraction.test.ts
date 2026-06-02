@@ -198,6 +198,14 @@ describe("furniture canvas interaction layout", () => {
     expect(planCanvasSource).not.toContain('r="7"');
   });
 
+  it("keeps rotate handles filled and clickable over circular symbol styling", () => {
+    const rotateHandleStyle = cssBlock(planCanvasSource, ".rotate-handle");
+
+    expect(planCanvasSource).toContain("circle:not(.symbol-body):not(.rotate-handle)");
+    expect(rotateHandleStyle).toContain("fill: #ffffff;");
+    expect(rotateHandleStyle).toContain("pointer-events: all;");
+  });
+
   it("keeps collapsed catalog groups stacked at the top of the scroll panel", () => {
     expect(catalogSource).toMatch(/\.catalog-groups\s*{[\s\S]*align-content:\s*start;/);
   });
