@@ -95,11 +95,18 @@ describe("furniture canvas interaction layout", () => {
   });
 
   it("draws wardrobe doors as white sliding panels like the reference wardrobe doors", () => {
+    const outlineOnlySymbols = setLiteralBlock(planCanvasSource, "OUTLINE_ONLY_SYMBOLS");
+
+    expect(outlineOnlySymbols).toContain('"sliding-door"');
+    expect(planCanvasSource).toContain('class="symbol-hit-target"');
     expect(planCanvasSource).toContain('class="wardrobe-door-panel fixed"');
     expect(planCanvasSource).toContain('class="wardrobe-door-panel sliding"');
     expect(planCanvasSource).toContain("rx={symbolCornerRadius(symbol.shape)}");
     expect(planCanvasSource).toContain("x={bounds.x}");
     expect(planCanvasSource).toContain("width={bounds.width * 0.58}");
+    expect(planCanvasSource).toContain(":not(.symbol-hit-target)");
+    expect(planCanvasSource).toMatch(/\.symbol-hit-target\s*{[\s\S]*stroke:\s*none;/);
+    expect(planCanvasSource).toMatch(/\.symbol-hit-target\s*{[\s\S]*pointer-events:\s*all;/);
     expect(planCanvasSource).toMatch(/\.wardrobe-door-panel\s*{[\s\S]*fill:\s*#fffdf8;/);
     expect(planCanvasSource).toMatch(/\.wardrobe-door-panel\s*{[\s\S]*stroke:\s*#111;/);
     expect(planCanvasSource).toMatch(/\.wardrobe-door-panel\s*{[\s\S]*stroke-width:\s*0\.45;/);
@@ -253,6 +260,20 @@ describe("furniture canvas interaction layout", () => {
     expect(editorSource).toContain("if (nextLayout !== layout) {");
     expect(editorSource).toContain("commitLayout(nextLayout)");
     expect(editorSource).toContain("onReorder={handleReorderObject}");
+  });
+
+  it("batches canvas drag edits into one undo history entry on pointer release", () => {
+    expect(editorSource).toContain("finishFurnitureGestureHistory");
+    expect(editorSource).toContain("let activeObjectEditSnapshot = $state<FurnitureHistorySnapshot | null>(null);");
+    expect(editorSource).toContain("function handleBeginObjectEdit(objectId: string)");
+    expect(editorSource).toContain("function handleFinishObjectEdit()");
+    expect(editorSource).toContain("previewLayout");
+    expect(editorSource).toContain("onBeginObjectEdit={handleBeginObjectEdit}");
+    expect(editorSource).toContain("onFinishObjectEdit={handleFinishObjectEdit}");
+    expect(planCanvasSource).toContain("onBeginObjectEdit: (objectId: string) => void;");
+    expect(planCanvasSource).toContain("onFinishObjectEdit: () => void;");
+    expect(planCanvasSource).toContain("onBeginObjectEdit(object.id)");
+    expect(planCanvasSource).toContain("onFinishObjectEdit();");
   });
 
   it("exposes global furniture order controls in the selected object inspector", () => {

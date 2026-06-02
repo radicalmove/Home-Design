@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   FURNITURE_HISTORY_LIMIT,
+  finishFurnitureGestureHistory,
   pushFurnitureHistory,
   redoFurnitureHistory,
   undoFurnitureHistory,
@@ -71,5 +72,32 @@ describe("furniture editor history", () => {
     const redone = redoFurnitureHistory(undone?.history ?? history, previous);
     expect(redone?.snapshot.selectedObjectId).toBe("object-1");
     expect(redone?.history.undoStack.at(-1)?.selectedObjectId).toBe("object-0");
+  });
+
+  it("commits one undo snapshot for a completed drag gesture", () => {
+    const start = { layout: layoutWithObjectCount(1), selectedObjectId: "object-0" };
+    const final = {
+      layout: {
+        ...layoutWithObjectCount(1),
+        objects: [{ ...layoutWithObjectCount(1).objects[0], x_m: 4, y_m: 5 }],
+      },
+      selectedObjectId: "object-0",
+    };
+
+    const history = finishFurnitureGestureHistory({ undoStack: [], redoStack: [] }, start, final);
+
+    expect(history.undoStack).toHaveLength(1);
+    expect(history.undoStack[0]).toBe(start);
+    expect(history.redoStack).toHaveLength(0);
+  });
+
+  it("does not add an undo entry when a drag finishes without layout changes", () => {
+    const start = { layout: layoutWithObjectCount(1), selectedObjectId: "object-0" };
+    const final = { layout: layoutWithObjectCount(1), selectedObjectId: "object-0" };
+
+    const history = finishFurnitureGestureHistory({ undoStack: [], redoStack: [] }, start, final);
+
+    expect(history.undoStack).toHaveLength(0);
+    expect(history.redoStack).toHaveLength(0);
   });
 });

@@ -72,6 +72,8 @@
     onZoomChange: (zoom: number) => void;
     onResizePreview: (label: string | null, x: number, y: number) => void;
     onViewportCenterChange: (point: PlanPoint) => void;
+    onBeginObjectEdit: (objectId: string) => void;
+    onFinishObjectEdit: () => void;
   };
 
   const RESIZE_HANDLES: Array<{
@@ -179,7 +181,7 @@
       : RESIZE_HANDLES;
   }
 
-  const OUTLINE_ONLY_SYMBOLS = new Set(["armchair", "stool", "table-and-chairs", "toilet"]);
+  const OUTLINE_ONLY_SYMBOLS = new Set(["armchair", "sliding-door", "stool", "table-and-chairs", "toilet"]);
   const INTRINSIC_TEXT_SYMBOLS = new Set(["dryer", "refrigerator", "washer"]);
   const SQUARE_CORNER_SYMBOLS = new Set([
     "bedside-table",
@@ -267,6 +269,8 @@
     onZoomChange,
     onResizePreview,
     onViewportCenterChange,
+    onBeginObjectEdit,
+    onFinishObjectEdit,
   }: Props = $props();
 
   let canvasElement = $state<HTMLDivElement | null>(null);
@@ -484,7 +488,7 @@
   function startMove(event: PointerEvent, object: FurnitureObject) {
     event.preventDefault();
     event.stopPropagation();
-    onSelectObject(object.id);
+    onBeginObjectEdit(object.id);
     dragState = {
       kind: "move",
       pointerId: event.pointerId,
@@ -498,7 +502,7 @@
   function startResize(event: PointerEvent, object: FurnitureObject, handle: ResizeHandleName) {
     event.preventDefault();
     event.stopPropagation();
-    onSelectObject(object.id);
+    onBeginObjectEdit(object.id);
     clearWallDistanceGuides();
     dragState = {
       kind: "resize",
@@ -525,7 +529,7 @@
       startAngleDeg: angleDegFromCenter(startSvg, bounds),
       startRotationDeg: object.rotation_deg,
     };
-    onSelectObject(object.id);
+    onBeginObjectEdit(object.id);
     clearWallDistanceGuides();
     svgElement?.setPointerCapture(event.pointerId);
     const local = localPointFromEvent(event);
@@ -600,6 +604,7 @@
       return;
     }
     svgElement?.releasePointerCapture(event.pointerId);
+    onFinishObjectEdit();
     dragState = null;
     clearWallDistanceGuides();
     onResizePreview(null, 0, 0);
@@ -663,6 +668,16 @@
           transform={`rotate(${object.rotation_deg}, ${bounds.cx}, ${bounds.cy})`}
           onpointerdown={(event) => startMove(event, object)}
         >
+          {#if !symbolUsesBaseRect(symbol.shape)}
+            <rect
+              class="symbol-hit-target"
+              x={bounds.x}
+              y={bounds.y}
+              width={bounds.width}
+              height={bounds.height}
+            />
+          {/if}
+
           {#if symbol.shape === "l-shape" && object.l_shape}
             <path
               class="symbol-body"
@@ -940,16 +955,17 @@
   ellipse:not(.symbol-body),
   circle:not(.symbol-body):not(.rotate-handle),
   path:not(.symbol-body),
-  .furniture-object rect:not(.symbol-body):not(.resize-handle):not(.wardrobe-door-panel) {
+  .furniture-object rect:not(.symbol-body):not(.resize-handle):not(.symbol-hit-target):not(.wardrobe-door-panel) {
     fill: none;
     stroke: #203139;
     stroke-width: 1;
     vector-effect: non-scaling-stroke;
   }
 
-  .furniture-object.sliding-door .symbol-body {
-    fill-opacity: 0.45;
-    stroke-dasharray: none;
+  .symbol-hit-target {
+    fill: transparent;
+    stroke: none;
+    pointer-events: all;
   }
 
   .wardrobe-door-panel {

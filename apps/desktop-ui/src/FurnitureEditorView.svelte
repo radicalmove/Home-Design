@@ -8,6 +8,7 @@
   import { clampPlanZoom, planZoomLabel } from "./lib/furnitureGeometry";
   import {
     FURNITURE_HISTORY_LIMIT,
+    finishFurnitureGestureHistory,
     pushFurnitureHistory,
     redoFurnitureHistory,
     undoFurnitureHistory,
@@ -66,6 +67,7 @@
   let planZoom = $state(1);
   let currentViewportCenter = $state<PlanPoint | null>(null);
   let history = $state<FurnitureHistoryState>({ undoStack: [], redoStack: [] });
+  let activeObjectEditSnapshot = $state<FurnitureHistorySnapshot | null>(null);
 
   let saveTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -116,6 +118,49 @@
     scheduleSave(nextLayout);
   }
 
+  function previewLayout(nextLayout: FurnitureLayout, nextSelectedObjectId = selectedObjectId) {
+    layout = nextLayout;
+    selectedObjectId = nextSelectedObjectId;
+  }
+
+  function applyObjectEditLayout(
+    nextLayout: FurnitureLayout,
+    nextSelectedObjectId = selectedObjectId,
+  ) {
+    if (activeObjectEditSnapshot) {
+      previewLayout(nextLayout, nextSelectedObjectId);
+      return;
+    }
+
+    commitLayout(nextLayout, nextSelectedObjectId);
+  }
+
+  function handleBeginObjectEdit(objectId: string) {
+    if (!layout) {
+      return;
+    }
+
+    activeObjectEditSnapshot ??= { layout, selectedObjectId: objectId };
+    selectedObjectId = objectId;
+  }
+
+  function handleFinishObjectEdit() {
+    if (!activeObjectEditSnapshot || !layout) {
+      activeObjectEditSnapshot = null;
+      return;
+    }
+
+    const startSnapshot = activeObjectEditSnapshot;
+    const currentSnapshot = { layout, selectedObjectId };
+    activeObjectEditSnapshot = null;
+
+    const nextHistory = finishFurnitureGestureHistory(history, startSnapshot, currentSnapshot);
+    if (nextHistory !== history) {
+      history = nextHistory;
+      scheduleSave(layout);
+    }
+  }
+
   function handleAddCatalogItem(item: FurnitureCatalogItem) {
     if (!layout) {
       return;
@@ -128,20 +173,20 @@
 
   function handleMoveObject(objectId: string, point: PlanPoint) {
     if (layout) {
-      commitLayout(moveObject(layout, objectId, point));
+      applyObjectEditLayout(moveObject(layout, objectId, point));
     }
   }
 
   function handleResizeObject(objectId: string, size: FurnitureSize, point?: PlanPoint) {
     if (layout) {
       const resizedLayout = resizeObject(layout, objectId, size);
-      commitLayout(point ? moveObject(resizedLayout, objectId, point) : resizedLayout);
+      applyObjectEditLayout(point ? moveObject(resizedLayout, objectId, point) : resizedLayout);
     }
   }
 
   function handleRotateObject(objectId: string, rotationDeg: number) {
     if (layout) {
-      commitLayout(rotateObject(layout, objectId, rotationDeg));
+      applyObjectEditLayout(rotateObject(layout, objectId, rotationDeg));
     }
   }
 
@@ -381,6 +426,8 @@
           showRoomLabels={roomLabelsVisible}
           zoom={planZoom}
           onSelectObject={(objectId) => (selectedObjectId = objectId)}
+          onBeginObjectEdit={handleBeginObjectEdit}
+          onFinishObjectEdit={handleFinishObjectEdit}
           onMoveObject={handleMoveObject}
           onResizeObject={handleResizeObject}
           onRotateObject={handleRotateObject}

@@ -34,6 +34,25 @@ export function pushFurnitureHistory(
   };
 }
 
+function snapshotsHaveSameLayout(
+  first: FurnitureHistorySnapshot,
+  second: FurnitureHistorySnapshot,
+): boolean {
+  return JSON.stringify(first.layout) === JSON.stringify(second.layout);
+}
+
+export function finishFurnitureGestureHistory(
+  history: FurnitureHistoryState,
+  start: FurnitureHistorySnapshot,
+  current: FurnitureHistorySnapshot,
+): FurnitureHistoryState {
+  if (snapshotsHaveSameLayout(start, current)) {
+    return history;
+  }
+
+  return pushFurnitureHistory(history, start);
+}
+
 export function undoFurnitureHistory(
   history: FurnitureHistoryState,
   current: FurnitureHistorySnapshot,
