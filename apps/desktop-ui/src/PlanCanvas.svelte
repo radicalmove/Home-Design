@@ -186,6 +186,7 @@
     "desk",
     "drawers",
     "partition-wall",
+    "shower",
     "sliding-door",
     "storage",
     "wardrobe",
@@ -707,11 +708,9 @@
             <ellipse class="toilet-bowl" cx={bounds.cx} cy={bounds.y + bounds.height * 0.56} rx={Math.max(3, bounds.width * 0.3)} ry={Math.max(4, bounds.height * 0.36)} />
             <ellipse cx={bounds.cx} cy={bounds.y + bounds.height * 0.55} rx={Math.max(2, bounds.width * 0.16)} ry={Math.max(3, bounds.height * 0.18)} />
           {:else if symbol.shape === "shower"}
-            <rect x={bounds.x + bounds.width * 0.05} y={bounds.y + bounds.height * 0.05} width={bounds.width * 0.9} height={bounds.height * 0.9} />
-            <path class="shower-door-swing" d={`M ${bounds.x + bounds.width * 0.95} ${bounds.y + bounds.height * 0.32} Q ${bounds.x + bounds.width * 0.95} ${bounds.y + bounds.height * 0.92} ${bounds.x + bounds.width * 0.35} ${bounds.y + bounds.height * 0.95}`} />
-            <circle cx={bounds.x + bounds.width * 0.18} cy={bounds.y + bounds.height * 0.2} r={Math.max(1.5, Math.min(bounds.width, bounds.height) * 0.05)} />
-            <line x1={bounds.x + bounds.width * 0.22} y1={bounds.y + bounds.height * 0.22} x2={bounds.x + bounds.width * 0.42} y2={bounds.y + bounds.height * 0.22} />
-            <line x1={bounds.x + bounds.width * 0.22} y1={bounds.y + bounds.height * 0.26} x2={bounds.x + bounds.width * 0.22} y2={bounds.y + bounds.height * 0.42} />
+            <circle class="shower-head" cx={bounds.x + bounds.width * 0.18} cy={bounds.y + bounds.height * 0.2} r={Math.max(1.5, Math.min(bounds.width, bounds.height) * 0.05)} />
+            <line class="shower-head-arm" x1={bounds.x + bounds.width * 0.22} y1={bounds.y + bounds.height * 0.22} x2={bounds.x + bounds.width * 0.42} y2={bounds.y + bounds.height * 0.22} />
+            <line class="shower-head-arm" x1={bounds.x + bounds.width * 0.22} y1={bounds.y + bounds.height * 0.26} x2={bounds.x + bounds.width * 0.22} y2={bounds.y + bounds.height * 0.42} />
           {:else if symbol.shape === "washer" || symbol.shape === "dryer"}
             <text class="symbol-mark" x={bounds.cx} y={bounds.cy}>{symbol.shape === "washer" ? "W" : "D"}</text>
           {:else if symbol.shape === "refrigerator"}

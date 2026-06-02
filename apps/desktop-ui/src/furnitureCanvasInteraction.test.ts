@@ -14,6 +14,10 @@ function cssBlock(source: string, selector: string): string {
   return source.match(new RegExp(`${escapedSelector}\\s*{(?<body>[\\s\\S]*?)}`))?.groups?.body ?? "";
 }
 
+function setLiteralBlock(source: string, name: string): string {
+  return source.match(new RegExp(`const ${name} = new Set\\(\\[(?<body>[\\s\\S]*?)\\]\\);`))?.groups?.body ?? "";
+}
+
 describe("furniture canvas interaction layout", () => {
   it("uses a crisp SVG viewBox canvas with a tall editing viewport", () => {
     expect(planCanvasSource).toContain("viewBox={viewBoxValue}");
@@ -137,7 +141,9 @@ describe("furniture canvas interaction layout", () => {
     expect(planCanvasSource).toContain('symbol.shape === "toilet"');
     expect(planCanvasSource).toContain('class="toilet-bowl"');
     expect(planCanvasSource).toContain('symbol.shape === "shower"');
-    expect(planCanvasSource).toContain('class="shower-door-swing"');
+    expect(planCanvasSource).toContain('class="shower-head"');
+    expect(planCanvasSource).not.toContain('class="shower-door-swing"');
+    expect(planCanvasSource).not.toContain('x={bounds.x + bounds.width * 0.05} y={bounds.y + bounds.height * 0.05} width={bounds.width * 0.9} height={bounds.height * 0.9}');
     expect(planCanvasSource).toContain('symbol.shape === "washer" || symbol.shape === "dryer"');
     expect(planCanvasSource).toContain('symbol.shape === "refrigerator"');
     expect(planCanvasSource).toContain('symbol.shape === "oven"');
@@ -166,10 +172,13 @@ describe("furniture canvas interaction layout", () => {
   });
 
   it("keeps desk and cabinet-style symbol bodies square-cornered", () => {
+    const squareCornerSymbols = setLiteralBlock(planCanvasSource, "SQUARE_CORNER_SYMBOLS");
+
     expect(planCanvasSource).toContain("const SQUARE_CORNER_SYMBOLS");
     expect(planCanvasSource).toContain('"bedside-table"');
     expect(planCanvasSource).toContain('"desk"');
     expect(planCanvasSource).toContain('"drawers"');
+    expect(squareCornerSymbols).toContain('"shower"');
     expect(planCanvasSource).toContain('"storage"');
     expect(planCanvasSource).toContain('"wardrobe"');
     expect(planCanvasSource).toContain("function symbolCornerRadius");
