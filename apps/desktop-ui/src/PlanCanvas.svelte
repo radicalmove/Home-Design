@@ -836,10 +836,10 @@
             <line x1={bounds.x + bounds.width * 0.28} y1={bounds.y + bounds.height * 0.72} x2={bounds.x + bounds.width * 0.18} y2={bounds.y + bounds.height * 0.82} />
             <line x1={bounds.x + bounds.width * 0.72} y1={bounds.y + bounds.height * 0.72} x2={bounds.x + bounds.width * 0.82} y2={bounds.y + bounds.height * 0.82} />
           {:else if symbol.shape === "armchair"}
-            <rect x={bounds.x + bounds.width * 0.22} y={bounds.y + bounds.height * 0.22} width={bounds.width * 0.56} height={bounds.height * 0.58} rx="2" />
-            <rect class="armchair-arm left" x={bounds.x} y={bounds.y + bounds.height * 0.32} width={bounds.width * 0.18} height={bounds.height * 0.38} rx="2" />
-            <rect class="armchair-arm right" x={bounds.x + bounds.width * 0.82} y={bounds.y + bounds.height * 0.32} width={bounds.width * 0.18} height={bounds.height * 0.38} rx="2" />
-            <rect x={bounds.x + bounds.width * 0.24} y={bounds.y} width={bounds.width * 0.52} height={bounds.height * 0.14} rx="3" />
+            <rect class="armchair-seat symbol-body" x={bounds.x + bounds.width * 0.22} y={bounds.y + bounds.height * 0.22} width={bounds.width * 0.56} height={bounds.height * 0.58} rx="2" fill={object.colour} />
+            <rect class="armchair-arm left symbol-body" x={bounds.x} y={bounds.y + bounds.height * 0.32} width={bounds.width * 0.18} height={bounds.height * 0.38} rx="2" fill={object.colour} />
+            <rect class="armchair-arm right symbol-body" x={bounds.x + bounds.width * 0.82} y={bounds.y + bounds.height * 0.32} width={bounds.width * 0.18} height={bounds.height * 0.38} rx="2" fill={object.colour} />
+            <rect class="armchair-back symbol-body" x={bounds.x + bounds.width * 0.24} y={bounds.y} width={bounds.width * 0.52} height={bounds.height * 0.14} rx="3" fill={object.colour} />
           {:else if symbol.shape === "drawers"}
             <line x1={bounds.x} y1={bounds.y + bounds.height * 0.33} x2={bounds.x + bounds.width} y2={bounds.y + bounds.height * 0.33} />
             <line x1={bounds.x} y1={bounds.y + bounds.height * 0.66} x2={bounds.x + bounds.width} y2={bounds.y + bounds.height * 0.66} />

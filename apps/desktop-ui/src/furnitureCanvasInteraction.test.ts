@@ -219,6 +219,11 @@ describe("furniture canvas interaction layout", () => {
       '{:else if symbol.shape === "stool"}',
       '{:else if symbol.shape === "armchair"}',
     );
+    const armchairBranch = sourceBetween(
+      planCanvasSource,
+      '{:else if symbol.shape === "armchair"}',
+      '{:else if symbol.shape === "drawers"}',
+    );
 
     expect(planCanvasSource).toContain('symbol.shape === "table-and-chairs"');
     expect(planCanvasSource).toContain('class="table-chair top"');
@@ -230,7 +235,11 @@ describe("furniture canvas interaction layout", () => {
     expect(stoolBranch).toContain("width={bounds.width}");
     expect(stoolBranch).toContain("height={bounds.height}");
     expect(planCanvasSource).toContain('symbol.shape === "armchair"');
-    expect(planCanvasSource).toContain('class="armchair-arm left"');
+    expect(armchairBranch).toContain('class="armchair-seat symbol-body"');
+    expect(armchairBranch).toContain('class="armchair-arm left symbol-body"');
+    expect(armchairBranch).toContain('class="armchair-arm right symbol-body"');
+    expect(armchairBranch).toContain('class="armchair-back symbol-body"');
+    expect(armchairBranch.match(/fill={object\.colour}/g)?.length).toBe(4);
     expect(planCanvasSource).toContain('symbol.shape === "wardrobe"');
     expect(planCanvasSource).toContain('class="wardrobe-base-line"');
     expect(planCanvasSource).toContain('class="bed-blanket-fold"');
