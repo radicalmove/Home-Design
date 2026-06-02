@@ -811,12 +811,12 @@
             <ellipse cx={bounds.cx} cy={bounds.cy} rx={Math.max(3, bounds.width * 0.42)} ry={Math.max(3, bounds.height * 0.38)} />
           {:else if symbol.shape === "table-and-chairs"}
             <rect class="table-top symbol-body" x={bounds.x + bounds.width * 0.08} y={bounds.y + bounds.height * 0.24} width={bounds.width * 0.84} height={bounds.height * 0.52} fill={object.colour} />
-            <ellipse class="table-chair top" cx={bounds.x + bounds.width * 0.28} cy={bounds.y + bounds.height * 0.12} rx={bounds.width * 0.09} ry={bounds.height * 0.08} />
-            <ellipse class="table-chair top" cx={bounds.cx} cy={bounds.y + bounds.height * 0.12} rx={bounds.width * 0.09} ry={bounds.height * 0.08} />
-            <ellipse class="table-chair top" cx={bounds.x + bounds.width * 0.72} cy={bounds.y + bounds.height * 0.12} rx={bounds.width * 0.09} ry={bounds.height * 0.08} />
-            <ellipse class="table-chair bottom" cx={bounds.x + bounds.width * 0.28} cy={bounds.y + bounds.height * 0.88} rx={bounds.width * 0.09} ry={bounds.height * 0.08} />
-            <ellipse class="table-chair bottom" cx={bounds.cx} cy={bounds.y + bounds.height * 0.88} rx={bounds.width * 0.09} ry={bounds.height * 0.08} />
-            <ellipse class="table-chair bottom" cx={bounds.x + bounds.width * 0.72} cy={bounds.y + bounds.height * 0.88} rx={bounds.width * 0.09} ry={bounds.height * 0.08} />
+            <ellipse class="table-chair top symbol-body" cx={bounds.x + bounds.width * 0.28} cy={bounds.y + bounds.height * 0.12} rx={bounds.width * 0.09} ry={bounds.height * 0.08} fill={object.colour} />
+            <ellipse class="table-chair top symbol-body" cx={bounds.cx} cy={bounds.y + bounds.height * 0.12} rx={bounds.width * 0.09} ry={bounds.height * 0.08} fill={object.colour} />
+            <ellipse class="table-chair top symbol-body" cx={bounds.x + bounds.width * 0.72} cy={bounds.y + bounds.height * 0.12} rx={bounds.width * 0.09} ry={bounds.height * 0.08} fill={object.colour} />
+            <ellipse class="table-chair bottom symbol-body" cx={bounds.x + bounds.width * 0.28} cy={bounds.y + bounds.height * 0.88} rx={bounds.width * 0.09} ry={bounds.height * 0.08} fill={object.colour} />
+            <ellipse class="table-chair bottom symbol-body" cx={bounds.cx} cy={bounds.y + bounds.height * 0.88} rx={bounds.width * 0.09} ry={bounds.height * 0.08} fill={object.colour} />
+            <ellipse class="table-chair bottom symbol-body" cx={bounds.x + bounds.width * 0.72} cy={bounds.y + bounds.height * 0.88} rx={bounds.width * 0.09} ry={bounds.height * 0.08} fill={object.colour} />
           {:else if symbol.shape === "piano"}
             <rect class="piano-case" x={bounds.x} y={bounds.y} width={bounds.width} height={bounds.height} rx={Math.max(1, Math.min(bounds.width, bounds.height) * 0.08)} />
             <rect class="piano-keyboard" x={bounds.x + bounds.width * 0.1} y={bounds.y + bounds.height * 0.62} width={bounds.width * 0.8} height={bounds.height * 0.18} />

@@ -233,7 +233,9 @@ describe("furniture canvas interaction layout", () => {
     expect(planCanvasSource).toContain('symbol.shape === "table-and-chairs"');
     expect(tableAndChairsBranch).toContain('class="table-top symbol-body"');
     expect(tableAndChairsBranch).toContain("fill={object.colour}");
-    expect(planCanvasSource).toContain('class="table-chair top"');
+    expect(tableAndChairsBranch).toContain('class="table-chair top symbol-body"');
+    expect(tableAndChairsBranch).toContain('class="table-chair bottom symbol-body"');
+    expect(tableAndChairsBranch.match(/fill={object\.colour}/g)?.length).toBe(7);
     expect(planCanvasSource).toContain('symbol.shape === "piano"');
     expect(planCanvasSource).toContain('class="piano-keyboard"');
     expect(planCanvasSource).toContain('class="piano-key"');
