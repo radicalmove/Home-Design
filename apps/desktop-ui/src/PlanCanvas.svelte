@@ -718,10 +718,10 @@
             <line x1={bounds.cx} y1={bounds.y} x2={bounds.cx} y2={bounds.y + bounds.height * 0.3} />
             <circle cx={bounds.cx} cy={bounds.y + bounds.height * 0.38} r={Math.max(1.5, Math.min(bounds.width, bounds.height) * 0.06)} />
           {:else if symbol.shape === "toilet"}
-            <rect class="toilet-tank" x={bounds.x + bounds.width * 0.18} y={bounds.y} width={bounds.width * 0.64} height={bounds.height * 0.22} rx="2" fill={object.colour} />
+            <rect class="toilet-tank" x={bounds.x} y={bounds.y} width={bounds.width} height={bounds.height * 0.24} rx="2" fill={object.colour} />
             <circle cx={bounds.cx} cy={bounds.y + bounds.height * 0.1} r={Math.max(1.3, Math.min(bounds.width, bounds.height) * 0.05)} />
-            <ellipse class="toilet-bowl" cx={bounds.cx} cy={bounds.y + bounds.height * 0.56} rx={Math.max(3, bounds.width * 0.3)} ry={Math.max(4, bounds.height * 0.36)} fill={object.colour} />
-            <ellipse class="toilet-inlay" cx={bounds.cx} cy={bounds.y + bounds.height * 0.55} rx={Math.max(2, bounds.width * 0.16)} ry={Math.max(3, bounds.height * 0.18)} />
+            <ellipse class="toilet-bowl" cx={bounds.cx} cy={bounds.y + bounds.height * 0.6} rx={Math.max(3, bounds.width * 0.48)} ry={Math.max(4, bounds.height * 0.4)} fill={object.colour} />
+            <ellipse class="toilet-inlay" cx={bounds.cx} cy={bounds.y + bounds.height * 0.6} rx={Math.max(2, bounds.width * 0.24)} ry={Math.max(3, bounds.height * 0.2)} />
           {:else if symbol.shape === "shower"}
             <circle class="shower-head" cx={bounds.x + bounds.width * 0.18} cy={bounds.y + bounds.height * 0.2} r={Math.max(1.5, Math.min(bounds.width, bounds.height) * 0.05)} />
             <line class="shower-head-arm" x1={bounds.x + bounds.width * 0.22} y1={bounds.y + bounds.height * 0.22} x2={bounds.x + bounds.width * 0.42} y2={bounds.y + bounds.height * 0.22} />
@@ -759,11 +759,11 @@
           {:else if symbol.shape === "stool"}
             <rect
               class="stool-seat symbol-body"
-              x={bounds.x + bounds.width * 0.16}
-              y={bounds.y + bounds.height * 0.16}
-              width={bounds.width * 0.68}
-              height={bounds.height * 0.68}
-              rx={Math.max(2, Math.min(bounds.width, bounds.height) * 0.14)}
+              x={bounds.x}
+              y={bounds.y}
+              width={bounds.width}
+              height={bounds.height}
+              rx={Math.max(2, Math.min(bounds.width, bounds.height) * 0.18)}
               fill={object.colour}
             />
             <circle cx={bounds.cx} cy={bounds.cy} r={Math.max(1.4, Math.min(bounds.width, bounds.height) * 0.08)} />

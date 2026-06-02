@@ -18,6 +18,16 @@ function setLiteralBlock(source: string, name: string): string {
   return source.match(new RegExp(`const ${name} = new Set\\(\\[(?<body>[\\s\\S]*?)\\]\\);`))?.groups?.body ?? "";
 }
 
+function sourceBetween(source: string, start: string, end: string): string {
+  const startIndex = source.indexOf(start);
+  if (startIndex === -1) {
+    return "";
+  }
+
+  const endIndex = source.indexOf(end, startIndex + start.length);
+  return endIndex === -1 ? source.slice(startIndex) : source.slice(startIndex, endIndex);
+}
+
 describe("furniture canvas interaction layout", () => {
   it("uses a crisp SVG viewBox canvas with a tall editing viewport", () => {
     expect(planCanvasSource).toContain("viewBox={viewBoxValue}");
@@ -140,6 +150,12 @@ describe("furniture canvas interaction layout", () => {
   });
 
   it("draws Planner-style bathroom, laundry, and kitchen symbols", () => {
+    const toiletBranch = sourceBetween(
+      planCanvasSource,
+      '{:else if symbol.shape === "toilet"}',
+      '{:else if symbol.shape === "shower"}',
+    );
+
     expect(planCanvasSource).toContain('symbolForFurnitureObject(object.type, object.abbreviation, object.catalog_id)');
     expect(planCanvasSource).toContain('symbol.shape === "bath"');
     expect(planCanvasSource).toContain('class="bath-inner"');
@@ -151,6 +167,9 @@ describe("furniture canvas interaction layout", () => {
     expect(planCanvasSource).toContain('class="toilet-inlay"');
     expect(planCanvasSource).toContain(":not(.toilet-tank)");
     expect(planCanvasSource).toContain(":not(.toilet-bowl):not(.toilet-inlay)");
+    expect(toiletBranch).toContain("x={bounds.x}");
+    expect(toiletBranch).toContain("y={bounds.y}");
+    expect(toiletBranch).toContain("width={bounds.width}");
     expect(planCanvasSource).toContain('symbol.shape === "shower"');
     expect(planCanvasSource).toContain('class="shower-head"');
     expect(planCanvasSource).not.toContain('class="shower-door-swing"');
@@ -163,11 +182,21 @@ describe("furniture canvas interaction layout", () => {
   });
 
   it("draws Planner-style common furniture silhouettes", () => {
+    const stoolBranch = sourceBetween(
+      planCanvasSource,
+      '{:else if symbol.shape === "stool"}',
+      '{:else if symbol.shape === "armchair"}',
+    );
+
     expect(planCanvasSource).toContain('symbol.shape === "table-and-chairs"');
     expect(planCanvasSource).toContain('class="table-chair top"');
     expect(planCanvasSource).toContain('symbol.shape === "stool"');
     expect(planCanvasSource).toMatch(/<rect\s+class="stool-seat symbol-body"[\s\S]*rx=/);
     expect(planCanvasSource).not.toContain('<ellipse class="stool-seat symbol-body"');
+    expect(stoolBranch).toContain("x={bounds.x}");
+    expect(stoolBranch).toContain("y={bounds.y}");
+    expect(stoolBranch).toContain("width={bounds.width}");
+    expect(stoolBranch).toContain("height={bounds.height}");
     expect(planCanvasSource).toContain('symbol.shape === "armchair"');
     expect(planCanvasSource).toContain('class="armchair-arm left"');
     expect(planCanvasSource).toContain('symbol.shape === "wardrobe"');
