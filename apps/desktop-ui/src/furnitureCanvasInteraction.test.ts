@@ -214,6 +214,11 @@ describe("furniture canvas interaction layout", () => {
   });
 
   it("draws Planner-style common furniture silhouettes", () => {
+    const tableAndChairsBranch = sourceBetween(
+      planCanvasSource,
+      '{:else if symbol.shape === "table-and-chairs"}',
+      '{:else if symbol.shape === "chair"}',
+    );
     const stoolBranch = sourceBetween(
       planCanvasSource,
       '{:else if symbol.shape === "stool"}',
@@ -226,7 +231,12 @@ describe("furniture canvas interaction layout", () => {
     );
 
     expect(planCanvasSource).toContain('symbol.shape === "table-and-chairs"');
+    expect(tableAndChairsBranch).toContain('class="table-top symbol-body"');
+    expect(tableAndChairsBranch).toContain("fill={object.colour}");
     expect(planCanvasSource).toContain('class="table-chair top"');
+    expect(planCanvasSource).toContain('symbol.shape === "piano"');
+    expect(planCanvasSource).toContain('class="piano-keyboard"');
+    expect(planCanvasSource).toContain('class="piano-key"');
     expect(planCanvasSource).toContain('symbol.shape === "stool"');
     expect(planCanvasSource).toMatch(/<rect\s+class="stool-seat symbol-body"[\s\S]*rx=/);
     expect(planCanvasSource).not.toContain('<ellipse class="stool-seat symbol-body"');

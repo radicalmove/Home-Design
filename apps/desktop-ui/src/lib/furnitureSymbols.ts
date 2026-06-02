@@ -11,6 +11,7 @@ export type FurnitureSymbol = {
     | "fireplace"
     | "sofa"
     | "l-shape"
+    | "piano"
     | "bed"
     | "bedside-table"
     | "bath"
@@ -84,6 +85,8 @@ export function symbolForFurnitureObject(
     case "l_sofa":
     case "l_desk":
       return { shape: "l-shape", abbreviation };
+    case "piano":
+      return { shape: "piano", abbreviation };
     case "bed":
       return { shape: "bed", abbreviation };
     case "bedside_table":

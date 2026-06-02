@@ -31,6 +31,7 @@ describe("furniture symbols", () => {
     expect(symbolForFurnitureObject("tv", null).shape).toBe("tv");
     expect(symbolForFurnitureObject("desk", null).shape).toBe("desk");
     expect(symbolForFurnitureObject("l_desk", null).shape).toBe("l-shape");
+    expect(symbolForFurnitureObject("piano", null).shape).toBe("piano");
     expect(symbolForFurnitureObject("bedside_table", null).shape).toBe("bedside-table");
     expect(symbolForFurnitureObject("dresser_drawers", null).shape).toBe("drawers");
     expect(symbolForFurnitureObject("chair", null, "armchair").shape).toBe("armchair");

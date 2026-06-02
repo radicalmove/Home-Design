@@ -31,6 +31,7 @@ fn default_catalog_groups_current_house_first_objects() {
     assert!(item_ids.contains("l_sofa"));
     assert!(item_ids.contains("fireplace"));
     assert!(item_ids.contains("tv"));
+    assert!(item_ids.contains("piano"));
     assert!(item_ids.contains("stool"));
     assert!(item_ids.contains("queen_bed"));
     assert!(item_ids.contains("l_desk"));
@@ -52,6 +53,7 @@ fn default_catalog_groups_current_house_first_objects() {
         .collect();
     assert!(lounge_items.contains("fireplace"));
     assert!(lounge_items.contains("tv"));
+    assert!(lounge_items.contains("piano"));
     assert!(lounge_items.contains("stool"));
 
     let bedroom_items: BTreeSet<_> = catalog
@@ -112,6 +114,18 @@ fn default_catalog_groups_current_house_first_objects() {
         .expect("tv catalog item");
     assert_eq!(tv.layer, FurnitureLayerKind::Moveable);
     assert_eq!(tv.symbol, "tv");
+
+    let piano = catalog
+        .groups
+        .iter()
+        .flat_map(|group| group.items.iter())
+        .find(|item| item.id == "piano")
+        .expect("piano catalog item");
+    assert_eq!(piano.layer, FurnitureLayerKind::Moveable);
+    assert_eq!(piano.object_type, "piano");
+    assert_eq!(piano.default_width_m, 1.45);
+    assert_eq!(piano.default_depth_m, 0.55);
+    assert_eq!(piano.symbol, "piano");
 
     let stool = catalog
         .groups

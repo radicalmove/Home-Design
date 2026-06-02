@@ -414,6 +414,17 @@ pub fn default_furniture_catalog() -> FurnitureCatalog {
                         "tv",
                     ),
                     catalog_item(
+                        "piano",
+                        "Piano",
+                        FurnitureLayerKind::Moveable,
+                        "piano",
+                        None,
+                        1.45,
+                        0.55,
+                        "#24211d",
+                        "piano",
+                    ),
+                    catalog_item(
                         "dining_table",
                         "Dining table",
                         FurnitureLayerKind::Moveable,

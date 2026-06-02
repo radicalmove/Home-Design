@@ -810,13 +810,26 @@
           {:else if symbol.shape === "table"}
             <ellipse cx={bounds.cx} cy={bounds.cy} rx={Math.max(3, bounds.width * 0.42)} ry={Math.max(3, bounds.height * 0.38)} />
           {:else if symbol.shape === "table-and-chairs"}
-            <rect x={bounds.x + bounds.width * 0.08} y={bounds.y + bounds.height * 0.24} width={bounds.width * 0.84} height={bounds.height * 0.52} />
+            <rect class="table-top symbol-body" x={bounds.x + bounds.width * 0.08} y={bounds.y + bounds.height * 0.24} width={bounds.width * 0.84} height={bounds.height * 0.52} fill={object.colour} />
             <ellipse class="table-chair top" cx={bounds.x + bounds.width * 0.28} cy={bounds.y + bounds.height * 0.12} rx={bounds.width * 0.09} ry={bounds.height * 0.08} />
             <ellipse class="table-chair top" cx={bounds.cx} cy={bounds.y + bounds.height * 0.12} rx={bounds.width * 0.09} ry={bounds.height * 0.08} />
             <ellipse class="table-chair top" cx={bounds.x + bounds.width * 0.72} cy={bounds.y + bounds.height * 0.12} rx={bounds.width * 0.09} ry={bounds.height * 0.08} />
             <ellipse class="table-chair bottom" cx={bounds.x + bounds.width * 0.28} cy={bounds.y + bounds.height * 0.88} rx={bounds.width * 0.09} ry={bounds.height * 0.08} />
             <ellipse class="table-chair bottom" cx={bounds.cx} cy={bounds.y + bounds.height * 0.88} rx={bounds.width * 0.09} ry={bounds.height * 0.08} />
             <ellipse class="table-chair bottom" cx={bounds.x + bounds.width * 0.72} cy={bounds.y + bounds.height * 0.88} rx={bounds.width * 0.09} ry={bounds.height * 0.08} />
+          {:else if symbol.shape === "piano"}
+            <rect class="piano-case" x={bounds.x} y={bounds.y} width={bounds.width} height={bounds.height} rx={Math.max(1, Math.min(bounds.width, bounds.height) * 0.08)} />
+            <rect class="piano-keyboard" x={bounds.x + bounds.width * 0.1} y={bounds.y + bounds.height * 0.62} width={bounds.width * 0.8} height={bounds.height * 0.18} />
+            {#each Array.from({ length: 8 }) as _, keyIndex}
+              <line
+                class="piano-key"
+                x1={bounds.x + bounds.width * (0.1 + keyIndex * 0.1)}
+                y1={bounds.y + bounds.height * 0.62}
+                x2={bounds.x + bounds.width * (0.1 + keyIndex * 0.1)}
+                y2={bounds.y + bounds.height * 0.8}
+              />
+            {/each}
+            <line x1={bounds.x + bounds.width * 0.1} y1={bounds.y + bounds.height * 0.32} x2={bounds.x + bounds.width * 0.9} y2={bounds.y + bounds.height * 0.32} />
           {:else if symbol.shape === "chair"}
             <rect x={bounds.x + bounds.width * 0.18} y={bounds.y + bounds.height * 0.2} width={bounds.width * 0.64} height={bounds.height * 0.64} rx="2" />
             <line x1={bounds.x + bounds.width * 0.22} y1={bounds.y + bounds.height * 0.18} x2={bounds.x + bounds.width * 0.78} y2={bounds.y + bounds.height * 0.18} />
@@ -1047,6 +1060,26 @@
   .l-sofa-cushion-divider {
     stroke: #203139;
     stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .piano-case {
+    fill: #24211d;
+    stroke: #203139;
+    stroke-width: 1.3;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .piano-keyboard {
+    fill: #fffdf8;
+    stroke: #203139;
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .piano-key {
+    stroke: #203139;
+    stroke-width: 0.7;
     vector-effect: non-scaling-stroke;
   }
 
