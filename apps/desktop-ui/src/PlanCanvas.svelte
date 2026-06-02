@@ -12,6 +12,7 @@
     planViewBoxSize,
     resizeObjectFromHandle,
     rotateDeltaIntoObjectSpace,
+    roundedLShapePath,
     screenPixelsToSvgUnits,
     svgPointInViewBox,
     svgToMetres,
@@ -699,28 +700,10 @@
           {/if}
 
           {#if symbol.shape === "l-shape" && object.l_shape && isLShapedSofa(object)}
-            {@const sofaMainDepth = lShapeMainDepthSvg(bounds, object.l_shape)}
-            {@const sofaReturnWidth = lShapeReturnWidthSvg(bounds, object.l_shape)}
             {@const sofaRadius = Math.max(2, Math.min(bounds.width, bounds.height) * 0.08)}
-            <rect
-              class="l-sofa-main symbol-body"
-              x={bounds.x}
-              y={bounds.y}
-              width={bounds.width}
-              height={sofaMainDepth}
-              rx={sofaRadius}
-              fill={object.colour}
-            />
-            <rect
-              class="l-sofa-return symbol-body"
-              x={bounds.x}
-              y={bounds.y}
-              width={sofaReturnWidth}
-              height={bounds.height}
-              rx={sofaRadius}
-              fill={object.colour}
-            />
-            <path class="l-sofa-outline" d={lShapePath(bounds, object.l_shape, layout.plan_transform)} />
+            {@const sofaPath = roundedLShapePath(bounds, object.l_shape, layout.plan_transform, sofaRadius)}
+            <path class="l-sofa-body symbol-body" d={sofaPath} fill={object.colour} />
+            <path class="l-sofa-outline" d={sofaPath} />
           {:else if symbol.shape === "l-shape" && object.l_shape}
             <path
               class="symbol-body"
@@ -1043,14 +1026,13 @@
     stroke-width: 2.4;
   }
 
-  .l-sofa-main,
-  .l-sofa-return {
+  .l-sofa-body {
     stroke: none;
   }
 
   .l-sofa-outline {
     fill: none;
-    stroke: #203139;
+    stroke: transparent;
     stroke-width: 1.3;
     stroke-linecap: round;
     stroke-linejoin: round;
@@ -1076,7 +1058,7 @@
   line:not(.rotate-stem),
   ellipse:not(.symbol-body):not(.toilet-bowl):not(.toilet-inlay),
   circle:not(.symbol-body):not(.rotate-handle),
-  path:not(.symbol-body),
+  path:not(.symbol-body):not(.l-sofa-outline),
   .furniture-object rect:not(.symbol-body):not(.resize-handle):not(.symbol-hit-target):not(.toilet-tank):not(.wardrobe-door-panel) {
     fill: none;
     stroke: #203139;

@@ -95,11 +95,13 @@ describe("furniture canvas interaction layout", () => {
 
   it("renders L-shaped furniture footprints and exposes arm dimension fields", () => {
     expect(planCanvasSource).toContain("lShapePath");
+    expect(planCanvasSource).toContain("roundedLShapePath");
     expect(planCanvasSource).toContain("isLShapedSofa");
     expect(planCanvasSource).toContain('symbol.shape === "l-shape"');
     expect(planCanvasSource).toContain('symbol.shape === "l-shape" && object.l_shape && isLShapedSofa(object)');
-    expect(planCanvasSource).toContain('class="l-sofa-main symbol-body"');
-    expect(planCanvasSource).toContain('class="l-sofa-return symbol-body"');
+    expect(planCanvasSource).toContain('class="l-sofa-body symbol-body"');
+    expect(planCanvasSource).not.toContain('class="l-sofa-main symbol-body"');
+    expect(planCanvasSource).not.toContain('class="l-sofa-return symbol-body"');
     expect(planCanvasSource).toContain('class="l-sofa-cushion-divider"');
     expect(planCanvasSource).toContain("object.l_shape");
     expect(inspectorSource).toContain("updateLShapeMainDepth");
@@ -233,6 +235,15 @@ describe("furniture canvas interaction layout", () => {
     expect(planCanvasSource).toContain('class="wardrobe-base-line"');
     expect(planCanvasSource).toContain('class="bed-blanket-fold"');
     expect(planCanvasSource).toContain('class="sofa-cushion-divider"');
+  });
+
+  it("draws L-shaped sofas as one filled shape without the normal black outline", () => {
+    const lSofaOutlineStyle = cssBlock(planCanvasSource, ".l-sofa-outline");
+
+    expect(planCanvasSource).toContain("roundedLShapePath(bounds, object.l_shape, layout.plan_transform");
+    expect(planCanvasSource).toContain("path:not(.symbol-body):not(.l-sofa-outline)");
+    expect(lSofaOutlineStyle).toContain("stroke: transparent;");
+    expect(lSofaOutlineStyle).not.toContain("stroke: #203139;");
   });
 
   it("uses solid outlines for all fixed furniture symbol bodies", () => {

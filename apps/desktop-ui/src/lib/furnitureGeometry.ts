@@ -140,6 +140,92 @@ export function lShapePath(
   ].join(" ");
 }
 
+export function roundedLShapePath(
+  bounds: Pick<SvgBounds, "x" | "y" | "width" | "height">,
+  lShape: FurnitureLShapeDimensions,
+  transform: PlanTransform,
+  radius: number,
+): string {
+  const mainDepth = Math.min(bounds.height, Math.max(0, lShape.main_depth_m * transform.px_per_m));
+  const returnWidth = Math.min(bounds.width, Math.max(0, lShape.return_width_m * transform.px_per_m));
+  const x0 = bounds.x;
+  const y0 = bounds.y;
+  const x1 = bounds.x + bounds.width;
+  const y1 = bounds.y + bounds.height;
+  const innerX = bounds.x + returnWidth;
+  const innerY = bounds.y + mainDepth;
+  const cornerRadius = clamp(
+    radius,
+    0,
+    Math.max(
+      0,
+      Math.min(
+        bounds.width / 2,
+        bounds.height / 2,
+        mainDepth / 2,
+        returnWidth / 2,
+        (bounds.width - returnWidth) / 2,
+        (bounds.height - mainDepth) / 2,
+      ),
+    ),
+  );
+
+  if (cornerRadius === 0) {
+    return lShapePath(bounds, lShape, transform);
+  }
+
+  const r = cornerRadius;
+
+  return [
+    "M",
+    formatPathNumber(x0 + r),
+    formatPathNumber(y0),
+    "H",
+    formatPathNumber(x1 - r),
+    "Q",
+    formatPathNumber(x1),
+    formatPathNumber(y0),
+    formatPathNumber(x1),
+    formatPathNumber(y0 + r),
+    "V",
+    formatPathNumber(innerY - r),
+    "Q",
+    formatPathNumber(x1),
+    formatPathNumber(innerY),
+    formatPathNumber(x1 - r),
+    formatPathNumber(innerY),
+    "H",
+    formatPathNumber(innerX + r),
+    "Q",
+    formatPathNumber(innerX),
+    formatPathNumber(innerY),
+    formatPathNumber(innerX),
+    formatPathNumber(innerY + r),
+    "V",
+    formatPathNumber(y1 - r),
+    "Q",
+    formatPathNumber(innerX),
+    formatPathNumber(y1),
+    formatPathNumber(innerX - r),
+    formatPathNumber(y1),
+    "H",
+    formatPathNumber(x0 + r),
+    "Q",
+    formatPathNumber(x0),
+    formatPathNumber(y1),
+    formatPathNumber(x0),
+    formatPathNumber(y1 - r),
+    "V",
+    formatPathNumber(y0 + r),
+    "Q",
+    formatPathNumber(x0),
+    formatPathNumber(y0),
+    formatPathNumber(x0 + r),
+    formatPathNumber(y0),
+    "Z",
+  ].join(" ");
+}
+
 export function dimensionLabel(object: Pick<FurnitureObject, "width_m" | "depth_m">): string {
   return `${object.width_m.toFixed(2)} m x ${object.depth_m.toFixed(2)} m`;
 }

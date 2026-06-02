@@ -14,6 +14,7 @@ import {
   planZoomLabel,
   resizeObjectFromHandle,
   resizeObjectFromCorner,
+  roundedLShapePath,
   rotateDeltaIntoObjectSpace,
   screenPixelsToSvgUnits,
   visibleCanvasCenterOffset,
@@ -79,6 +80,25 @@ describe("furniture geometry", () => {
         },
       ),
     ).toBe("M 10.0 20.0 H 110.0 V 30.0 H 25.0 V 100.0 H 10.0 Z");
+  });
+
+  it("builds a rounded L-shaped sofa path without overlapping arms", () => {
+    expect(
+      roundedLShapePath(
+        { x: 10, y: 20, width: 100, height: 80 },
+        { main_depth_m: 0.5, return_width_m: 0.75 },
+        {
+          units: "metres",
+          svg_width_px: 1600,
+          svg_height_px: 900,
+          origin_svg_px: { x: 0, y: 0 },
+          px_per_m: 20,
+        },
+        6,
+      ),
+    ).toBe(
+      "M 15.0 20.0 H 105.0 Q 110.0 20.0 110.0 25.0 V 25.0 Q 110.0 30.0 105.0 30.0 H 30.0 Q 25.0 30.0 25.0 35.0 V 95.0 Q 25.0 100.0 20.0 100.0 H 15.0 Q 10.0 100.0 10.0 95.0 V 25.0 Q 10.0 20.0 15.0 20.0 Z",
+    );
   });
 
   it("formats live dimensions in metres", () => {
