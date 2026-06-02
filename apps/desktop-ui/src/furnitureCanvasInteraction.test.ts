@@ -148,6 +148,8 @@ describe("furniture canvas interaction layout", () => {
   it("draws Planner-style common furniture silhouettes", () => {
     expect(planCanvasSource).toContain('symbol.shape === "table-and-chairs"');
     expect(planCanvasSource).toContain('class="table-chair top"');
+    expect(planCanvasSource).toContain('symbol.shape === "stool"');
+    expect(planCanvasSource).toContain('class="stool-seat symbol-body"');
     expect(planCanvasSource).toContain('symbol.shape === "armchair"');
     expect(planCanvasSource).toContain('class="armchair-arm left"');
     expect(planCanvasSource).toContain('symbol.shape === "wardrobe"');
@@ -200,6 +202,16 @@ describe("furniture canvas interaction layout", () => {
     expect(appStylesSource).toMatch(/\.workspace\s*{[^}]*overflow:\s*hidden;/);
     expect(editorSource).toMatch(/\.furniture-editor\s*{[\s\S]*height:\s*100%;/);
     expect(editorSource).toMatch(/\.furniture-editor\s*{[\s\S]*overflow:\s*hidden;/);
+  });
+
+  it("filters catalog objects as search text is entered", () => {
+    expect(catalogSource).toContain("let searchQuery = $state(\"\");");
+    expect(catalogSource).toContain("filteredGroups");
+    expect(catalogSource).toContain("catalogSearchText");
+    expect(catalogSource).toContain('type="search"');
+    expect(catalogSource).toContain('aria-label="Search catalog objects"');
+    expect(catalogSource).toContain("bind:value={searchQuery}");
+    expect(catalogSource).toContain("{#each filteredGroups as group}");
   });
 
   it("lets the selected object switch between fixed and moveable layers", () => {

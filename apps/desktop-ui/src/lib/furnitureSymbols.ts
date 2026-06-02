@@ -22,6 +22,7 @@ export type FurnitureSymbol = {
     | "table-and-chairs"
     | "chair"
     | "armchair"
+    | "stool"
     | "storage"
     | "wardrobe"
     | "drawers"
@@ -98,6 +99,8 @@ export function symbolForFurnitureObject(
       return { shape: "table", abbreviation };
     case "chair":
       return { shape: "chair", abbreviation };
+    case "stool":
+      return { shape: "stool", abbreviation };
     case "wardrobe":
       return { shape: "wardrobe", abbreviation };
     case "bookcase":

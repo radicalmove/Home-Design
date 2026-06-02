@@ -7,6 +7,35 @@
   };
 
   let { catalog, onAddItem }: Props = $props();
+  let searchQuery = $state("");
+
+  function catalogSearchText(groupName: string, item: FurnitureCatalogItem): string {
+    return [
+      groupName,
+      item.id,
+      item.label,
+      item.layer,
+      item.type,
+      item.abbreviation,
+      item.symbol,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+  }
+
+  let filteredGroups = $derived(
+    searchQuery.trim()
+      ? catalog.groups
+          .map((group) => ({
+            ...group,
+            items: group.items.filter((item) =>
+              catalogSearchText(group.name, item).includes(searchQuery.trim().toLowerCase()),
+            ),
+          }))
+          .filter((group) => group.items.length > 0)
+      : catalog.groups,
+  );
 
   function stopCatalogWheelPropagation(event: WheelEvent) {
     event.stopPropagation();
@@ -19,31 +48,46 @@
     <h3>Objects</h3>
   </header>
 
+  <label class="catalog-search">
+    <span>Search</span>
+    <input
+      type="search"
+      aria-label="Search catalog objects"
+      placeholder="Search objects"
+      autocomplete="off"
+      bind:value={searchQuery}
+    />
+  </label>
+
   <div class="catalog-groups">
-    {#each catalog.groups as group}
-      <details open>
-        <summary>{group.name}</summary>
-        <div class="catalog-items">
-          {#each group.items as item}
-            <button type="button" onclick={() => onAddItem(item)}>
-              <span class="item-label">{item.label}</span>
-              <span class="item-meta">
-                {item.layer}
-                {item.abbreviation ? ` · ${item.abbreviation}` : ""}
-                · {item.default_width_m.toFixed(2)} x {item.default_depth_m.toFixed(2)} m
-              </span>
-            </button>
-          {/each}
-        </div>
-      </details>
-    {/each}
+    {#if filteredGroups.length > 0}
+      {#each filteredGroups as group}
+        <details open>
+          <summary>{group.name}</summary>
+          <div class="catalog-items">
+            {#each group.items as item}
+              <button type="button" onclick={() => onAddItem(item)}>
+                <span class="item-label">{item.label}</span>
+                <span class="item-meta">
+                  {item.layer}
+                  {item.abbreviation ? ` · ${item.abbreviation}` : ""}
+                  · {item.default_width_m.toFixed(2)} x {item.default_depth_m.toFixed(2)} m
+                </span>
+              </button>
+            {/each}
+          </div>
+        </details>
+      {/each}
+    {:else}
+      <p class="empty-search">No objects found.</p>
+    {/if}
   </div>
 </aside>
 
 <style>
   .catalog-panel {
     display: grid;
-    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
     gap: 12px;
     min-width: 0;
     min-height: 0;
@@ -64,6 +108,32 @@
     color: #1d2a30;
     font-size: 1rem;
     letter-spacing: 0;
+  }
+
+  .catalog-search {
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+    color: #475c64;
+    font-size: 0.72rem;
+    font-weight: 760;
+  }
+
+  .catalog-search input {
+    width: 100%;
+    min-width: 0;
+    height: 34px;
+    padding: 6px 9px;
+    color: #1e3037;
+    background: #ffffff;
+    border: 1px solid #cfd9de;
+    border-radius: 6px;
+  }
+
+  .catalog-search input:focus {
+    border-color: #7ebdae;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(126, 189, 174, 0.2);
   }
 
   .catalog-groups {
@@ -127,5 +197,13 @@
   .item-meta {
     color: #5a6b72;
     font-size: 0.69rem;
+  }
+
+  .empty-search {
+    margin: 0;
+    padding: 10px 2px;
+    color: #5d7077;
+    font-size: 0.76rem;
+    line-height: 1.4;
   }
 </style>

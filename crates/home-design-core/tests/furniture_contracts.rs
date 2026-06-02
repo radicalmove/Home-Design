@@ -30,6 +30,7 @@ fn default_catalog_groups_current_house_first_objects() {
     assert!(item_ids.contains("l_sofa"));
     assert!(item_ids.contains("fireplace"));
     assert!(item_ids.contains("tv"));
+    assert!(item_ids.contains("stool"));
     assert!(item_ids.contains("queen_bed"));
     assert!(item_ids.contains("l_desk"));
     assert!(item_ids.contains("bedside_table"));
@@ -50,6 +51,7 @@ fn default_catalog_groups_current_house_first_objects() {
         .collect();
     assert!(lounge_items.contains("fireplace"));
     assert!(lounge_items.contains("tv"));
+    assert!(lounge_items.contains("stool"));
 
     let bedroom_items: BTreeSet<_> = catalog
         .groups
@@ -99,6 +101,18 @@ fn default_catalog_groups_current_house_first_objects() {
         .expect("tv catalog item");
     assert_eq!(tv.layer, FurnitureLayerKind::Moveable);
     assert_eq!(tv.symbol, "tv");
+
+    let stool = catalog
+        .groups
+        .iter()
+        .flat_map(|group| group.items.iter())
+        .find(|item| item.id == "stool")
+        .expect("stool catalog item");
+    assert_eq!(stool.layer, FurnitureLayerKind::Moveable);
+    assert_eq!(stool.object_type, "stool");
+    assert_eq!(stool.default_width_m, 0.42);
+    assert_eq!(stool.default_depth_m, 0.42);
+    assert_eq!(stool.symbol, "stool");
 
     let wardrobe_doors = catalog
         .groups

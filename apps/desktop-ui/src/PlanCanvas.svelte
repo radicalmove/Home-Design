@@ -179,7 +179,7 @@
       : RESIZE_HANDLES;
   }
 
-  const OUTLINE_ONLY_SYMBOLS = new Set(["armchair", "table-and-chairs", "toilet"]);
+  const OUTLINE_ONLY_SYMBOLS = new Set(["armchair", "stool", "table-and-chairs", "toilet"]);
   const INTRINSIC_TEXT_SYMBOLS = new Set(["dryer", "refrigerator", "washer"]);
   const SQUARE_CORNER_SYMBOLS = new Set([
     "bedside-table",
@@ -742,6 +742,13 @@
           {:else if symbol.shape === "chair"}
             <rect x={bounds.x + bounds.width * 0.18} y={bounds.y + bounds.height * 0.2} width={bounds.width * 0.64} height={bounds.height * 0.64} rx="2" />
             <line x1={bounds.x + bounds.width * 0.22} y1={bounds.y + bounds.height * 0.18} x2={bounds.x + bounds.width * 0.78} y2={bounds.y + bounds.height * 0.18} />
+          {:else if symbol.shape === "stool"}
+            <ellipse class="stool-seat symbol-body" cx={bounds.cx} cy={bounds.cy} rx={Math.max(3, bounds.width * 0.38)} ry={Math.max(3, bounds.height * 0.38)} fill={object.colour} />
+            <circle cx={bounds.cx} cy={bounds.cy} r={Math.max(1.4, Math.min(bounds.width, bounds.height) * 0.08)} />
+            <line x1={bounds.x + bounds.width * 0.28} y1={bounds.y + bounds.height * 0.28} x2={bounds.x + bounds.width * 0.18} y2={bounds.y + bounds.height * 0.18} />
+            <line x1={bounds.x + bounds.width * 0.72} y1={bounds.y + bounds.height * 0.28} x2={bounds.x + bounds.width * 0.82} y2={bounds.y + bounds.height * 0.18} />
+            <line x1={bounds.x + bounds.width * 0.28} y1={bounds.y + bounds.height * 0.72} x2={bounds.x + bounds.width * 0.18} y2={bounds.y + bounds.height * 0.82} />
+            <line x1={bounds.x + bounds.width * 0.72} y1={bounds.y + bounds.height * 0.72} x2={bounds.x + bounds.width * 0.82} y2={bounds.y + bounds.height * 0.82} />
           {:else if symbol.shape === "armchair"}
             <rect x={bounds.x + bounds.width * 0.22} y={bounds.y + bounds.height * 0.22} width={bounds.width * 0.56} height={bounds.height * 0.58} rx="2" />
             <rect class="armchair-arm left" x={bounds.x} y={bounds.y + bounds.height * 0.32} width={bounds.width * 0.18} height={bounds.height * 0.38} rx="2" />
@@ -931,8 +938,8 @@
   }
 
   line:not(.rotate-stem),
-  ellipse,
-  circle,
+  ellipse:not(.symbol-body),
+  circle:not(.symbol-body),
   path:not(.symbol-body),
   .furniture-object rect:not(.symbol-body):not(.resize-handle):not(.wardrobe-door-panel) {
     fill: none;

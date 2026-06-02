@@ -359,6 +359,17 @@ pub fn default_furniture_catalog() -> FurnitureCatalog {
                         "chair",
                     ),
                     catalog_item(
+                        "stool",
+                        "Stool",
+                        FurnitureLayerKind::Moveable,
+                        "stool",
+                        None,
+                        0.42,
+                        0.42,
+                        "#c8a46b",
+                        "stool",
+                    ),
+                    catalog_item(
                         "coffee_table",
                         "Coffee table",
                         FurnitureLayerKind::Moveable,

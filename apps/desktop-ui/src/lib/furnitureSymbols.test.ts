@@ -32,6 +32,7 @@ describe("furniture symbols", () => {
     expect(symbolForFurnitureObject("bedside_table", null).shape).toBe("bedside-table");
     expect(symbolForFurnitureObject("dresser_drawers", null).shape).toBe("drawers");
     expect(symbolForFurnitureObject("chair", null, "armchair").shape).toBe("armchair");
+    expect(symbolForFurnitureObject("stool", null).shape).toBe("stool");
     expect(symbolForFurnitureObject("table", null, "dining_table").shape).toBe("table-and-chairs");
     expect(symbolForFurnitureObject("wardrobe", "CL", "wardrobe").shape).toBe("wardrobe");
   });
