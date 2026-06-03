@@ -12,6 +12,7 @@ pub struct AppStatus {
 pub enum ViewMode {
     BasePlan,
     ThreeDNavigation,
+    DesignReport,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -63,6 +64,13 @@ pub fn built_in_project_manifest() -> ProjectManifest {
                 label: "3D Navigation".to_string(),
                 mode: ViewMode::ThreeDNavigation,
                 asset_path: "/views/house_3d.html".to_string(),
+                available: true,
+            },
+            ViewDescriptor {
+                id: "design-report".to_string(),
+                label: "Design Report".to_string(),
+                mode: ViewMode::DesignReport,
+                asset_path: "/views/calibration_report.html".to_string(),
                 available: true,
             },
         ],

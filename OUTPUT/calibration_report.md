@@ -265,6 +265,11 @@
 - This bound is a drawing/model bound, not yet a verified exterior footprint.
 - External anchors should be used to calibrate the next coordinate pass.
 
+## Design Issues
+
+- No second toilet (practical design issue): The current layout has only one toilet, accessed through the laundry. That creates a practical constraint for guests, shared use, and times when the toilet or laundry is occupied.
+  Possible solution: Redo the bathroom layout to include a second toilet, subject to checking fixture clearances, plumbing route, waterproofing, ventilation, and whether storage or basin/shower positions need to change.
+
 ## Next Measurements
 
 - Sunroom exterior segment lengths, including angled/inset door face.

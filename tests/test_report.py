@@ -2,6 +2,7 @@ import unittest
 
 from CODE.home_design.model import load_model
 from CODE.home_design.report import render_calibration_report
+from CODE.home_design.report import render_calibration_report_html
 
 
 class CalibrationReportTests(unittest.TestCase):
@@ -32,6 +33,23 @@ class CalibrationReportTests(unittest.TestCase):
         self.assertIn("Wall-adjusted internal target", report)
         self.assertIn("15.5m", report)
         self.assertIn("10.98m", report)
+
+    def test_report_lists_design_issues(self):
+        model = load_model("DATA/house_model.json")
+        report = render_calibration_report(model)
+        self.assertIn("## Design Issues", report)
+        self.assertIn("No second toilet (practical design issue)", report)
+        self.assertNotIn("practical_design_issue", report)
+        self.assertIn("only one toilet", report)
+        self.assertIn("Redo the bathroom layout to include a second toilet", report)
+
+    def test_report_html_lists_design_issues_for_packaged_app_view(self):
+        model = load_model("DATA/house_model.json")
+        html = render_calibration_report_html(model)
+        self.assertIn("<h1>Home Design Calibration Report</h1>", html)
+        self.assertIn("<h2>Design Issues</h2>", html)
+        self.assertIn("No second toilet (practical design issue)", html)
+        self.assertIn("Redo the bathroom layout to include a second toilet", html)
 
     def test_report_lists_sunroom_hand_measurements(self):
         model = load_model("DATA/house_model.json")

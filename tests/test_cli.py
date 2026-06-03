@@ -60,3 +60,12 @@ class CliTests(unittest.TestCase):
         html = path.read_text()
         self.assertIn("House 3D Viewer", html)
         self.assertIn('id="house-3d-config"', html)
+
+    def test_cli_can_write_report_html(self):
+        path = Path("/private/tmp/home-design-calibration-report-test.html")
+        result = main(["report", "--output", str(path)])
+
+        self.assertEqual(result, 0)
+        html = path.read_text()
+        self.assertIn("<h1>Home Design Calibration Report</h1>", html)
+        self.assertIn("No second toilet (practical design issue)", html)

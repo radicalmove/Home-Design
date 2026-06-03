@@ -32,7 +32,15 @@ describe("home design Tauri commands", () => {
       name: "Current House",
       model_version: "current-generated-views",
       model_source: "DATA/house_model.json",
-      views: [],
+      views: [
+        {
+          id: "design-report",
+          label: "Design Report",
+          mode: "design_report",
+          asset_path: "/views/calibration_report.html",
+          available: true,
+        },
+      ],
       scenarios: [],
       layers: [],
       object_catalogs: [],
@@ -43,5 +51,27 @@ describe("home design Tauri commands", () => {
 
     expect(invokeMock).toHaveBeenCalledWith("load_builtin_project");
     expect(project.id).toBe("current-house");
+    expect(project.views[0].asset_path).toBe("/views/calibration_report.html");
+  });
+
+  it("falls back to the packaged manifest when Tauri invoke is unavailable", async () => {
+    invokeMock.mockRejectedValueOnce(new TypeError("Cannot read properties of undefined (reading 'invoke')"));
+
+    const project = await loadBuiltinProject();
+
+    expect(project.id).toBe("current-house");
+    expect(project.views.map((view) => view.id)).toContain("design-report");
+    expect(project.views.find((view) => view.id === "design-report")?.asset_path).toBe(
+      "/views/calibration_report.html",
+    );
+  });
+
+  it("falls back to packaged status when Tauri invoke is unavailable", async () => {
+    invokeMock.mockRejectedValueOnce(new TypeError("Cannot read properties of undefined (reading 'invoke')"));
+
+    const status = await getAppStatus();
+
+    expect(status.app_name).toBe("Home Design");
+    expect(status.built_in_project_count).toBe(1);
   });
 });

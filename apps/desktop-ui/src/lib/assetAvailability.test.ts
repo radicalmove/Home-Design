@@ -22,6 +22,13 @@ const project: ProjectManifest = {
       asset_path: "/views/house_3d.html",
       available: true,
     },
+    {
+      id: "design-report",
+      label: "Design Report",
+      mode: "design_report",
+      asset_path: "/views/calibration_report.html",
+      available: true,
+    },
   ],
   scenarios: [],
   layers: [],
@@ -34,7 +41,8 @@ describe("asset availability", () => {
     const fetcher = vi
       .fn()
       .mockResolvedValueOnce({ ok: true })
-      .mockResolvedValueOnce({ ok: false });
+      .mockResolvedValueOnce({ ok: false })
+      .mockResolvedValueOnce({ ok: true });
 
     const checked = await withCheckedViewAvailability(project, fetcher);
 
@@ -42,8 +50,13 @@ describe("asset availability", () => {
       cache: "no-store",
       method: "GET",
     });
+    expect(fetcher).toHaveBeenCalledWith("/views/calibration_report.html", {
+      cache: "no-store",
+      method: "GET",
+    });
     expect(checked.views[0].available).toBe(true);
     expect(checked.views[1].available).toBe(false);
+    expect(checked.views[2].available).toBe(true);
   });
 
   it("marks a view unavailable when fetch fails", async () => {

@@ -681,6 +681,24 @@ class ModelValidationTests(unittest.TestCase):
         result = validate_model(model)
         self.assertNotIn("daylight", " ".join(result.errors).lower())
 
+    def test_design_issues_require_actionable_report_fields(self):
+        import copy
+
+        from CODE.home_design.model import HouseModel, load_model
+        from CODE.home_design.validate import validate_model
+
+        model = load_model("DATA/house_model.json")
+        raw = copy.deepcopy(model.raw)
+        raw["design_issues"] = [
+            {
+                "id": "incomplete_issue",
+                "title": "Incomplete issue",
+                "summary": "This issue lacks a suggested path forward.",
+            }
+        ]
+        result = validate_model(HouseModel(raw=raw, units=model.units, rooms=model.rooms))
+        self.assertIn("design_issues.incomplete_issue missing possible_solution", result.errors)
+
 
 def _centroid(points):
     return (

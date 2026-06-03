@@ -52,6 +52,19 @@ def validate_model(model: HouseModel) -> ValidationResult:
         if not room.layout:
             errors.append(f"missing layout for {room.id}")
 
+    design_issues = raw.get("design_issues", [])
+    if not isinstance(design_issues, list):
+        errors.append("design_issues must be a list")
+    else:
+        for index, issue in enumerate(design_issues):
+            if not isinstance(issue, dict):
+                errors.append(f"design_issues.index_{index} must be an object")
+                continue
+            issue_id = issue.get("id") or f"index_{index}"
+            for field in ("id", "title", "summary", "possible_solution"):
+                if not issue.get(field):
+                    errors.append(f"design_issues.{issue_id} missing {field}")
+
     photo_check_ids = {check.get("id") for check in raw.get("photo_evidence", {}).get("checks", [])}
     current_structure = raw.get("current_structure", {})
     if current_structure:

@@ -57,10 +57,14 @@ def main(argv: list[str] | None = None) -> int:
         from pathlib import Path
 
         from .report import render_calibration_report
+        from .report import render_calibration_report_html
 
         output = Path(args.output)
         output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text(render_calibration_report(model))
+        if output.suffix.lower() == ".html":
+            output.write_text(render_calibration_report_html(model))
+        else:
+            output.write_text(render_calibration_report(model))
         print(f"wrote {args.output}")
     elif args.command == "viewer":
         from pathlib import Path

@@ -78,9 +78,11 @@ Regenerate packaged view assets during development:
 ```bash
 python3 -m CODE.home_design.cli reference-plan --output OUTPUT/reference_plan.html
 python3 -m CODE.home_design.cli house-3d --output OUTPUT/house_3d.html
+python3 -m CODE.home_design.cli report --output OUTPUT/calibration_report.html
 mkdir -p apps/desktop-ui/public/views
 cp OUTPUT/reference_plan.html apps/desktop-ui/public/views/reference_plan.html
 cp OUTPUT/house_3d.html apps/desktop-ui/public/views/house_3d.html
+cp OUTPUT/calibration_report.html apps/desktop-ui/public/views/calibration_report.html
 mkdir -p apps/desktop-ui/public/vendor/three@0.160.0/build
 mkdir -p apps/desktop-ui/public/vendor/three@0.160.0/examples
 cp apps/desktop-ui/node_modules/three/build/three.module.js apps/desktop-ui/public/vendor/three@0.160.0/build/three.module.js

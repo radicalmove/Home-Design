@@ -22,6 +22,13 @@ const project: ProjectManifest = {
       asset_path: "/views/house_3d.html",
       available: true,
     },
+    {
+      id: "design-report",
+      label: "Design Report",
+      mode: "design_report",
+      asset_path: "/views/calibration_report.html",
+      available: true,
+    },
   ],
   scenarios: [],
   layers: [],
@@ -50,6 +57,6 @@ describe("view state helpers", () => {
   });
 
   it("returns the active descriptor for the selected view", () => {
-    expect(activeView(project, "three-d-navigation")?.asset_path).toBe("/views/house_3d.html");
+    expect(activeView(project, "design-report")?.asset_path).toBe("/views/calibration_report.html");
   });
 });
