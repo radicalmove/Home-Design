@@ -8,7 +8,7 @@ export type StructuralTransitionZone = {
   fill: string;
 };
 
-export type ProposedPlanFloor = "carpet" | "deck" | "vinyl" | "tile";
+export type ProposedPlanFloor = "carpet" | "vinyl" | "tile";
 
 export type StructuralTransitionProposedRoom = StructuralTransitionZone & {
   floor: ProposedPlanFloor;
@@ -190,18 +190,6 @@ const BACK_SIDE_LIVING_TRANSITION: DesignStructuralTransition = {
       floor: "vinyl",
     },
     {
-      id: "design-2-day-room-carpet-lounge-zone",
-      d: "M 775.75 524.85 L 952.4 524.85 L 952.4 597.8 L 775.75 597.8 Z",
-      fill: "#f3ead9",
-      floor: "carpet",
-    },
-    {
-      id: "design-2-east-deck-extension",
-      d: "M 945 420.3 L 1004 485.5 L 1004 602.2 L 956.4 602.2 L 956.4 489.1 L 965 489.1 L 965 432.3 Z",
-      fill: "#9a6438",
-      floor: "deck",
-    },
-    {
       id: "design-2-kitchen-chill-edge-floor",
       d: "M 762.8 306.3 L 829 306.3 L 829 487.25 L 805.55 487.25 L 805.55 521.45 L 762.75 521.15 L 762.75 352.8 L 762.8 352.8 Z",
       fill: "#f0e1c5",
@@ -284,21 +272,41 @@ const BACK_SIDE_LIVING_TRANSITION: DesignStructuralTransition = {
     {
       id: "design-2-day-room-east-full-height-window",
       kind: "window",
-      label: "day room full-height east window",
+      label: "day room east window",
       x1: 956.4,
-      y1: 562,
+      y1: 514.3,
       x2: 956.4,
-      y2: 596,
+      y2: 543.5,
       strokeWidth: 8,
     },
     {
-      id: "design-2-day-room-east-double-glass-door",
-      kind: "door",
-      label: "day room double glass door to deck",
-      x1: 956.4,
-      y1: 506,
-      x2: 956.4,
-      y2: 550,
+      id: "design-2-main-entry-west-floor-window",
+      kind: "window",
+      label: "main entry west floor-to-ceiling window",
+      x1: 806,
+      y1: 489.1,
+      x2: 838,
+      y2: 489.1,
+      strokeWidth: 8,
+    },
+    {
+      id: "design-2-main-entry-east-floor-window",
+      kind: "window",
+      label: "main entry east floor-to-ceiling window",
+      x1: 886,
+      y1: 489.1,
+      x2: 910,
+      y2: 489.1,
+      strokeWidth: 8,
+    },
+    {
+      id: "design-2-old-laundry-north-floor-window",
+      kind: "window",
+      label: "old laundry north floor-to-ceiling window",
+      x1: 914,
+      y1: 489.1,
+      x2: 950.6,
+      y2: 489.1,
       strokeWidth: 8,
     },
     {
@@ -414,18 +422,6 @@ const BACK_SIDE_LIVING_TRANSITION: DesignStructuralTransition = {
       label: "main entry deck door",
       leafPath: "M 842 489.1 L 842 521.1",
       arcPath: "M 874 489.1 A 32 32 0 0 1 842 521.1",
-    },
-    {
-      id: "day-room-east-double-glass-door-upper",
-      label: "day room upper east glass door",
-      leafPath: "M 956.4 506 L 978.4 506",
-      arcPath: "M 978.4 506 A 22 22 0 0 1 956.4 528",
-    },
-    {
-      id: "day-room-east-double-glass-door-lower",
-      label: "day room lower east glass door",
-      leafPath: "M 956.4 550 L 978.4 550",
-      arcPath: "M 978.4 550 A 22 22 0 0 0 956.4 528",
     },
     {
       id: "retained-hallway-to-lounge-bedroom-door",

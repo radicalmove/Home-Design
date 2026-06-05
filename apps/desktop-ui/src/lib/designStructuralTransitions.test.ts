@@ -33,21 +33,13 @@ describe("design structural transitions", () => {
     const dayRoomFloor = transition?.floorAreas.find((area) => area.id === "design-2-continuous-day-room-floor");
     expect(transition?.floorAreas.map((area) => area.id)).toEqual(expect.arrayContaining([
       "design-2-continuous-day-room-floor",
-      "design-2-day-room-carpet-lounge-zone",
-      "design-2-east-deck-extension",
       "design-2-kitchen-chill-edge-floor",
     ]));
+    expect(transition?.floorAreas.map((area) => area.id)).not.toContain("design-2-east-deck-extension");
+    expect(transition?.floorAreas.map((area) => area.id)).not.toContain("design-2-day-room-carpet-lounge-zone");
     expect(dayRoomFloor?.d).toBe(
       "M 805.55 490.95 L 952.4 490.95 L 952.4 597.8 L 775.75 597.8 L 775.75 524.85 L 805.55 524.85 Z",
     );
-    expect(transition?.floorAreas.find((area) => area.id === "design-2-day-room-carpet-lounge-zone")).toMatchObject({
-      d: "M 775.75 524.85 L 952.4 524.85 L 952.4 597.8 L 775.75 597.8 Z",
-      floor: "carpet",
-    });
-    expect(transition?.floorAreas.find((area) => area.id === "design-2-east-deck-extension")).toMatchObject({
-      d: "M 945 420.3 L 1004 485.5 L 1004 602.2 L 956.4 602.2 L 956.4 489.1 L 965 489.1 L 965 432.3 Z",
-      floor: "deck",
-    });
     expect(transition?.openings.map((opening) => opening.id)).toEqual(expect.arrayContaining([
       "design-2-new-bedroom-front-windows",
       "design-2-new-bedroom-side-window",
@@ -56,7 +48,9 @@ describe("design structural transitions", () => {
       "design-2-wet-core-bathroom-south-window",
       "design-2-main-lounge-south-window",
       "design-2-day-room-east-full-height-window",
-      "design-2-day-room-east-double-glass-door",
+      "design-2-main-entry-west-floor-window",
+      "design-2-main-entry-east-floor-window",
+      "design-2-old-laundry-north-floor-window",
       "design-2-main-lounge-deck-doors",
       "design-2-wet-core-door",
     ]));
@@ -68,6 +62,7 @@ describe("design structural transitions", () => {
       "design-2-day-room-north-window",
       "design-2-day-room-east-window",
       "design-2-day-room-frosted-east-window",
+      "design-2-day-room-east-double-glass-door",
     ]));
     expect(transition?.openings.find((opening) => opening.id === "design-2-main-lounge-deck-doors")).toMatchObject({
       kind: "door",
@@ -93,16 +88,32 @@ describe("design structural transitions", () => {
       kind: "window",
       x1: 956.4,
       x2: 956.4,
-      y1: 562,
-      y2: 596,
+      y1: 514.3,
+      y2: 543.5,
       strokeWidth: 8,
     });
-    expect(transition?.openings.find((opening) => opening.id === "design-2-day-room-east-double-glass-door")).toMatchObject({
-      kind: "door",
-      x1: 956.4,
-      x2: 956.4,
-      y1: 506,
-      y2: 550,
+    expect(transition?.openings.find((opening) => opening.id === "design-2-main-entry-west-floor-window")).toMatchObject({
+      kind: "window",
+      x1: 806,
+      x2: 838,
+      y1: 489.1,
+      y2: 489.1,
+      strokeWidth: 8,
+    });
+    expect(transition?.openings.find((opening) => opening.id === "design-2-main-entry-east-floor-window")).toMatchObject({
+      kind: "window",
+      x1: 886,
+      x2: 910,
+      y1: 489.1,
+      y2: 489.1,
+      strokeWidth: 8,
+    });
+    expect(transition?.openings.find((opening) => opening.id === "design-2-old-laundry-north-floor-window")).toMatchObject({
+      kind: "window",
+      x1: 914,
+      x2: 950.6,
+      y1: 489.1,
+      y2: 489.1,
       strokeWidth: 8,
     });
     expect(transition?.openings.find((opening) => opening.id === "design-2-new-bedroom-front-windows")).toMatchObject({
@@ -178,10 +189,10 @@ describe("design structural transitions", () => {
     expect(transition?.doorMarkers.map((door) => door.id)).not.toContain("main-entry-deck-door");
     expect(transition?.retainedDoorTraces?.map((door) => door.id)).toEqual(expect.arrayContaining([
       "main-entry-deck-door-trace",
-      "day-room-east-double-glass-door-upper",
-      "day-room-east-double-glass-door-lower",
       "retained-hallway-to-lounge-bedroom-door",
     ]));
+    expect(transition?.retainedDoorTraces?.map((door) => door.id)).not.toContain("day-room-east-double-glass-door-upper");
+    expect(transition?.retainedDoorTraces?.map((door) => door.id)).not.toContain("day-room-east-double-glass-door-lower");
     expect(transition?.retainedDoorTraces?.find((door) => door.id === "main-entry-deck-door-trace")).toMatchObject({
       leafPath: "M 842 489.1 L 842 521.1",
       arcPath: "M 874 489.1 A 32 32 0 0 1 842 521.1",
@@ -189,14 +200,6 @@ describe("design structural transitions", () => {
     expect(transition?.retainedDoorTraces?.find((door) => door.id === "retained-hallway-to-lounge-bedroom-door")).toMatchObject({
       leafPath: "M 701.5 484.6 L 701.5 462.6",
       arcPath: "M 723.5 484.6 A 22.0 22.0 0 0 0 701.5 462.6",
-    });
-    expect(transition?.retainedDoorTraces?.find((door) => door.id === "day-room-east-double-glass-door-upper")).toMatchObject({
-      leafPath: "M 956.4 506 L 978.4 506",
-      arcPath: "M 978.4 506 A 22 22 0 0 1 956.4 528",
-    });
-    expect(transition?.retainedDoorTraces?.find((door) => door.id === "day-room-east-double-glass-door-lower")).toMatchObject({
-      leafPath: "M 956.4 550 L 978.4 550",
-      arcPath: "M 978.4 550 A 22 22 0 0 0 956.4 528",
     });
     expect(transition?.doorMarkers.map((door) => door.id)).not.toEqual(expect.arrayContaining([
       "new-bedroom-hall-door",

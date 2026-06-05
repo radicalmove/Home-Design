@@ -535,24 +535,52 @@ const DESIGN_2_ADDED_FEATURES: PlanVectorFeature[] = [
     shape: {
       kind: "polygon",
       points: [
-        [952.4, 562],
-        [960.4, 562],
-        [960.4, 596],
-        [952.4, 596],
+        [952.4, 514.3],
+        [960.4, 514.3],
+        [960.4, 543.5],
+        [952.4, 543.5],
       ],
     },
   },
   {
-    id: "future_day_room_east_double_glass_door",
-    type: "door_group",
-    renderGroup: "door",
+    id: "future_main_entry_west_floor_window",
+    type: "window",
+    renderGroup: "window",
     shape: {
       kind: "polygon",
       points: [
-        [952.4, 506],
-        [960.4, 506],
-        [960.4, 550],
-        [952.4, 550],
+        [806, 485.1],
+        [838, 485.1],
+        [838, 493.1],
+        [806, 493.1],
+      ],
+    },
+  },
+  {
+    id: "future_main_entry_east_floor_window",
+    type: "window",
+    renderGroup: "window",
+    shape: {
+      kind: "polygon",
+      points: [
+        [886, 485.1],
+        [910, 485.1],
+        [910, 493.1],
+        [886, 493.1],
+      ],
+    },
+  },
+  {
+    id: "future_old_laundry_north_floor_window",
+    type: "window",
+    renderGroup: "window",
+    shape: {
+      kind: "polygon",
+      points: [
+        [914, 485.1],
+        [950.6, 485.1],
+        [950.6, 493.1],
+        [914, 493.1],
       ],
     },
   },

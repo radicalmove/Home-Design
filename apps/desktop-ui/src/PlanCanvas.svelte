@@ -360,9 +360,6 @@
     if (floor === "vinyl") {
       return "url(#plan-overlay-vinyl-planks)";
     }
-    if (floor === "deck") {
-      return "url(#plan-overlay-deck-boards)";
-    }
     if (floor === "tile") {
       return "url(#plan-overlay-tile)";
     }
@@ -378,9 +375,6 @@
     }
     if (opening.id === "design-2-main-lounge-deck-doors") {
       return MAIN_ENTRY_CUTOUT_COLOUR;
-    }
-    if (opening.id === "design-2-day-room-east-double-glass-door") {
-      return "url(#plan-overlay-deck-boards)";
     }
     return "#f8f1e5";
   }
@@ -759,11 +753,6 @@
         <rect width="22" height="46" fill="#bda684" />
         <path d="M7 0 V46 M15 0 V46" stroke="#92785c" stroke-width="0.55" opacity="0.62" />
         <path d="M0 15 H7 M15 31 H22" stroke="#a48b6a" stroke-width="0.5" opacity="0.55" />
-      </pattern>
-      <pattern id="plan-overlay-deck-boards" width="24" height="18" patternUnits="userSpaceOnUse">
-        <rect width="24" height="18" fill="#9a6438" />
-        <path d="M0 3 H24 M0 9 H24 M0 15 H24" stroke="#704725" stroke-width="0.75" opacity="0.62" />
-        <path d="M8 0 V3 M17 9 V15" stroke="#704725" stroke-width="0.6" opacity="0.42" />
       </pattern>
       <pattern id="plan-overlay-carpet" width="18" height="18" patternUnits="userSpaceOnUse">
         <rect width="18" height="18" fill="#f3ead9" />

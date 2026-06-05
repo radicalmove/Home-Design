@@ -181,11 +181,9 @@ describe("base view furniture overlays", () => {
     expect(planCanvasSource).toContain('stroke="#c4b49a"');
     expect(planCanvasSource).toContain('opacity="0.68"');
     expect(planCanvasSource).toContain("plan-overlay-tile");
-    expect(planCanvasSource).toContain("plan-overlay-deck-boards");
     expect(planCanvasSource).toContain("type StructuralTransitionOpening");
     expect(planCanvasSource).toContain("function openingCutoutStroke(opening: StructuralTransitionOpening)");
     expect(planCanvasSource).toContain('opening.id === "design-2-main-lounge-deck-doors"');
-    expect(planCanvasSource).toContain('opening.id === "design-2-day-room-east-double-glass-door"');
     expect(planCanvasSource).toContain("stroke={openingCutoutStroke(opening)}");
     expect(planCanvasSource).toContain("stroke: none;");
     expect(planCanvasSource).toContain("stroke-dasharray: 4 4;");
@@ -211,6 +209,8 @@ describe("base view furniture overlays", () => {
     expect(planCanvasSource).not.toContain("opening.strokeWidth / 2");
     expect(planCanvasSource).not.toContain("windowGlassStrokeWidth");
     expect(planCanvasSource).not.toContain("proposed-plan-window-glass");
+    expect(planCanvasSource).not.toContain("plan-overlay-deck-boards");
+    expect(planCanvasSource).not.toContain('opening.id === "design-2-day-room-east-double-glass-door"');
     expect(planCanvasSource).not.toContain("structuralTransition.planLabels");
     expect(planCanvasSource).not.toContain("proposed-plan-label-layer");
     expect(planCanvasSource).not.toContain("proposed-plan-label");
