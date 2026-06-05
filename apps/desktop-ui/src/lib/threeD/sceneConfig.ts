@@ -11,8 +11,9 @@ import {
 import { furniture3DDepthFor, furniture3DMetadataFor } from "./furniture3d";
 import { defaultThreeDMaterials, type ThreeDMaterialPreset } from "./materials";
 import { defaultPhotoViewpoints, type ThreeDPhotoViewpoint } from "./photoViewpoints";
-import { buildMeasuredWallsFromRooms, type ThreeDWall } from "./walls";
-import { houseModelForScenario } from "../scenarioHouseModel";
+import { buildMeasuredWallsFromRooms, buildPlanVectorWalls, type ThreeDWall } from "./walls";
+import { houseModelForScenario, isScenarioHouseModelAvailable } from "../scenarioHouseModel";
+import { planVectorModelForScenario } from "../planVectorModel";
 
 export const HOUSE_FLOOR_ELEVATION_M = 0.3;
 export type { ThreeDMaterialPreset } from "./materials";
@@ -1189,21 +1190,27 @@ function buildFoundation(rooms: ThreeDRoom[], walls: ThreeDWall[], site: ThreeDS
 
 export function buildThreeDSceneConfig(data: DesignReviewData): ThreeDSceneConfig {
   const transform = data.furniture_layout.layout.plan_transform;
+  const scenarioId = data.furniture_layout.layout.scenario_id;
   const model = houseModelForScenario(
     data.house_model,
-    data.furniture_layout.layout.scenario_id,
+    scenarioId,
     transform.px_per_m,
   );
   const rooms = buildRooms(model, transform);
   const site = buildSite(model, transform);
-  const measuredWalls = buildMeasuredWallsFromRooms(rooms.map((room) => ({
+  const scenarioWalls = isScenarioHouseModelAvailable(scenarioId)
+    ? buildPlanVectorWalls(transform, planVectorModelForScenario(scenarioId).walls)
+    : [];
+  const measuredWalls = scenarioWalls.length > 0 ? [] : buildMeasuredWallsFromRooms(rooms.map((room) => ({
     id: room.id,
     geometry: room.geometry,
   })));
-  const walls = [
-    ...measuredWalls,
-    ...supplementalMeasuredWalls(rooms, measuredWalls),
-  ];
+  const walls = scenarioWalls.length > 0
+    ? scenarioWalls
+    : [
+        ...measuredWalls,
+        ...supplementalMeasuredWalls(rooms, measuredWalls),
+      ];
   const openings = withSyntheticTopLevelOpenings(
     withWallAnchoredOpenings(buildOpenings(model, transform), walls, model),
     walls,

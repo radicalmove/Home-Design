@@ -37,6 +37,23 @@ export type ThreeDWallRoomInput = {
   geometry: SceneGeometry;
 };
 
+export type ThreeDPlanVectorWallInput = {
+  id: string;
+  shape:
+    | {
+        kind: "line";
+        x1: number;
+        y1: number;
+        x2: number;
+        y2: number;
+      }
+    | {
+        kind: "path";
+        d: string;
+      };
+  thicknessPx: number;
+};
+
 type CuratedWallPath = [id: string, wallClass: ThreeDWallClass, path: string];
 
 const CURATED_WALL_PATHS: CuratedWallPath[] = [
@@ -422,5 +439,58 @@ export function buildCuratedWalls(transform: PlanTransform, openings: ThreeDWall
       thicknessM: spec.thicknessM,
       material: "paintedWall",
     };
+  });
+}
+
+function wallClassForVectorThickness(thicknessPx: number, transform: PlanTransform): ThreeDWallClass {
+  const thicknessM = thicknessPx / transform.px_per_m;
+  if (thicknessM >= 0.2) {
+    return "exterior";
+  }
+  if (thicknessM >= 0.12) {
+    return "thin-exterior";
+  }
+  return thicknessM <= 0.08 ? "thin-interior" : "interior";
+}
+
+function vectorWallSegments(wall: ThreeDPlanVectorWallInput, transform: PlanTransform): ThreeDWallSegment[] {
+  if (wall.shape.kind === "line") {
+    const start = displayPointToScene({ x: wall.shape.x1, y: wall.shape.y1 }, transform);
+    const end = displayPointToScene({ x: wall.shape.x2, y: wall.shape.y2 }, transform);
+    return [{ x1: start.x, z1: start.z, x2: end.x, z2: end.z }];
+  }
+
+  return parseWallPathSegments(wall.shape.d).map(([start, end]) => {
+    const startPoint = displayPointToScene({ x: start.x, y: start.z }, transform);
+    const endPoint = displayPointToScene({ x: end.x, y: end.z }, transform);
+    return { x1: startPoint.x, z1: startPoint.z, x2: endPoint.x, z2: endPoint.z };
+  });
+}
+
+export function buildPlanVectorWalls(
+  transform: PlanTransform,
+  walls: ThreeDPlanVectorWallInput[],
+): ThreeDWall[] {
+  return walls.flatMap((wall) => {
+    const wallClass = wallClassForVectorThickness(wall.thicknessPx, transform);
+    const spec = WALL_CLASS_SPECS[wallClass];
+    const segments = vectorWallSegments(wall, transform).filter((segment) => (
+      Math.hypot(segment.x2 - segment.x1, segment.z2 - segment.z1) > 0.01
+    ));
+    if (segments.length === 0) {
+      return [];
+    }
+    return [{
+      id: `plan-vector-wall:${wall.id}`,
+      class: wallClass,
+      pixelPath: wall.shape.kind === "path"
+        ? wall.shape.d
+        : `M ${wall.shape.x1} ${wall.shape.y1} L ${wall.shape.x2} ${wall.shape.y2}`,
+      sourceRoomIds: [],
+      segments,
+      heightM: spec.heightM,
+      thicknessM: wall.thicknessPx / transform.px_per_m,
+      material: "paintedWall" as const,
+    }];
   });
 }

@@ -576,6 +576,9 @@ describe("three-dimensional scene config", () => {
       .toBe("bedroom");
     expect(futureConfig.rooms.find((room) => room.id === "future_living_dining_day_room")?.floorMaterial)
       .toBe("vinylPlank");
+    expect(futureConfig.walls.every((wall) => !wall.id.startsWith("measured-wall:"))).toBe(true);
+    expect(futureConfig.walls.map((wall) => wall.id)).toContain("plan-vector-wall:replacement-bedroom-envelope");
+    expect(futureConfig.walls.some((wall) => wall.sourceRoomIds.includes("future_living_dining_day_room"))).toBe(false);
     expect(futureConfig.openings.map((opening) => opening.id)).toEqual(expect.arrayContaining([
       "future_front_door",
       "future_lounge_bedroom_north_window",

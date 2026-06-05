@@ -398,6 +398,14 @@ describe("furniture canvas interaction layout", () => {
     expect(planCanvasSource).toContain("onFinishObjectEdit();");
   });
 
+  it("does not recenter the furniture canvas on every drag-preview layout replacement", () => {
+    expect(planCanvasSource).toContain("let lastViewResetKey = $state<number | null>(null);");
+    expect(planCanvasSource).toContain("let lastViewScenarioId = $state<string | null>(null);");
+    expect(planCanvasSource).toContain("if (lastViewResetKey === null || lastViewScenarioId === null)");
+    expect(planCanvasSource).toContain("if (nextResetKey === lastViewResetKey && nextScenarioId === lastViewScenarioId)");
+    expect(planCanvasSource).not.toContain("$effect(() => {\n    resetKey;\n    layout.scenario_id;");
+  });
+
   it("exposes global furniture order controls in the selected object inspector", () => {
     expect(inspectorSource).toContain('onReorder: (objectId: string, action: FurnitureOrderAction) => void;');
     expect(inspectorSource).toContain('aria-label="Furniture order controls"');

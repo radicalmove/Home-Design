@@ -316,6 +316,8 @@
   let previousZoom = $state(1);
   let internallyAnchoredZoom = $state<number | null>(null);
   let wallDistanceGuides = $state<WallDistanceGuide[]>([]);
+  let lastViewResetKey = $state<number | null>(null);
+  let lastViewScenarioId = $state<string | null>(null);
 
   let visibleObjects = $derived(
     sortedFurnitureObjects(layout.objects).filter(
@@ -414,9 +416,21 @@
   });
 
   $effect(() => {
-    resetKey;
-    layout.scenario_id;
+    const nextResetKey = resetKey;
+    const nextScenarioId = layout.scenario_id;
     untrack(() => {
+      if (lastViewResetKey === null || lastViewScenarioId === null) {
+        lastViewResetKey = nextResetKey;
+        lastViewScenarioId = nextScenarioId;
+        return;
+      }
+
+      if (nextResetKey === lastViewResetKey && nextScenarioId === lastViewScenarioId) {
+        return;
+      }
+
+      lastViewResetKey = nextResetKey;
+      lastViewScenarioId = nextScenarioId;
       viewOriginInitialised = false;
       internallyAnchoredZoom = null;
       previousZoom = zoom;
