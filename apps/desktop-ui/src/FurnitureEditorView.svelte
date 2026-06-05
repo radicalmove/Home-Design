@@ -440,6 +440,8 @@
           showLabels={labelsVisible}
           showRoomLabels={roomLabelsVisible}
           zoom={planZoom}
+          structuralTransitionProgress={1}
+          structuralTransitionScenarioId={scenarioId}
           onSelectObject={(objectId) => (selectedObjectId = objectId)}
           onBeginObjectEdit={handleBeginObjectEdit}
           onFinishObjectEdit={handleFinishObjectEdit}

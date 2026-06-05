@@ -13,6 +13,8 @@ describe("design review view wiring", () => {
   it("renders the core report headings and live evidence controls", () => {
     expect(designReviewSource).toContain("scenarioId: string;");
     expect(designReviewSource).toContain("loadDesignReviewData(projectId, scenarioId)");
+    expect(designReviewSource).toContain("designScenarioConceptById(scenarioId)");
+    expect(designReviewSource).toContain("reviewTitle");
     expect(designReviewSource).toContain("analysis.overallAssessment");
     expect(designReviewSource).toContain("analysis.summarySections");
     expect(designReviewSource).toContain("analysis.practicalFindings");
@@ -39,6 +41,8 @@ describe("design review view wiring", () => {
     expect(designReviewSource).toContain("Refresh Review");
     expect(designReviewSource).toContain("Plan Snippets");
     expect(designReviewSource).toContain("Theoretical Movement Map");
+    expect(designReviewSource).toContain("reviewStructuralTransition");
+    expect(designReviewSource).toContain("review-structural-context");
     expect(designReviewSource).toContain("Room-By-Room Analysis");
     expect(designReviewSource).toContain("Expert Review Lens");
     expect(designReviewSource).toContain("Data Snapshot");

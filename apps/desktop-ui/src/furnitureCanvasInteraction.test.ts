@@ -83,6 +83,13 @@ describe("furniture canvas interaction layout", () => {
     expect(furnitureBackgroundSource).toContain('class="ref-site-label"');
   });
 
+  it("shows the completed scenario structural plan while editing future-design furniture", () => {
+    expect(editorSource).toContain("structuralTransitionProgress={1}");
+    expect(editorSource).toContain("structuralTransitionScenarioId={scenarioId}");
+    expect(planCanvasSource).toContain("structuralTransitionProgress?: number;");
+    expect(planCanvasSource).toContain("structuralTransitionScenarioId?: string | null;");
+  });
+
   it("renders side and corner handles for anchored furniture resizing", () => {
     expect(planCanvasSource).toContain("const RESIZE_HANDLES");
     expect(planCanvasSource).toContain('name: "n"');

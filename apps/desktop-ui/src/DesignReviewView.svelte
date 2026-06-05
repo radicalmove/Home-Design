@@ -1,6 +1,9 @@
 <script lang="ts">
   import { objectBoundsSvg } from "./lib/furnitureGeometry";
+  import { CURRENT_SCENARIO_ID } from "./lib/designScenarios";
   import { buildDesignReviewAnalysis } from "./lib/designReview";
+  import { designScenarioConceptById } from "./lib/designScenarioConcepts";
+  import { structuralTransitionForScenario } from "./lib/designStructuralTransitions";
   import { loadDesignReviewData } from "./lib/homeDesignCommands";
   import type {
     DesignReviewAnalysis,
@@ -24,6 +27,18 @@
 
   let analysis = $derived<DesignReviewAnalysis | null>(
     reviewData ? buildDesignReviewAnalysis(reviewData) : null,
+  );
+  let reviewScenarioConcept = $derived(
+    scenarioId === CURRENT_SCENARIO_ID ? null : designScenarioConceptById(scenarioId),
+  );
+  let reviewStructuralTransition = $derived(structuralTransitionForScenario(scenarioId));
+  let reviewTitle = $derived(
+    reviewScenarioConcept ? `${reviewScenarioConcept.label} Review` : "Current House Design Review",
+  );
+  let reviewSubject = $derived(
+    reviewScenarioConcept
+      ? `Practical interior-design and builder-style review of ${reviewScenarioConcept.label}, using its scenario structure, furniture layout, daylight assumptions, and movement routes.`
+      : "Practical interior-design and builder-style review for two adults in the Master Bedroom and a teenage girl in Bedroom 2, refreshed from the current saved furniture layout.",
   );
 
   function toErrorMessage(reason: unknown): string {
@@ -104,11 +119,8 @@
     <header class="review-hero">
       <div>
         <span class="eyebrow">Design Review</span>
-        <h3>Current House Design Review</h3>
-        <p>
-          Practical interior-design and builder-style review for two adults in the Master Bedroom
-          and a teenage girl in Bedroom 2, refreshed from the current saved furniture layout.
-        </p>
+        <h3>{reviewTitle}</h3>
+        <p>{reviewSubject}</p>
       </div>
       <div class="review-actions">
         <button type="button" onclick={refreshReview}>Refresh Review</button>
@@ -193,6 +205,54 @@
             width={reviewData.furniture_layout.layout.plan_transform.svg_width_px}
             height={reviewData.furniture_layout.layout.plan_transform.svg_height_px}
           />
+          {#if reviewStructuralTransition}
+            <g class="review-structural-context" aria-hidden="true">
+              {#each reviewStructuralTransition.wallMasks as wall (wall.id)}
+                <line
+                  class="review-wall-mask"
+                  x1={wall.x1}
+                  y1={wall.y1}
+                  x2={wall.x2}
+                  y2={wall.y2}
+                  stroke-width={wall.strokeWidth}
+                />
+              {/each}
+              {#each reviewStructuralTransition.proposedRooms as room (room.id)}
+                <rect
+                  class={`review-floor ${room.floor}`}
+                  x={room.x}
+                  y={room.y}
+                  width={room.width}
+                  height={room.height}
+                  fill={room.fill}
+                />
+              {/each}
+              {#each reviewStructuralTransition.floorAreas as area (area.id)}
+                <path class={`review-floor ${area.floor}`} d={area.d} fill={area.fill} />
+              {/each}
+              {#each reviewStructuralTransition.futureWalls as wall (wall.id)}
+                <path class="review-future-wall" d={wall.path} stroke-width={wall.strokeWidth} />
+              {/each}
+              {#each reviewStructuralTransition.openings as opening (opening.id)}
+                <line
+                  class={`review-opening ${opening.kind}`}
+                  x1={opening.x1}
+                  y1={opening.y1}
+                  x2={opening.x2}
+                  y2={opening.y2}
+                />
+              {/each}
+              {#each reviewStructuralTransition.doorMarkers as door (door.id)}
+                <g
+                  class="review-door-marker"
+                  transform={`translate(${door.x}, ${door.y}) rotate(${door.rotationDeg})`}
+                >
+                  <line x1={-door.width / 2} y1="0" x2={door.width / 2} y2="0" />
+                  <path d={`M ${-door.width / 2} 0 A ${door.width} ${door.width} 0 0 1 ${door.width / 2} ${door.width}`} />
+                </g>
+              {/each}
+            </g>
+          {/if}
           {#each analysis.movementScenarios as scenario}
             {#if scenario.points.length > 1}
               <polyline
@@ -271,6 +331,54 @@
                 width={reviewData.furniture_layout.layout.plan_transform.svg_width_px}
                 height={reviewData.furniture_layout.layout.plan_transform.svg_height_px}
               />
+              {#if reviewStructuralTransition}
+                <g class="review-structural-context" aria-hidden="true">
+                  {#each reviewStructuralTransition.wallMasks as wall (wall.id)}
+                    <line
+                      class="review-wall-mask"
+                      x1={wall.x1}
+                      y1={wall.y1}
+                      x2={wall.x2}
+                      y2={wall.y2}
+                      stroke-width={wall.strokeWidth}
+                    />
+                  {/each}
+                  {#each reviewStructuralTransition.proposedRooms as room (room.id)}
+                    <rect
+                      class={`review-floor ${room.floor}`}
+                      x={room.x}
+                      y={room.y}
+                      width={room.width}
+                      height={room.height}
+                      fill={room.fill}
+                    />
+                  {/each}
+                  {#each reviewStructuralTransition.floorAreas as area (area.id)}
+                    <path class={`review-floor ${area.floor}`} d={area.d} fill={area.fill} />
+                  {/each}
+                  {#each reviewStructuralTransition.futureWalls as wall (wall.id)}
+                    <path class="review-future-wall" d={wall.path} stroke-width={wall.strokeWidth} />
+                  {/each}
+                  {#each reviewStructuralTransition.openings as opening (opening.id)}
+                    <line
+                      class={`review-opening ${opening.kind}`}
+                      x1={opening.x1}
+                      y1={opening.y1}
+                      x2={opening.x2}
+                      y2={opening.y2}
+                    />
+                  {/each}
+                  {#each reviewStructuralTransition.doorMarkers as door (door.id)}
+                    <g
+                      class="review-door-marker"
+                      transform={`translate(${door.x}, ${door.y}) rotate(${door.rotationDeg})`}
+                    >
+                      <line x1={-door.width / 2} y1="0" x2={door.width / 2} y2="0" />
+                      <path d={`M ${-door.width / 2} 0 A ${door.width} ${door.width} 0 0 1 ${door.width / 2} ${door.width}`} />
+                    </g>
+                  {/each}
+                </g>
+              {/if}
               {#each highlightedObjects(snippet) as object}
                 {@const bounds = furnitureRect(object)}
                 {#if bounds}
@@ -667,6 +775,45 @@
     font-size: 10px;
     font-weight: 800;
     text-anchor: middle;
+  }
+
+  .review-structural-context {
+    opacity: 0.96;
+  }
+
+  .review-wall-mask {
+    stroke: #f8f1e5;
+    stroke-linecap: square;
+  }
+
+  .review-floor {
+    opacity: 0.86;
+  }
+
+  .review-future-wall {
+    fill: none;
+    stroke: #4e5860;
+    stroke-linecap: square;
+    stroke-linejoin: miter;
+  }
+
+  .review-opening {
+    stroke: #fffdf8;
+    stroke-linecap: square;
+    stroke-width: 8;
+  }
+
+  .review-opening.window {
+    stroke: #fffdf8;
+    stroke-width: 7;
+  }
+
+  .review-door-marker line,
+  .review-door-marker path {
+    fill: none;
+    stroke: #111;
+    stroke-width: 1.8;
+    stroke-linecap: square;
   }
 
   .movement-routes,

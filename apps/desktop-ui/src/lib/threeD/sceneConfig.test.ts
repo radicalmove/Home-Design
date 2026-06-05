@@ -529,7 +529,7 @@ describe("three-dimensional scene config", () => {
     }));
   });
 
-  it("applies rough room-purpose metadata for future design scenarios without changing Design 1", () => {
+  it("builds future design scenarios from the scenario vector plan without changing Design 1", () => {
     const modelPath = new URL("../../../../../DATA/house_model.json", import.meta.url);
     const houseModel = JSON.parse(readFileSync(modelPath, "utf8")) as Record<string, unknown>;
     const currentConfig = buildThreeDSceneConfig({
@@ -558,11 +558,31 @@ describe("three-dimensional scene config", () => {
     });
 
     expect(currentConfig.rooms.find((room) => room.id === "bedroom_2")?.name).toBe("Bedroom 2");
-    expect(futureConfig.rooms.find((room) => room.id === "bedroom_2")?.name).toBe("Living / dining day room");
-    expect(futureConfig.rooms.find((room) => room.id === "bedroom_2")?.category).toBe("living");
-    expect(futureConfig.rooms.find((room) => room.id === "sunroom")?.name).toBe("New insulated bedroom");
-    expect(futureConfig.rooms.find((room) => room.id === "sunroom")?.category).toBe("bedroom");
-    expect(futureConfig.rooms.find((room) => room.id === "lounge")?.name).toBe("Bedroom");
-    expect(futureConfig.rooms.find((room) => room.id === "lounge")?.category).toBe("bedroom");
+    expect(currentConfig.rooms.map((room) => room.id)).not.toContain("future_living_dining_day_room");
+
+    expect(futureConfig.rooms.map((room) => room.id)).toEqual(expect.arrayContaining([
+      "kitchen_dining",
+      "future_living_dining_day_room",
+      "kitchen_dining_chill_zone",
+      "replacement_insulated_bedroom",
+      "relocated_service_rooms",
+      "current_lounge_bedroom",
+    ]));
+    expect(futureConfig.rooms.map((room) => room.id)).not.toContain("sunroom");
+    expect(futureConfig.rooms.map((room) => room.id)).not.toContain("bedroom_2");
+    expect(futureConfig.rooms.find((room) => room.id === "future_living_dining_day_room")?.name)
+      .toBe("Living / Dining Day Room");
+    expect(futureConfig.rooms.find((room) => room.id === "replacement_insulated_bedroom")?.category)
+      .toBe("bedroom");
+    expect(futureConfig.rooms.find((room) => room.id === "future_living_dining_day_room")?.floorMaterial)
+      .toBe("vinylPlank");
+    expect(futureConfig.openings.map((opening) => opening.id)).toEqual(expect.arrayContaining([
+      "future_front_door",
+      "future_lounge_bedroom_north_window",
+      "future_day_room_east_full_height_window",
+      "future_old_laundry_north_floor_window",
+    ]));
+    expect(futureConfig.openings.map((opening) => opening.id)).not.toContain("sunroom_lounge_slider");
+    expect(futureConfig.openings.every((opening) => opening.anchor)).toBe(true);
   });
 });

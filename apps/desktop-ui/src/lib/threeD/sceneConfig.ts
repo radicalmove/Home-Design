@@ -12,7 +12,7 @@ import { furniture3DDepthFor, furniture3DMetadataFor } from "./furniture3d";
 import { defaultThreeDMaterials, type ThreeDMaterialPreset } from "./materials";
 import { defaultPhotoViewpoints, type ThreeDPhotoViewpoint } from "./photoViewpoints";
 import { buildMeasuredWallsFromRooms, type ThreeDWall } from "./walls";
-import { CURRENT_SCENARIO_ID } from "../designScenarios";
+import { houseModelForScenario } from "../scenarioHouseModel";
 
 export const HOUSE_FLOOR_ELEVATION_M = 0.3;
 export type { ThreeDMaterialPreset } from "./materials";
@@ -204,6 +204,9 @@ function roomMaterial(roomId: string, category: string): string {
   if (category === "built_in") {
     return "carpet";
   }
+  if (category === "bedroom") {
+    return "carpet";
+  }
   if (TILE_ROOM_IDS.has(roomId) || category === "wet") {
     return "tile";
   }
@@ -334,122 +337,6 @@ function buildRooms(model: JsonRecord, transform: PlanTransform): ThreeDRoom[] {
   });
 
   return [...roomRecords, ...builtInRecords];
-}
-
-function roomWithPurpose(
-  room: ThreeDRoom,
-  name: string,
-  category: string,
-  notes: string[],
-): ThreeDRoom {
-  return {
-    ...room,
-    name,
-    category,
-    confidence: room.confidence === "measured" ? "concept-from-measured" : room.confidence,
-    floorMaterial: roomMaterial(room.id, category),
-    notes: [...room.notes, ...notes],
-  };
-}
-
-function applyScenarioRoomOverrides(scenarioId: string, rooms: ThreeDRoom[]): ThreeDRoom[] {
-  if (scenarioId === CURRENT_SCENARIO_ID) {
-    return rooms;
-  }
-
-  return rooms.map((room) => {
-    if (scenarioId === "back-side-living-sunroom-bedroom") {
-      if (room.id === "bedroom_2") {
-        return roomWithPurpose(room, "Living / dining day room", "living", [
-          "Future scenario: Bedroom 2, laundry, toilet, and entrance are tested as the brighter back-side living and dining room.",
-        ]);
-      }
-      if (room.id === "sunroom") {
-        return roomWithPurpose(room, "New insulated bedroom", "bedroom", [
-          "Future scenario: current sunroom footprint is treated as a replacement insulated bedroom mass.",
-        ]);
-      }
-      if (room.id === "lounge") {
-        return roomWithPurpose(room, "Bedroom", "bedroom", [
-          "Future scenario: current lounge is tested as a proper bedroom with clearer privacy and a larger north window.",
-        ]);
-      }
-      if (room.id === "office") {
-        return roomWithPurpose(room, "Separated service rooms", "wet", [
-          "Future scenario: office area is tested as adjacent laundry, WC, bathroom, and storage service rooms.",
-        ]);
-      }
-    }
-
-    if (scenarioId === "wet-core-bright-day-room") {
-      if (room.id === "office") {
-        return roomWithPurpose(room, "Expanded service rooms", "wet", [
-          "Future scenario: office is absorbed into adjacent bathroom, laundry, WC, and storage rooms.",
-        ]);
-      }
-      if (room.id === "laundry" || room.id === "toilet" || room.id === "entrance") {
-        return roomWithPurpose(room, "Bright day room / back entry", "living", [
-          "Future scenario: service-end daylight is released for sitting, reading, or a better back-entry zone.",
-        ]);
-      }
-      if (room.id === "lounge") {
-        return roomWithPurpose(room, "Evening media room", "living", [
-          "Future scenario: current lounge is treated as darker evening media rather than the only daytime living room.",
-        ]);
-      }
-    }
-
-    if (scenarioId === "kitchen-kept-social-spine") {
-      if (room.id === "kitchen_dining") {
-        return roomWithPurpose(room, "Retained kitchen / social spine", "living", [
-          "Future scenario: renovated kitchen is protected while adjacent social flow is rebuilt.",
-        ]);
-      }
-      if (room.id === "bedroom_2") {
-        return roomWithPurpose(room, "Back lounge / day room", "living", [
-          "Future scenario: Bedroom 2/service end can become the back-side social room.",
-        ]);
-      }
-      if (room.id === "lounge") {
-        return roomWithPurpose(room, "Media / guest overflow", "living", [
-          "Future scenario: current lounge becomes secondary social or guest space.",
-        ]);
-      }
-    }
-
-    if (scenarioId === "two-living-room-family") {
-      if (room.id === "bedroom_2") {
-        return roomWithPurpose(room, "Daytime family room", "living", [
-          "Future scenario: back-side room tests daytime family living before the full rebuild.",
-        ]);
-      }
-      if (room.id === "lounge") {
-        return roomWithPurpose(room, "Evening media room", "living", [
-          "Future scenario: current lounge remains useful for evening media and quieter sitting.",
-        ]);
-      }
-    }
-
-    if (scenarioId === "new-bedroom-pod-bedroom2-lounge") {
-      if (room.id === "bedroom_2") {
-        return roomWithPurpose(room, "Main lounge / day room", "living", [
-          "Future scenario: Bedroom 2 becomes the main back-side lounge after a new bedroom pod is added.",
-        ]);
-      }
-      if (room.id === "sunroom") {
-        return roomWithPurpose(room, "Sunroom removed or reduced", "living", [
-          "Future scenario: sunroom is no longer relied on as the replacement bedroom.",
-        ]);
-      }
-      if (room.id === "lounge") {
-        return roomWithPurpose(room, "Media room / snug", "living", [
-          "Future scenario: current lounge becomes secondary evening or quiet space.",
-        ]);
-      }
-    }
-
-    return room;
-  });
 }
 
 function openingSourceRecords(model: JsonRecord): JsonRecord[] {
@@ -1301,12 +1188,13 @@ function buildFoundation(rooms: ThreeDRoom[], walls: ThreeDWall[], site: ThreeDS
 }
 
 export function buildThreeDSceneConfig(data: DesignReviewData): ThreeDSceneConfig {
-  const model = asRecord(data.house_model);
   const transform = data.furniture_layout.layout.plan_transform;
-  const rooms = applyScenarioRoomOverrides(
+  const model = houseModelForScenario(
+    data.house_model,
     data.furniture_layout.layout.scenario_id,
-    buildRooms(model, transform),
+    transform.px_per_m,
   );
+  const rooms = buildRooms(model, transform);
   const site = buildSite(model, transform);
   const measuredWalls = buildMeasuredWallsFromRooms(rooms.map((room) => ({
     id: room.id,

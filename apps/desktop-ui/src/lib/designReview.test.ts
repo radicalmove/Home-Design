@@ -420,4 +420,83 @@ describe("design review analysis", () => {
       "New required: Bedroom storage, blackout/privacy window treatment, and heating for the replacement bedroom.",
     );
   });
+
+  it("uses the Design 2 scenario structure for room analysis, movement, and furniture assignment", () => {
+    const futureData: DesignReviewData = {
+      ...reviewData,
+      furniture_layout: {
+        ...reviewData.furniture_layout,
+        layout: {
+          ...layout,
+          scenario_id: "back-side-living-sunroom-bedroom",
+          plan_transform: {
+            units: "metres",
+            svg_width_px: 1600,
+            svg_height_px: 900,
+            origin_svg_px: { x: 518, y: 314 },
+            px_per_m: 27.16,
+          },
+          objects: [
+            {
+              ...layout.objects[1],
+              id: "design-2-sofa",
+              x_m: 12.7,
+              y_m: 8.5,
+            },
+          ],
+        },
+      },
+    };
+
+    const analysis = buildDesignReviewAnalysis(futureData);
+
+    expect(analysis.rooms.map((room) => room.id)).toEqual(expect.arrayContaining([
+      "future_living_dining_day_room",
+      "replacement_insulated_bedroom",
+      "current_lounge_bedroom",
+      "relocated_service_rooms",
+    ]));
+    expect(analysis.rooms.map((room) => room.id)).not.toContain("sunroom");
+    expect(analysis.rooms.map((room) => room.id)).not.toContain("bedroom_2");
+    expect(analysis.rooms.find((room) => room.id === "future_living_dining_day_room")?.objects.map((object) => object.id))
+      .toEqual(["design-2-sofa"]);
+    expect(analysis.roomAnalyses.find((room) => room.id === "current_lounge_bedroom")?.name)
+      .toBe("Current Lounge Bedroom");
+    expect(analysis.movementScenarios.find((scenario) => scenario.person === "Teenager")?.rooms)
+      .toContain("Current Lounge Bedroom");
+    expect(analysis.movementMapViewBox).not.toBe("0 0 240 160");
+  });
+
+  it("writes Design 2 review sections as a proposed redesign rather than the current-house critique", () => {
+    const futureData: DesignReviewData = {
+      ...reviewData,
+      furniture_layout: {
+        ...reviewData.furniture_layout,
+        layout: {
+          ...layout,
+          scenario_id: "back-side-living-sunroom-bedroom",
+          plan_transform: {
+            units: "metres",
+            svg_width_px: 1600,
+            svg_height_px: 900,
+            origin_svg_px: { x: 518, y: 314 },
+            px_per_m: 27.16,
+          },
+        },
+      },
+    };
+
+    const analysis = buildDesignReviewAnalysis(futureData);
+
+    expect(analysis.overallAssessment.paragraphs.join(" ")).toContain("Design 2");
+    expect(analysis.summarySections.find((section) => section.id === "strengths")?.points.join(" "))
+      .toContain("back-side light");
+    expect(analysis.summarySections.find((section) => section.id === "weaknesses")?.points.join(" "))
+      .toContain("highest-risk");
+    expect(analysis.summarySections.find((section) => section.id === "moveable-opportunities")?.points.join(" "))
+      .toContain("reuse");
+    expect(analysis.roomAnalyses.find((room) => room.id === "future_living_dining_day_room")?.use)
+      .toContain("main everyday living");
+    expect(analysis.snippets.map((snippet) => snippet.id)).toContain("design-2-new-day-room");
+  });
 });

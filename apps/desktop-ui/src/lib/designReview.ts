@@ -6,6 +6,7 @@ import {
   type DesignScenarioFurnitureReuse,
   type DesignScenarioConcept,
 } from "./designScenarioConcepts";
+import { houseModelForScenario } from "./scenarioHouseModel";
 import type { DesignReviewData, FurnitureLayout, FurnitureObject, PlanPoint, PlanTransform } from "../types";
 
 type JsonRecord = Record<string, unknown>;
@@ -535,7 +536,26 @@ function buildOverallAssessment(
   rooms: ReviewRoom[],
   metrics: DesignReviewMetrics,
   serviceLightRooms: string[],
+  scenarioId: string,
 ): DesignReviewOverallAssessment {
+  if (scenarioId === "back-side-living-sunroom-bedroom") {
+    return {
+      title: "Overall Assessment",
+      paragraphs: [
+        "Design 2 is a genuine whole-house rebalancing rather than a furniture shuffle. Its strongest idea is moving everyday living toward the brighter back side of the house, while turning the old lounge into a quieter bedroom and replacing the thermally awkward sunroom with an insulated bedroom.",
+        "The plan is promising because it puts the best morning and early-afternoon light into a room people would actually occupy: the new living/dining/day room. It also keeps the renovated kitchen largely intact, creates a clearer arrival point, and gives the teenager a bedroom position that is less overloaded by the current long narrow Bedroom 2 constraints.",
+        `The trade-off is build complexity. With ${metrics.totalFurnitureObjects} furniture objects to reuse or relocate, this option only works if the new lounge furniture grouping, relocated service rooms, and bedroom storage are designed as a coordinated package. It is not prohibitively extravagant compared with adding another storey, but it is still a high-disruption renovation.`,
+      ],
+      priorities: [
+        "Keep the renovated kitchen in place unless a later costing proves a minor adjustment is worth it.",
+        "Resolve the relocated bathroom, laundry, and WC as proper separated service rooms, not a combined bathroom/laundry compromise.",
+        "Use the new back-side living room for daily sitting, dining, homework, and entertaining so the best light is no longer wasted on service rooms.",
+        "Make the old lounge bedroom feel intentional: correct door swing, a large north window, calm storage, and enough acoustic separation from the kitchen/chill edge.",
+        "Treat the former sunroom replacement bedroom as a real insulated room with privacy, heating/cooling, and window coverings, not as a glazed add-on.",
+      ],
+    };
+  }
+
   const bedroom2 = rooms.find((room) => room.id === "bedroom_2");
   return {
     title: "Overall Assessment",
@@ -560,7 +580,48 @@ function buildSummarySections(
   metrics: DesignReviewMetrics,
   offPlanObjects: AssignedFurnitureObject[],
   serviceLightRooms: string[],
+  scenarioId: string,
 ): DesignReviewSummarySection[] {
+  if (scenarioId === "back-side-living-sunroom-bedroom") {
+    return [
+      {
+        id: "strengths",
+        title: "Strengths",
+        points: [
+          "The main strength is that the best back-side light is reassigned to a room people would actually use for sitting, eating, homework, and entertaining.",
+          "The kitchen can remain largely as renovated, which protects recent investment while still changing the house's daily centre of gravity.",
+          "Replacing the sunroom with an insulated bedroom solves the current seasonal comfort problem more decisively than trying to make the old sunroom do everything.",
+          "The current lounge can become a calmer bedroom because it no longer has to operate as both the main sitting room and a through-route.",
+          offPlanObjects.length === 0
+            ? "The furniture layout is currently all on-plan, so the review can focus on whether reuse and placement support the new room purposes."
+            : `${offPlanObjects.length} item${offPlanObjects.length === 1 ? "" : "s"} still need placement cleanup before this option can be judged fully.`,
+        ],
+      },
+      {
+        id: "weaknesses",
+        title: "Weaknesses",
+        points: [
+          "This is the highest-risk of the worked-through options because it relocates service functions, changes room purposes, and depends on good detailing around new walls, doors, windows, and flooring.",
+          "The relocated laundry, bathroom, and WC must be separated and properly ventilated. A combined bathroom/laundry would undermine the design and feel awkward day to day.",
+          "The old lounge bedroom needs careful acoustic and privacy treatment because it remains close to kitchen/chill activity.",
+          "The replacement bedroom on the former sunroom footprint must be built as a proper insulated room; if it inherits sunroom-like thermal behaviour, the design fails at its biggest promise.",
+          "Furniture reuse is helpful for cost control, but reused pieces can easily become clutter if the new living/dining/day room is treated as a dumping ground for everything that used to fit elsewhere.",
+        ],
+      },
+      {
+        id: "moveable-opportunities",
+        title: "Moveable Furniture Opportunities",
+        points: [
+          `Reuse the existing sofa, armchairs, dining table, chairs, and media pieces only where they reinforce the new back-side living room's daily purpose.`,
+          "Use the kitchen/dining chill edge for a lighter reading or quiet sitting setup rather than duplicating the main lounge furniture.",
+          "Keep the old lounge bedroom simple: bed, storage, bedside pieces, and possibly a small reading/media piece, but avoid recreating a second lounge in that room.",
+          "If the teenager moves into the old lounge bedroom, reuse existing bedroom furniture selectively and prioritise desk/storage positions that protect the new door and window clearances.",
+          `Because there are ${metrics.moveableFurnitureObjects} moveable objects, the review should test subtraction as much as relocation: some pieces may be better stored, sold, or replaced with slimmer versions.`,
+        ],
+      },
+    ];
+  }
+
   const bedroom2 = rooms.find((room) => room.id === "bedroom_2");
   const lounge = rooms.find((room) => room.id === "lounge");
   const kitchen = rooms.find((room) => room.id === "kitchen_dining");
@@ -795,6 +856,16 @@ function countLabel(count: number, singular: string, plural = `${singular}s`): s
 
 function roomUseAnalysis(room: ReviewRoom): string {
   switch (room.id) {
+    case "future_living_dining_day_room":
+      return "The main everyday living, dining, homework, shared screen time, and entertaining zone. This is where Design 2 deliberately relocates the family's daily life to capture the better back-side light.";
+    case "kitchen_dining_chill_zone":
+      return "Renovated kitchen plus a quieter chill or reading edge. It should support food, coffee, conversation, and short retreat without competing with the main day room.";
+    case "replacement_insulated_bedroom":
+      return "New insulated bedroom replacing the old sunroom footprint. It must behave like a proper bedroom, not a seasonal glazed porch.";
+    case "relocated_service_rooms":
+      return "Separated bathroom, laundry, WC, and storage service core. The aim is practical function and privacy without wasting the brightest back-side wall.";
+    case "current_lounge_bedroom":
+      return "Bedroom 2 in the former lounge position, giving the teenager more privacy and removing the room from the narrow back-side service strip.";
     case "kitchen_dining":
       return "Daily meals, food preparation, household gathering, and the route between the living areas and service end.";
     case "lounge":
@@ -824,6 +895,16 @@ function roomUseAnalysis(room: ReviewRoom): string {
 
 function roomLightAnalysis(room: ReviewRoom): string {
   switch (room.id) {
+    case "future_living_dining_day_room":
+      return `${room.daylightSummary}. This is the key daylight win: morning and early-afternoon light moves into the room most likely to be occupied during waking hours.`;
+    case "kitchen_dining_chill_zone":
+      return `${room.daylightSummary}. Keep finishes and furniture visually light so the renovated kitchen and chill edge still borrow brightness from the deck-side glazing.`;
+    case "replacement_insulated_bedroom":
+      return `${room.daylightSummary}. It needs curtains, privacy, and thermal control because the old sunroom position has the best light but also the greatest comfort risk.`;
+    case "relocated_service_rooms":
+      return `${room.daylightSummary}. This area can rely more on controlled artificial light, extraction, and practical finishes than on prime daylight.`;
+    case "current_lounge_bedroom":
+      return `${room.daylightSummary}. The proposed larger north window is important because the old lounge position should become a believable bedroom, not a leftover dark room.`;
     case "lounge":
       return `${room.daylightSummary}. This is borrowed light rather than a bright, direct-light lounge, so pale finishes and uncluttered openings matter.`;
     case "entrance":
@@ -852,6 +933,16 @@ function roomFurnitureAnalysis(room: ReviewRoom): string {
 
 function roomImprovementAnalysis(room: ReviewRoom): string {
   switch (room.id) {
+    case "future_living_dining_day_room":
+      return "Group sofa, dining, and circulation deliberately: clear entry path, no furniture crossing the bedroom/service routes, and enough open floor for three people plus guests.";
+    case "kitchen_dining_chill_zone":
+      return "Keep this quieter than the main day room: a reading chair, slim storage, or small music/coffee spot works better than a full second lounge setup.";
+    case "replacement_insulated_bedroom":
+      return "Design the envelope first: insulation, window size, privacy treatment, heating/cooling, and a normal door. Furniture should follow those decisions.";
+    case "relocated_service_rooms":
+      return "Separate bathroom, WC, laundry, and storage cleanly; check plumbing runs, ventilation, acoustic privacy, and usable appliance clearances before committing.";
+    case "current_lounge_bedroom":
+      return "Make the former lounge read as a bedroom with a clear door, large north window, simple storage wall, and controlled connection to the kitchen/chill edge.";
     case "kitchen_dining":
       return "Keep dining furniture light, preserve chair pull-out space, and avoid tall moveable storage near the brighter dining/window end.";
     case "lounge":
@@ -891,22 +982,37 @@ function buildRoomAnalyses(rooms: ReviewRoom[]): DesignReviewRoomAnalysis[] {
   }));
 }
 
-function buildMovementScenarios(model: JsonRecord): DesignReviewMovementScenario[] {
-  const names = roomNameById(model);
-  const centers = roomSvgCenters(model);
-  const deckPoint = featureCenterSvg(model, "rear_timber_deck");
-  const namedPoint = (roomId: string): DesignReviewMovementPoint[] => {
-    const point = roomId === "deck" ? deckPoint : centers.get(roomId);
-    if (!point) {
-      return [];
-    }
-    return [{
-      ...point,
-      label: roomId === "deck" ? "Deck" : names.get(roomId) ?? titleFromId(roomId),
-    }];
-  };
+function movementRouteDefinitions(scenarioId: string) {
+  if (scenarioId === "back-side-living-sunroom-bedroom") {
+    return [
+      {
+        id: "adult-1-morning",
+        person: "Adult 1",
+        routine: "Morning start",
+        roomIds: ["master_bedroom", "hallway", "relocated_service_rooms", "kitchen_dining", "future_living_dining_day_room"],
+        colour: "#2f6f9f",
+        note: "Shows the adult route from sleeping to the relocated service core, kitchen, and brighter back-side living/day area.",
+      },
+      {
+        id: "adult-2-home-evening",
+        person: "Adult 2",
+        routine: "Evening home loop",
+        roomIds: ["future_living_dining_day_room", "kitchen_dining", "kitchen_dining_chill_zone", "current_lounge_bedroom", "master_bedroom"],
+        colour: "#8b5d9f",
+        note: "Shows arrival into the new day room, food, quieter chill space, checking the new bedroom, and return to the adult bedroom end.",
+      },
+      {
+        id: "teen-after-school",
+        person: "Teenager",
+        routine: "After-school pattern",
+        roomIds: ["current_lounge_bedroom", "relocated_service_rooms", "kitchen_dining", "future_living_dining_day_room", "current_lounge_bedroom"],
+        colour: "#c46f2d",
+        note: "Shows the teen loop from the new Bedroom 2 position to bathroom/service rooms, food, shared sitting, and retreat.",
+      },
+    ];
+  }
 
-  const scenarios = [
+  return [
     {
       id: "adult-1-morning",
       person: "Adult 1",
@@ -932,6 +1038,24 @@ function buildMovementScenarios(model: JsonRecord): DesignReviewMovementScenario
       note: "Shows the likely teen loop between bedroom, bathroom, food, shared sitting, and retreat.",
     },
   ];
+}
+
+function buildMovementScenarios(model: JsonRecord, scenarioId: string): DesignReviewMovementScenario[] {
+  const names = roomNameById(model);
+  const centers = roomSvgCenters(model);
+  const deckPoint = featureCenterSvg(model, "rear_timber_deck");
+  const namedPoint = (roomId: string): DesignReviewMovementPoint[] => {
+    const point = roomId === "deck" ? deckPoint : centers.get(roomId);
+    if (!point) {
+      return [];
+    }
+    return [{
+      ...point,
+      label: roomId === "deck" ? "Deck" : names.get(roomId) ?? titleFromId(roomId),
+    }];
+  };
+
+  const scenarios = movementRouteDefinitions(scenarioId);
 
   return scenarios.map((scenario) => ({
     id: scenario.id,
@@ -980,11 +1104,48 @@ function buildExpertReview(): DesignReviewExpertReview[] {
   ];
 }
 
-function buildSnippets(rooms: ReviewRoom[]): DesignReviewSnippet[] {
+function buildSnippets(rooms: ReviewRoom[], scenarioId: string): DesignReviewSnippet[] {
   const objectIdsForRooms = (roomIds: string[]) =>
     rooms
       .filter((room) => roomIds.includes(room.id))
       .flatMap((room) => room.objects.map((object) => object.id));
+
+  if (scenarioId === "back-side-living-sunroom-bedroom") {
+    return [
+      {
+        id: "design-2-new-day-room",
+        title: "New Back-Side Living / Dining Room",
+        body: "Shows the main Design 2 move: the bright back-side service/Bedroom 2 end becomes the everyday living and dining room.",
+        viewBox: "750 470 245 160",
+        focusRoomIds: ["future_living_dining_day_room"],
+        highlightObjectIds: objectIdsForRooms(["future_living_dining_day_room"]),
+      },
+      {
+        id: "design-2-bedroom-replacement",
+        title: "Replacement Bedroom And Bedroom 2",
+        body: "Shows the former sunroom rebuilt as a proper bedroom and the old lounge repurposed as Bedroom 2.",
+        viewBox: "510 325 280 190",
+        focusRoomIds: ["replacement_insulated_bedroom", "current_lounge_bedroom"],
+        highlightObjectIds: objectIdsForRooms(["replacement_insulated_bedroom", "current_lounge_bedroom"]),
+      },
+      {
+        id: "design-2-service-core",
+        title: "Relocated Service Core",
+        body: "Shows the high-risk part of the option: laundry, WC, bathroom, and storage need to work as separated service rooms.",
+        viewBox: "625 500 180 130",
+        focusRoomIds: ["relocated_service_rooms"],
+        highlightObjectIds: objectIdsForRooms(["relocated_service_rooms"]),
+      },
+      {
+        id: "design-2-kitchen-chill-edge",
+        title: "Kitchen And Chill / Reading Edge",
+        body: "Shows the retained renovated kitchen and the former dining strip becoming a quieter support space rather than the only living zone.",
+        viewBox: "730 285 135 245",
+        focusRoomIds: ["kitchen_dining", "kitchen_dining_chill_zone"],
+        highlightObjectIds: objectIdsForRooms(["kitchen_dining", "kitchen_dining_chill_zone"]),
+      },
+    ];
+  }
 
   return [
     {
@@ -1049,15 +1210,15 @@ function photoEvidence(model: JsonRecord): DesignReviewPhotoEvidence[] {
 }
 
 export function buildDesignReviewAnalysis(data: DesignReviewData): DesignReviewAnalysis {
-  const model = asRecord(data.house_model);
   const layout = data.furniture_layout.layout;
+  const model = houseModelForScenario(data.house_model, layout.scenario_id, layout.plan_transform.px_per_m);
   const assignedObjects = assignObjects(layout, model);
   const offPlanObjects = assignedObjects.filter((object) => isOffPlan(object, layout));
   const unassignedObjects = assignedObjects.filter((object) => !object.roomId && !isOffPlan(object, layout));
   const rooms = buildRooms(model, assignedObjects);
   const lowLightRooms = lowWinterLightRooms(model, roomNameById(model));
   const serviceLightRooms = usefulLowUseLightRoomNames(model, rooms);
-  const movementScenarios = buildMovementScenarios(model);
+  const movementScenarios = buildMovementScenarios(model, layout.scenario_id);
   const metrics: DesignReviewMetrics = {
     totalFurnitureObjects: layout.objects.length,
     fixedFurnitureObjects: layout.objects.filter((object) => object.layer === "fixed").length,
@@ -1071,8 +1232,8 @@ export function buildDesignReviewAnalysis(data: DesignReviewData): DesignReviewA
     modelSource: data.model_source,
     layoutSource: data.furniture_layout.source,
     metrics,
-    overallAssessment: buildOverallAssessment(rooms, metrics, serviceLightRooms),
-    summarySections: buildSummarySections(rooms, metrics, offPlanObjects, serviceLightRooms),
+    overallAssessment: buildOverallAssessment(rooms, metrics, serviceLightRooms, layout.scenario_id),
+    summarySections: buildSummarySections(rooms, metrics, offPlanObjects, serviceLightRooms, layout.scenario_id),
     practicalFindings: buildPracticalFindings(rooms, lowLightRooms, serviceLightRooms),
     roomAnalyses: buildRoomAnalyses(rooms),
     movementMapViewBox: movementMapViewBox(layout, movementScenarios),
@@ -1087,7 +1248,7 @@ export function buildDesignReviewAnalysis(data: DesignReviewData): DesignReviewA
       ...buildScenarioReportSections(layout.scenario_id),
       ...buildReportSections(rooms, metrics),
     ],
-    snippets: buildSnippets(rooms),
+    snippets: buildSnippets(rooms, layout.scenario_id),
     photoEvidence: photoEvidence(model),
   };
 }
