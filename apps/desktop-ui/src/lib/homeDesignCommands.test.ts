@@ -69,6 +69,7 @@ describe("home design Tauri commands", () => {
     expect(project.id).toBe("current-house");
     expect(project.views.map((view) => view.id)).toContain("design-review");
     expect(project.views.map((view) => view.id)).toContain("furniture-editor");
+    expect(project.views.map((view) => view.id)).toContain("estimated-cost");
     expect(project.scenarios.map((scenario) => scenario.id)).toContain("back-side-living-sunroom-bedroom");
   });
 

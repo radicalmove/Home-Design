@@ -8,6 +8,7 @@ import {
   selectAvailableScenario,
   selectAvailableScenarioView,
   selectAvailableView,
+  viewsForScenario,
 } from "./viewState";
 
 const project: ProjectManifest = {
@@ -35,6 +36,13 @@ const project: ProjectManifest = {
       label: "Furniture Editor",
       mode: "furniture_editor",
       asset_path: "/views/reference_plan.svg",
+      available: true,
+    },
+    {
+      id: "estimated-cost",
+      label: "Estimated Cost",
+      mode: "estimated_cost",
+      asset_path: "",
       available: true,
     },
   ],
@@ -128,6 +136,21 @@ describe("view state helpers", () => {
     ).toEqual({
       scenarioId: "back-side-living-sunroom-bedroom",
       viewId: "base-view",
+    });
+  });
+
+  it("only exposes the estimated cost view for Design 2", () => {
+    expect(viewsForScenario(project, "current").map((view) => view.id)).not.toContain("estimated-cost");
+    expect(viewsForScenario(project, "back-side-living-sunroom-bedroom").map((view) => view.id)).toContain(
+      "estimated-cost",
+    );
+    expect(selectAvailableScenarioView(project, "current", "estimated-cost")).toEqual({
+      scenarioId: "current",
+      viewId: "base-view",
+    });
+    expect(selectAvailableScenarioView(project, "back-side-living-sunroom-bedroom", "estimated-cost")).toEqual({
+      scenarioId: "back-side-living-sunroom-bedroom",
+      viewId: "estimated-cost",
     });
   });
 });

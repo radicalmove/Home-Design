@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import BaseView from "./BaseView.svelte";
   import DesignReviewView from "./DesignReviewView.svelte";
+  import EstimatedCostView from "./EstimatedCostView.svelte";
   import FurnitureEditorView from "./FurnitureEditorView.svelte";
   import ThreeDNavigationView from "./ThreeDNavigationView.svelte";
   import { withCheckedViewAvailability } from "./lib/assetAvailability";
@@ -20,6 +21,7 @@
     activeScenario,
     activeView,
     selectAvailableScenarioView,
+    viewsForScenario,
   } from "./lib/viewState";
   import type {
     AppStatus,
@@ -51,7 +53,9 @@
   let selectedView = $derived(activeView(project, selectedViewId));
   let measurementAudit = $derived(modelStatus?.summary.measurement_audit ?? null);
   let selectedViewDisplayPath = $derived(
-    selectedView?.mode === "three_d_navigation" || selectedView?.mode === "design_review"
+    selectedView?.mode === "three_d_navigation"
+      || selectedView?.mode === "design_review"
+      || selectedView?.mode === "estimated_cost"
       ? "Native renderer"
       : selectedView?.mode === "base_plan" && project
         ? basePlanBackgroundAssetPath(project)
@@ -258,7 +262,7 @@
 
             {#if !isScenarioCollapsed(scenario.id)}
               <div class="view-tabs">
-                {#each project.views as view}
+                {#each viewsForScenario(project, scenario.id) as view}
                   <button
                     type="button"
                     class:selected={selectedScenarioId === scenario.id && selectedViewId === view.id}
@@ -299,6 +303,8 @@
         <BaseView projectId={project.id} scenarioId={selectedScenario.id} resetKey={viewActivationKey} backgroundAssetPath={basePlanBackgroundAssetPath(project)} />
       {:else if selectedView.mode === "design_review" && project}
         <DesignReviewView projectId={project.id} scenarioId={selectedScenario.id} />
+      {:else if selectedView.mode === "estimated_cost" && project}
+        <EstimatedCostView projectId={project.id} scenarioId={selectedScenario.id} />
       {:else if selectedView.mode === "three_d_navigation" && project}
         <ThreeDNavigationView projectId={project.id} scenarioId={selectedScenario.id} />
       {:else}

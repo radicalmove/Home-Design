@@ -1,20 +1,37 @@
 import type { DesignScenarioDescriptor, ProjectManifest, ViewDescriptor } from "../types";
 import { CURRENT_SCENARIO_ID, sortedScenarios } from "./designScenarios";
 
+const ESTIMATED_COST_SCENARIO_IDS = new Set(["back-side-living-sunroom-bedroom"]);
+
 export type ScenarioViewSelection = {
   scenarioId: string;
   viewId: string;
 };
 
-export function firstAvailableViewId(project: ProjectManifest): string | null {
-  return project.views.find((view) => view.available)?.id ?? null;
+export function isViewAvailableForScenario(view: ViewDescriptor, scenarioId: string | null): boolean {
+  return view.mode !== "estimated_cost" || (scenarioId !== null && ESTIMATED_COST_SCENARIO_IDS.has(scenarioId));
 }
 
-export function selectAvailableView(project: ProjectManifest, requestedId: string | null): string | null {
-  if (requestedId && project.views.some((view) => view.id === requestedId && view.available)) {
+export function viewsForScenario(project: ProjectManifest, scenarioId: string | null): ViewDescriptor[] {
+  return project.views.filter((view) => isViewAvailableForScenario(view, scenarioId));
+}
+
+export function firstAvailableViewId(project: ProjectManifest, scenarioId: string | null = null): string | null {
+  return viewsForScenario(project, scenarioId).find((view) => view.available)?.id ?? null;
+}
+
+export function selectAvailableView(
+  project: ProjectManifest,
+  requestedId: string | null,
+  scenarioId: string | null = null,
+): string | null {
+  if (
+    requestedId
+    && viewsForScenario(project, scenarioId).some((view) => view.id === requestedId && view.available)
+  ) {
     return requestedId;
   }
-  return firstAvailableViewId(project);
+  return firstAvailableViewId(project, scenarioId);
 }
 
 export function activeView(
@@ -67,7 +84,7 @@ export function selectAvailableScenarioView(
   requestedViewId: string | null,
 ): ScenarioViewSelection | null {
   const scenarioId = selectAvailableScenario(project, requestedScenarioId);
-  const viewId = selectAvailableView(project, requestedViewId);
+  const viewId = selectAvailableView(project, requestedViewId, scenarioId);
 
   if (!scenarioId || !viewId) {
     return null;

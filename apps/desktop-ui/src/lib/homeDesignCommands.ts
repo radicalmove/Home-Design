@@ -49,6 +49,13 @@ const fallbackProject: ProjectManifest = {
       asset_path: "",
       available: true,
     },
+    {
+      id: "estimated-cost",
+      label: "Estimated Cost",
+      mode: "estimated_cost",
+      asset_path: "",
+      available: true,
+    },
   ],
   scenarios: [
     {

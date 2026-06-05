@@ -32,6 +32,7 @@ pub enum ViewMode {
     ThreeDNavigation,
     FurnitureEditor,
     DesignReview,
+    EstimatedCost,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -107,6 +108,13 @@ pub fn built_in_project_manifest() -> ProjectManifest {
                 id: "design-review".to_string(),
                 label: "Design Review".to_string(),
                 mode: ViewMode::DesignReview,
+                asset_path: String::new(),
+                available: true,
+            },
+            ViewDescriptor {
+                id: "estimated-cost".to_string(),
+                label: "Estimated Cost".to_string(),
+                mode: ViewMode::EstimatedCost,
                 asset_path: String::new(),
                 available: true,
             },

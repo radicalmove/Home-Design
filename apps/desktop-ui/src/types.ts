@@ -4,7 +4,12 @@ export type AppStatus = {
   built_in_project_count: number;
 };
 
-export type ViewMode = "base_plan" | "three_d_navigation" | "furniture_editor" | "design_review";
+export type ViewMode =
+  | "base_plan"
+  | "three_d_navigation"
+  | "furniture_editor"
+  | "design_review"
+  | "estimated_cost";
 
 export type ViewDescriptor = {
   id: string;

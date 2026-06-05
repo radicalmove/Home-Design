@@ -7,7 +7,7 @@ fn built_in_project_manifest_exposes_current_house_views() {
     assert_eq!(manifest.id, "current-house");
     assert_eq!(manifest.name, "Current House");
     assert_eq!(manifest.model_source, "DATA/house_model.json");
-    assert_eq!(manifest.views.len(), 4);
+    assert_eq!(manifest.views.len(), 5);
 
     let base_view = manifest
         .views
@@ -48,6 +48,16 @@ fn built_in_project_manifest_exposes_current_house_views() {
     assert_eq!(design_review_view.mode, ViewMode::DesignReview);
     assert_eq!(design_review_view.asset_path, "");
     assert!(design_review_view.available);
+
+    let estimated_cost_view = manifest
+        .views
+        .iter()
+        .find(|view| view.id == "estimated-cost")
+        .expect("estimated cost view");
+    assert_eq!(estimated_cost_view.label, "Estimated Cost");
+    assert_eq!(estimated_cost_view.mode, ViewMode::EstimatedCost);
+    assert_eq!(estimated_cost_view.asset_path, "");
+    assert!(estimated_cost_view.available);
 
     let scenario_ids: Vec<_> = manifest
         .scenarios

@@ -30,13 +30,19 @@ fn load_builtin_project_returns_packaged_view_manifest() {
     let manifest = load_builtin_project();
 
     assert_eq!(manifest.id, "current-house");
-    assert_eq!(manifest.views.len(), 4);
+    assert_eq!(manifest.views.len(), 5);
     assert!(manifest.views.iter().all(|view| view.available));
     assert!(
         manifest
             .views
             .iter()
             .any(|view| view.id == "furniture-editor")
+    );
+    assert!(
+        manifest
+            .views
+            .iter()
+            .any(|view| view.id == "estimated-cost")
     );
 }
 
