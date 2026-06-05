@@ -94,16 +94,24 @@ describe("design structural transitions", () => {
     });
     expect(transition?.openings.find((opening) => opening.id === "design-2-main-entry-west-floor-window")).toMatchObject({
       kind: "window",
-      x1: 806,
-      x2: 838,
+      x1: 844,
+      x2: 852,
       y1: 489.1,
       y2: 489.1,
       strokeWidth: 8,
     });
     expect(transition?.openings.find((opening) => opening.id === "design-2-main-entry-east-floor-window")).toMatchObject({
       kind: "window",
-      x1: 886,
-      x2: 910,
+      x1: 888,
+      x2: 896,
+      y1: 489.1,
+      y2: 489.1,
+      strokeWidth: 8,
+    });
+    expect(transition?.openings.find((opening) => opening.id === "design-2-main-lounge-deck-doors")).toMatchObject({
+      kind: "door",
+      x1: 854,
+      x2: 886,
       y1: 489.1,
       y2: 489.1,
       strokeWidth: 8,
@@ -194,8 +202,8 @@ describe("design structural transitions", () => {
     expect(transition?.retainedDoorTraces?.map((door) => door.id)).not.toContain("day-room-east-double-glass-door-upper");
     expect(transition?.retainedDoorTraces?.map((door) => door.id)).not.toContain("day-room-east-double-glass-door-lower");
     expect(transition?.retainedDoorTraces?.find((door) => door.id === "main-entry-deck-door-trace")).toMatchObject({
-      leafPath: "M 842 489.1 L 842 521.1",
-      arcPath: "M 874 489.1 A 32 32 0 0 1 842 521.1",
+      leafPath: "M 854 489.1 L 854 517.1",
+      arcPath: "M 882 489.1 A 28 28 0 0 1 854 517.1",
     });
     expect(transition?.retainedDoorTraces?.find((door) => door.id === "retained-hallway-to-lounge-bedroom-door")).toMatchObject({
       leafPath: "M 701.5 484.6 L 701.5 462.6",

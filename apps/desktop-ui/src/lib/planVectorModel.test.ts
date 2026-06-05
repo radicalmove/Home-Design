@@ -172,10 +172,10 @@ describe("plan vector model", () => {
     expect(model.features.find((feature) => feature.id === "future_front_door")?.shape).toEqual({
       kind: "polygon",
       points: [
-        [842, 486.6],
-        [882, 486.6],
-        [882, 491.6],
-        [842, 491.6],
+        [854, 486.6],
+        [886, 486.6],
+        [886, 491.6],
+        [854, 491.6],
       ],
     });
     expect(model.features.find((feature) => feature.id === "future_lounge_bedroom_north_window")?.shape).toEqual({
@@ -208,19 +208,19 @@ describe("plan vector model", () => {
     expect(model.features.find((feature) => feature.id === "future_main_entry_west_floor_window")?.shape).toEqual({
       kind: "polygon",
       points: [
-        [806, 485.1],
-        [838, 485.1],
-        [838, 493.1],
-        [806, 493.1],
+        [844, 485.1],
+        [852, 485.1],
+        [852, 493.1],
+        [844, 493.1],
       ],
     });
     expect(model.features.find((feature) => feature.id === "future_main_entry_east_floor_window")?.shape).toEqual({
       kind: "polygon",
       points: [
-        [886, 485.1],
-        [910, 485.1],
-        [910, 493.1],
-        [886, 493.1],
+        [888, 485.1],
+        [896, 485.1],
+        [896, 493.1],
+        [888, 493.1],
       ],
     });
     expect(model.features.find((feature) => feature.id === "future_old_laundry_north_floor_window")?.shape).toEqual({
