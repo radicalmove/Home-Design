@@ -121,6 +121,11 @@ THIN_EXTERIOR_WALL_STROKE_PX = round(REFERENCE_PX_PER_M * 0.14, 1)
 TRIMMED_EXTERIOR_WALL_STROKE_PX = 6.0
 THIN_INTERIOR_WALL_STROKE_PX = round(REFERENCE_PX_PER_M * 0.125, 1)
 TOILET_EXTERIOR_WALL_STROKE_PX = round(REFERENCE_PX_PER_M * 0.27, 1)
+EXTERIOR_WALL_HALF_PX = EXTERIOR_WALL_STROKE_PX / 2
+INTERIOR_WALL_HALF_PX = INTERIOR_WALL_STROKE_PX / 2
+THIN_EXTERIOR_WALL_HALF_PX = THIN_EXTERIOR_WALL_STROKE_PX / 2
+THIN_INTERIOR_WALL_HALF_PX = THIN_INTERIOR_WALL_STROKE_PX / 2
+TOILET_EXTERIOR_WALL_HALF_PX = TOILET_EXTERIOR_WALL_STROKE_PX / 2
 POCKET_DOOR_IDS = {"hallway_to_bathroom_sliding_door"}
 POCKET_DOOR_POCKET_CENTERLINES = {
     "hallway_to_bathroom_sliding_door": (743.4, 523.0, 773.9, 523.0),
@@ -193,6 +198,61 @@ OPENING_CENTERLINE_OVERRIDES = {
 
 WINDOW_GUIDE_OFFSET_PX = 2.0
 
+def _dimension_annotation(
+    dimension_id: str,
+    kind: str,
+    label: str,
+    x1: float,
+    y1: float,
+    x2: float,
+    y2: float,
+    offset_x: float,
+    offset_y: float,
+    confidence: str,
+    source: str,
+) -> dict[str, Any]:
+    return {
+        "id": dimension_id,
+        "kind": kind,
+        "label": label,
+        "x1": x1,
+        "y1": y1,
+        "x2": x2,
+        "y2": y2,
+        "offset_x": offset_x,
+        "offset_y": offset_y,
+        "confidence": confidence,
+        "source": source,
+    }
+
+
+DIMENSION_ANNOTATIONS = [
+    _dimension_annotation("overall-master-to-laundry", "external", "16.10 m", 533.9, 617.8, 960.4, 617.8, 0.0, 44.0, "measured", "anchor:long_side_master_to_laundry"),
+    _dimension_annotation("overall-external-depth", "external", "11.58 m", 984.4, 302.3, 984.4, 602.2, 44.0, 0.0, "measured", "anchor:combined_external_depth"),
+    _dimension_annotation("sunroom-approx-span", "external", "~4.87 m", 533.9, 326.0, 663.1, 326.0, 0.0, -24.0, "approximate", "room:sunroom.reference_position"),
+    _dimension_annotation("kitchen-dining-clear-length", "internal", "8.12 m", 833.0 - EXTERIOR_WALL_HALF_PX, 302.3 + EXTERIOR_WALL_HALF_PX, 833.0 - EXTERIOR_WALL_HALF_PX, 523.3 - THIN_INTERIOR_WALL_HALF_PX, 34.0, 0.0, "measured", "room:kitchen_dining.length"),
+    _dimension_annotation("kitchen-dining-clear-width", "internal", "2.50 m", 760.9 + INTERIOR_WALL_HALF_PX, 302.3 + EXTERIOR_WALL_HALF_PX, 833.0 - EXTERIOR_WALL_HALF_PX, 302.3 + EXTERIOR_WALL_HALF_PX, 0.0, -32.0, "measured", "room:kitchen_dining.width"),
+    _dimension_annotation("lounge-clear-length", "internal", "4.90 m", 659.1 + INTERIOR_WALL_HALF_PX, 348.8 + EXTERIOR_WALL_HALF_PX, 659.1 + INTERIOR_WALL_HALF_PX, 484.6 - INTERIOR_WALL_HALF_PX, 0.0, 0.0, "measured", "room:lounge.length"),
+    _dimension_annotation("lounge-clear-width", "internal", "3.70 m", 659.1 + INTERIOR_WALL_HALF_PX, 348.8 + EXTERIOR_WALL_HALF_PX, 760.9 - INTERIOR_WALL_HALF_PX, 348.8 + EXTERIOR_WALL_HALF_PX, 0.0, -24.0, "measured", "room:lounge.width"),
+    _dimension_annotation("hallway-clear-length", "internal", "4.80 m", 627.1 + EXTERIOR_WALL_HALF_PX, 484.6 + INTERIOR_WALL_HALF_PX, 760.9 - INTERIOR_WALL_HALF_PX, 484.6 + INTERIOR_WALL_HALF_PX, 0.0, -22.0, "measured", "room:hallway.length"),
+    _dimension_annotation("hallway-clear-width", "internal", "1.30 m", 627.1 + EXTERIOR_WALL_HALF_PX, 484.6 + INTERIOR_WALL_HALF_PX, 627.1 + EXTERIOR_WALL_HALF_PX, 523.0 - INTERIOR_WALL_HALF_PX, -20.0, 0.0, "measured", "room:hallway.width"),
+    _dimension_annotation("master-bedroom-clear-length", "internal", "3.30 m", 533.9 + EXTERIOR_WALL_HALF_PX, 601.8 - EXTERIOR_WALL_HALF_PX, 627.1 - THIN_INTERIOR_WALL_HALF_PX, 601.8 - EXTERIOR_WALL_HALF_PX, 0.0, 22.0, "measured", "room:master_bedroom.length"),
+    _dimension_annotation("master-bedroom-clear-width", "internal", "4.20 m", 533.9 + EXTERIOR_WALL_HALF_PX, 482.4 + EXTERIOR_WALL_HALF_PX, 533.9 + EXTERIOR_WALL_HALF_PX, 601.8 - EXTERIOR_WALL_HALF_PX, -28.0, 0.0, "measured", "room:master_bedroom.width"),
+    _dimension_annotation("wardrobe-bay-depth", "built_in", "0.62 m", 627.1 + THIN_INTERIOR_WALL_HALF_PX, 609.5, 646.8 - THIN_INTERIOR_WALL_HALF_PX, 609.5, 0.0, 16.0, "measured", "built_in:master_bedroom_wardrobe"),
+    _dimension_annotation("office-clear-length", "internal", "2.90 m", 646.8 + THIN_INTERIOR_WALL_HALF_PX, 601.8 - EXTERIOR_WALL_HALF_PX, 727.1 - THIN_INTERIOR_WALL_HALF_PX, 601.8 - EXTERIOR_WALL_HALF_PX, 0.0, 22.0, "measured", "room:office.length"),
+    _dimension_annotation("office-clear-width", "internal", "2.75 m", 646.8 + THIN_INTERIOR_WALL_HALF_PX, 523.0 + THIN_INTERIOR_WALL_HALF_PX, 646.8 + THIN_INTERIOR_WALL_HALF_PX, 601.8 - EXTERIOR_WALL_HALF_PX, -15.7, 0.0, "measured", "room:office.width"),
+    _dimension_annotation("bathroom-clear-length", "internal", "1.64 m", 727.1 + THIN_INTERIOR_WALL_HALF_PX, 601.8 - EXTERIOR_WALL_HALF_PX, 773.9 - THIN_INTERIOR_WALL_HALF_PX, 601.8 - EXTERIOR_WALL_HALF_PX, 0.0, 22.0, "measured", "room:bathroom.length"),
+    _dimension_annotation("bathroom-clear-width", "internal", "2.75 m", 773.9 - THIN_INTERIOR_WALL_HALF_PX, 523.0 + THIN_INTERIOR_WALL_HALF_PX, 773.9 - THIN_INTERIOR_WALL_HALF_PX, 601.8 - EXTERIOR_WALL_HALF_PX, 15.7, 0.0, "measured", "room:bathroom.width"),
+    _dimension_annotation("bedroom-2-clear-length", "internal", "4.73 m", 773.9 + THIN_INTERIOR_WALL_HALF_PX, 546.0, 902.8 - INTERIOR_WALL_HALF_PX, 546.0, 0.0, -16.0, "measured", "room:bedroom_2.length"),
+    _dimension_annotation("bedroom-2-clear-width", "internal", "2.75 m", 902.8 - INTERIOR_WALL_HALF_PX, 523.3 + THIN_INTERIOR_WALL_HALF_PX, 902.8 - INTERIOR_WALL_HALF_PX, 601.8 - EXTERIOR_WALL_HALF_PX, -16.2, 0.0, "measured", "room:bedroom_2.width"),
+    _dimension_annotation("entrance-clear-length", "internal", "3.70 m", 803.7 + THIN_INTERIOR_WALL_HALF_PX, 489.1 + THIN_EXTERIOR_WALL_HALF_PX, 902.8 - INTERIOR_WALL_HALF_PX, 489.1 + THIN_EXTERIOR_WALL_HALF_PX, 0.0, -19.9, "measured", "room:entrance.length"),
+    _dimension_annotation("entrance-clear-width", "internal", "1.16 m", 902.8 - INTERIOR_WALL_HALF_PX, 489.1 + THIN_EXTERIOR_WALL_HALF_PX, 902.8 - INTERIOR_WALL_HALF_PX, 523.3 - THIN_INTERIOR_WALL_HALF_PX, 17.9, 0.0, "measured", "room:entrance.width"),
+    _dimension_annotation("laundry-clear-length", "internal", "3.03 m", 956.4 - EXTERIOR_WALL_HALF_PX, 489.1 + THIN_EXTERIOR_WALL_HALF_PX, 956.4 - EXTERIOR_WALL_HALF_PX, 572.9 - THIN_INTERIOR_WALL_HALF_PX, 28.0, 0.0, "measured", "room:laundry.length"),
+    _dimension_annotation("laundry-clear-width", "internal", "1.80 m", 902.8 + INTERIOR_WALL_HALF_PX, 489.1 + THIN_EXTERIOR_WALL_HALF_PX, 956.4 - EXTERIOR_WALL_HALF_PX, 489.1 + THIN_EXTERIOR_WALL_HALF_PX, 0.0, -29.9, "measured", "room:laundry.width"),
+    _dimension_annotation("toilet-clear-length", "internal", "0.91 m", 956.4 - EXTERIOR_WALL_HALF_PX, 572.9 + THIN_INTERIOR_WALL_HALF_PX, 956.4 - EXTERIOR_WALL_HALF_PX, 602.2 - TOILET_EXTERIOR_WALL_HALF_PX, 28.0, 0.0, "measured", "room:toilet.length"),
+    _dimension_annotation("toilet-clear-width", "internal", "1.80 m", 902.8 + INTERIOR_WALL_HALF_PX, 602.2 - TOILET_EXTERIOR_WALL_HALF_PX, 956.4 - EXTERIOR_WALL_HALF_PX, 602.2 - TOILET_EXTERIOR_WALL_HALF_PX, 0.0, 23.6, "measured", "room:toilet.width"),
+]
+
 def render_reference_plan_svg(model: HouseModel) -> str:
     current_structure = model.raw.get("current_structure", {})
     current_site = model.raw.get("current_site", {})
@@ -218,6 +278,7 @@ def render_reference_plan_svg(model: HouseModel) -> str:
         _render_opening_layer(features),
         _render_scale_layer(),
         _render_orientation_layer(model.raw.get("orientation", {})),
+        _render_dimension_layer(),
         _render_label_layer(spaces, site_elements),
         "</svg>",
     ]
@@ -309,6 +370,13 @@ text { font-family: Arial, sans-serif; fill: #1d2522; }
 .ref-site-label { font-size: 8px; fill: #243029; }
 .ref-scale-line, .ref-scale-tick { stroke: #2f3134; stroke-width: 1.1; stroke-linecap: butt; }
 .ref-scale-label { font-size: 7px; text-anchor: middle; dominant-baseline: auto; fill: #2f3134; }
+.ref-dimension-line, .ref-dimension-extension, .ref-dimension-tick { stroke: #263238; stroke-width: 0.85; stroke-linecap: butt; fill: none; }
+.ref-dimension-extension { opacity: 0.58; }
+.ref-dimension-label-bg { fill: #fffdf8; stroke: #d3cabd; stroke-width: 0.55; opacity: 0.96; }
+.ref-dimension-label-bg.approximate { fill: #fff8e4; stroke: #b3893c; }
+.ref-dimension-label { font-size: 7px; font-weight: 700; text-anchor: middle; dominant-baseline: middle; fill: #263238; paint-order: stroke; stroke: #fffdf8; stroke-width: 3px; stroke-linejoin: round; }
+.ref-dimension-label.approximate { fill: #7a5a1f; }
+.ref-dimension-group.approximate .ref-dimension-line, .ref-dimension-group.approximate .ref-dimension-tick { stroke-dasharray: 3 2; stroke: #7a5a1f; }
 .ref-compass-axis { stroke: #2f3134; stroke-width: 1.1; stroke-linecap: round; }
 .ref-compass-secondary { stroke: #2f3134; stroke-width: 0.7; stroke-linecap: round; opacity: 0.58; }
 .ref-compass-arrow { fill: #2f3134; stroke: none; }
@@ -931,6 +999,59 @@ def _render_scale_layer() -> str:
             f'<text class="ref-scale-label" x="{x1:.1f}" y="{y + 12:.1f}">0</text>',
             f'<text class="ref-scale-label" x="{x_mid:.1f}" y="{y + 12:.1f}">1 m</text>',
             f'<text class="ref-scale-label" x="{x2:.1f}" y="{y + 12:.1f}">2 m</text>',
+            "</g>",
+        ]
+    )
+
+
+def _render_dimension_layer() -> str:
+    parts = ['<g id="reference-dimension-layer" style="display:none" aria-hidden="true">']
+    for annotation in DIMENSION_ANNOTATIONS:
+        parts.append(_render_dimension_annotation(annotation))
+    parts.append("</g>")
+    return "\n".join(parts)
+
+
+def _render_dimension_annotation(annotation: dict[str, Any]) -> str:
+    dimension_id = escape(str(annotation["id"]))
+    kind = escape(str(annotation["kind"]))
+    confidence = escape(str(annotation["confidence"]))
+    label = escape(str(annotation["label"]))
+    source = escape(str(annotation["source"]))
+    x1 = float(annotation["x1"])
+    y1 = float(annotation["y1"])
+    x2 = float(annotation["x2"])
+    y2 = float(annotation["y2"])
+    offset_x = float(annotation["offset_x"])
+    offset_y = float(annotation["offset_y"])
+    line_x1 = x1 + offset_x
+    line_y1 = y1 + offset_y
+    line_x2 = x2 + offset_x
+    line_y2 = y2 + offset_y
+    label_x = (line_x1 + line_x2) / 2
+    label_y = (line_y1 + line_y2) / 2
+    label_width = max(26.0, len(label) * 3.8 + 8.0)
+    label_height = 11.0
+    tick = 4.5
+    if abs(line_x2 - line_x1) >= abs(line_y2 - line_y1):
+        tick_one = (line_x1, line_y1 - tick, line_x1, line_y1 + tick)
+        tick_two = (line_x2, line_y2 - tick, line_x2, line_y2 + tick)
+    else:
+        tick_one = (line_x1 - tick, line_y1, line_x1 + tick, line_y1)
+        tick_two = (line_x2 - tick, line_y2, line_x2 + tick, line_y2)
+
+    return "\n".join(
+        [
+            f'<g class="ref-dimension-group {confidence}" data-ref-dimension="{dimension_id}" '
+            f'data-ref-dimension-kind="{kind}" data-ref-dimension-confidence="{confidence}" '
+            f'data-ref-dimension-source="{source}">',
+            f'<line class="ref-dimension-extension" x1="{x1:.1f}" y1="{y1:.1f}" x2="{line_x1:.1f}" y2="{line_y1:.1f}"/>',
+            f'<line class="ref-dimension-extension" x1="{x2:.1f}" y1="{y2:.1f}" x2="{line_x2:.1f}" y2="{line_y2:.1f}"/>',
+            f'<line class="ref-dimension-line" x1="{line_x1:.1f}" y1="{line_y1:.1f}" x2="{line_x2:.1f}" y2="{line_y2:.1f}"/>',
+            f'<line class="ref-dimension-tick" x1="{tick_one[0]:.1f}" y1="{tick_one[1]:.1f}" x2="{tick_one[2]:.1f}" y2="{tick_one[3]:.1f}"/>',
+            f'<line class="ref-dimension-tick" x1="{tick_two[0]:.1f}" y1="{tick_two[1]:.1f}" x2="{tick_two[2]:.1f}" y2="{tick_two[3]:.1f}"/>',
+            f'<rect class="ref-dimension-label-bg {confidence}" x="{label_x - label_width / 2:.1f}" y="{label_y - label_height / 2:.1f}" width="{label_width:.1f}" height="{label_height:.1f}" rx="2.0" ry="2.0"/>',
+            f'<text class="ref-dimension-label {confidence}" x="{label_x:.1f}" y="{label_y:.1f}">{label}</text>',
             "</g>",
         ]
     )

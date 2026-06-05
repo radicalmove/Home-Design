@@ -7,3 +7,5 @@ rust-version.workspace = true
 
 [dependencies]
 home-design-core = { path = "../home-design-core" }
+serde.workspace = true
+serde_json.workspace = true

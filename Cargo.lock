@@ -1222,6 +1222,7 @@ name = "home-design-core"
 version = "0.1.0"
 dependencies = [
  "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -1229,6 +1230,8 @@ name = "home-design-desktop"
 version = "0.1.0"
 dependencies = [
  "home-design-core",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

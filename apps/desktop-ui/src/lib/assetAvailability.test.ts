@@ -10,7 +10,7 @@ const project: ProjectManifest = {
   views: [
     {
       id: "base-view",
-      label: "Base View",
+      label: "2D Plan",
       mode: "base_plan",
       asset_path: "/views/reference_plan.html",
       available: true,
@@ -23,10 +23,17 @@ const project: ProjectManifest = {
       available: true,
     },
     {
-      id: "design-report",
-      label: "Design Report",
-      mode: "design_report",
-      asset_path: "/views/calibration_report.html",
+      id: "furniture-editor",
+      label: "Furniture Editor",
+      mode: "furniture_editor",
+      asset_path: "/views/reference_plan.svg",
+      available: true,
+    },
+    {
+      id: "design-review",
+      label: "Design Review",
+      mode: "design_review",
+      asset_path: "",
       available: true,
     },
   ],
@@ -50,13 +57,26 @@ describe("asset availability", () => {
       cache: "no-store",
       method: "GET",
     });
-    expect(fetcher).toHaveBeenCalledWith("/views/calibration_report.html", {
+    expect(fetcher).toHaveBeenCalledWith("/views/reference_plan.svg", {
       cache: "no-store",
       method: "GET",
     });
     expect(checked.views[0].available).toBe(true);
     expect(checked.views[1].available).toBe(false);
     expect(checked.views[2].available).toBe(true);
+    expect(checked.views[3].available).toBe(true);
+  });
+
+  it("keeps native views available without trying to fetch an empty asset path", async () => {
+    const fetcher = vi.fn().mockRejectedValue(new Error("missing"));
+
+    const checked = await withCheckedViewAvailability(project, fetcher);
+
+    expect(fetcher).not.toHaveBeenCalledWith("", {
+      cache: "no-store",
+      method: "GET",
+    });
+    expect(checked.views.find((view) => view.id === "design-review")?.available).toBe(true);
   });
 
   it("marks a view unavailable when fetch fails", async () => {
@@ -64,6 +84,7 @@ describe("asset availability", () => {
 
     const checked = await withCheckedViewAvailability(project, fetcher);
 
-    expect(checked.views.every((view) => !view.available)).toBe(true);
+    expect(checked.views.filter((view) => view.asset_path).every((view) => !view.available)).toBe(true);
+    expect(checked.views.find((view) => view.id === "design-review")?.available).toBe(true);
   });
 });

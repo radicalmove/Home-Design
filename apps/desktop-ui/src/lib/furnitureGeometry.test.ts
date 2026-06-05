@@ -1,0 +1,329 @@
+import { describe, expect, it } from "vitest";
+import {
+  anchoredViewOriginAfterZoom,
+  angleDegFromCenter,
+  centeredViewOrigin,
+  centeredViewOriginAtCanvasPoint,
+  clampPlanZoom,
+  dimensionLabel,
+  lShapePath,
+  metresToSvg,
+  nearestWallDistanceGuides,
+  nextWheelPlanZoom,
+  objectBoundsSvg,
+  planViewBoxSize,
+  planZoomLabel,
+  resizeObjectFromHandle,
+  resizeObjectFromCorner,
+  roundedLShapePath,
+  rotateDeltaIntoObjectSpace,
+  screenPixelsToSvgUnits,
+  visibleCanvasCenterOffset,
+  viewOriginAfterPan,
+  svgToMetres,
+} from "./furnitureGeometry";
+import type { FurnitureObject, PlanTransform } from "../types";
+
+const transform: PlanTransform = {
+  units: "metres",
+  svg_width_px: 1600,
+  svg_height_px: 900,
+  origin_svg_px: { x: 518, y: 314 },
+  px_per_m: 27.160493827160494,
+};
+
+const object: FurnitureObject = {
+  id: "sofa",
+  catalog_id: "sofa",
+  layer: "moveable",
+  type: "sofa",
+  label: "Sofa",
+  abbreviation: null,
+  x_m: 5,
+  y_m: 3,
+  width_m: 2,
+  depth_m: 0.9,
+  z_index: 0,
+  rotation_deg: 0,
+  colour: "#33312e",
+  locked: false,
+  notes: null,
+  evidence: null,
+};
+
+describe("furniture geometry", () => {
+  it("round trips between metres and SVG coordinates", () => {
+    const svg = metresToSvg({ x: 2.5, y: 1.25 }, transform);
+    const metres = svgToMetres(svg, transform);
+
+    expect(metres.x).toBeCloseTo(2.5, 5);
+    expect(metres.y).toBeCloseTo(1.25, 5);
+  });
+
+  it("computes SVG object bounds from metre dimensions", () => {
+    const bounds = objectBoundsSvg(object, transform);
+
+    expect(bounds.width).toBeCloseTo(54.32, 1);
+    expect(bounds.height).toBeCloseTo(24.44, 1);
+  });
+
+  it("builds an L-shaped footprint path from adjustable arm dimensions", () => {
+    expect(
+      lShapePath(
+        { x: 10, y: 20, width: 100, height: 80 },
+        { main_depth_m: 0.5, return_width_m: 0.75 },
+        {
+          units: "metres",
+          svg_width_px: 1600,
+          svg_height_px: 900,
+          origin_svg_px: { x: 0, y: 0 },
+          px_per_m: 20,
+        },
+      ),
+    ).toBe("M 10.0 20.0 H 110.0 V 30.0 H 25.0 V 100.0 H 10.0 Z");
+  });
+
+  it("builds a rounded L-shaped sofa path without overlapping arms", () => {
+    expect(
+      roundedLShapePath(
+        { x: 10, y: 20, width: 100, height: 80 },
+        { main_depth_m: 0.5, return_width_m: 0.75 },
+        {
+          units: "metres",
+          svg_width_px: 1600,
+          svg_height_px: 900,
+          origin_svg_px: { x: 0, y: 0 },
+          px_per_m: 20,
+        },
+        6,
+      ),
+    ).toBe(
+      "M 15.0 20.0 H 105.0 Q 110.0 20.0 110.0 25.0 V 25.0 Q 110.0 30.0 105.0 30.0 H 30.0 Q 25.0 30.0 25.0 35.0 V 95.0 Q 25.0 100.0 20.0 100.0 H 15.0 Q 10.0 100.0 10.0 95.0 V 25.0 Q 10.0 20.0 15.0 20.0 Z",
+    );
+  });
+
+  it("formats live dimensions in metres", () => {
+    expect(dimensionLabel(object)).toBe("2.00 m x 0.90 m");
+  });
+
+  it("uses the visible clipped canvas area when finding the screen centre", () => {
+    const centre = visibleCanvasCenterOffset(
+      { left: 458, top: 134, width: 1356, height: 2712 },
+      { width: 2048, height: 640 },
+    );
+
+    expect(centre.x).toBeCloseTo(678);
+    expect(centre.y).toBeCloseTo(253);
+  });
+
+  it("resizes from a corner with minimum positive dimensions", () => {
+    const resized = resizeObjectFromCorner(object, { deltaWidthM: -4, deltaDepthM: 1 }, 0.2);
+
+    expect(resized.width_m).toBe(0.2);
+    expect(resized.depth_m).toBeCloseTo(1.9);
+  });
+
+  it("resizes one horizontal edge while keeping the opposite edge fixed", () => {
+    const resizedEast = resizeObjectFromHandle(object, "e", { deltaWidthM: 0.6, deltaDepthM: 2 });
+    expect(resizedEast.width_m).toBeCloseTo(2.6);
+    expect(resizedEast.depth_m).toBeCloseTo(0.9);
+    expect(resizedEast.x_m - resizedEast.width_m / 2).toBeCloseTo(object.x_m - object.width_m / 2);
+    expect(resizedEast.x_m).toBeCloseTo(5.3);
+
+    const resizedWest = resizeObjectFromHandle(object, "w", { deltaWidthM: 0.6, deltaDepthM: 2 });
+    expect(resizedWest.width_m).toBeCloseTo(1.4);
+    expect(resizedWest.depth_m).toBeCloseTo(0.9);
+    expect(resizedWest.x_m + resizedWest.width_m / 2).toBeCloseTo(object.x_m + object.width_m / 2);
+    expect(resizedWest.x_m).toBeCloseTo(5.3);
+  });
+
+  it("resizes one vertical edge while keeping the opposite edge fixed", () => {
+    const resizedNorth = resizeObjectFromHandle(object, "n", { deltaWidthM: 1, deltaDepthM: 0.2 });
+
+    expect(resizedNorth.width_m).toBeCloseTo(2);
+    expect(resizedNorth.depth_m).toBeCloseTo(0.7);
+    expect(resizedNorth.y_m + resizedNorth.depth_m / 2).toBeCloseTo(object.y_m + object.depth_m / 2);
+    expect(resizedNorth.y_m).toBeCloseTo(3.1);
+  });
+
+  it("resizes a rotated object along its local edge axis", () => {
+    const rotated = { ...object, rotation_deg: 90 };
+    const resized = resizeObjectFromHandle(rotated, "e", { deltaWidthM: 1, deltaDepthM: 0 });
+
+    expect(resized.width_m).toBeCloseTo(3);
+    expect(resized.depth_m).toBeCloseTo(0.9);
+    expect(resized.x_m).toBeCloseTo(rotated.x_m);
+    expect(resized.y_m).toBeCloseTo(rotated.y_m + 0.5);
+  });
+
+  it("supports separate width and depth minimums for thin partition wall resizing", () => {
+    const partitionWall = {
+      ...object,
+      id: "partition-wall",
+      catalog_id: "partition_wall",
+      type: "partition_wall",
+      width_m: 1.2,
+      depth_m: 0.03,
+    };
+
+    const resizedSouth = resizeObjectFromHandle(
+      partitionWall,
+      "s",
+      { deltaWidthM: 0, deltaDepthM: 0 },
+      { widthM: 0.2, depthM: 0.03 },
+    );
+    const resizedWest = resizeObjectFromHandle(
+      partitionWall,
+      "w",
+      { deltaWidthM: 2, deltaDepthM: 0 },
+      { widthM: 0.2, depthM: 0.03 },
+    );
+
+    expect(resizedSouth.depth_m).toBeCloseTo(0.03);
+    expect(resizedWest.width_m).toBeCloseTo(0.2);
+    expect(resizedWest.depth_m).toBeCloseTo(0.03);
+  });
+
+  it("clamps and labels furniture plan zoom", () => {
+    expect(clampPlanZoom(0.2)).toBe(0.5);
+    expect(clampPlanZoom(24)).toBe(20);
+    expect(planZoomLabel(1.25)).toBe("125%");
+    expect(planZoomLabel(20)).toBe("2000%");
+  });
+
+  it("computes wheel zoom up to 2000 percent", () => {
+    expect(nextWheelPlanZoom(1, -1)).toBe(1.1);
+    expect(nextWheelPlanZoom(1, 1)).toBe(0.9);
+    expect(nextWheelPlanZoom(19.9, -1)).toBe(20);
+  });
+
+  it("finds nearest wall distances around an object footprint", () => {
+    const guides = nearestWallDistanceGuides(
+      { x: 10, y: 10, width: 20, height: 10 },
+      [
+        { id: "top", x1: 0, y1: 0, x2: 40, y2: 0 },
+        { id: "bottom", x1: 0, y1: 30, x2: 40, y2: 30 },
+        { id: "left", x1: 0, y1: 0, x2: 0, y2: 40 },
+        { id: "right", x1: 40, y1: 0, x2: 40, y2: 40 },
+        { id: "non-overlapping", x1: 50, y1: 5, x2: 60, y2: 5 },
+      ],
+      { px_per_m: 10 },
+    );
+
+    expect(guides.map((guide) => guide.side).sort()).toEqual(["bottom", "left", "right", "top"]);
+    expect(guides.find((guide) => guide.side === "top")).toMatchObject({
+      distance_m: 1,
+      label: "1.00 m",
+      x1: 20,
+      y1: 10,
+      x2: 20,
+      y2: 0,
+    });
+    expect(guides.find((guide) => guide.side === "right")).toMatchObject({
+      distance_m: 1,
+      label: "1.00 m",
+      x1: 30,
+      y1: 15,
+      x2: 40,
+      y2: 15,
+    });
+  });
+
+  it("measures wall distances to the inside face instead of the wall centreline", () => {
+    const guides = nearestWallDistanceGuides(
+      { x: 10, y: 10, width: 20, height: 10 },
+      [
+        { id: "top", x1: 0, y1: 0, x2: 40, y2: 0, thickness_px: 4 },
+        { id: "bottom", x1: 0, y1: 30, x2: 40, y2: 30, thickness_px: 4 },
+        { id: "left", x1: 0, y1: 0, x2: 0, y2: 40, thickness_px: 4 },
+        { id: "right", x1: 40, y1: 0, x2: 40, y2: 40, thickness_px: 4 },
+      ],
+      { px_per_m: 10 },
+    );
+
+    expect(guides.find((guide) => guide.side === "top")).toMatchObject({
+      distance_m: 0.8,
+      label: "0.80 m",
+      x1: 20,
+      y1: 10,
+      x2: 20,
+      y2: 2,
+    });
+    expect(guides.find((guide) => guide.side === "right")).toMatchObject({
+      distance_m: 0.8,
+      label: "0.80 m",
+      x1: 30,
+      y1: 15,
+      x2: 38,
+      y2: 15,
+    });
+  });
+
+  it("uses viewBox maths for a portrait furniture field of view", () => {
+    const canvasSize = { width: 300, height: 600 };
+    const fullView = planViewBoxSize(canvasSize, 1);
+    const zoomedView = planViewBoxSize(canvasSize, 5);
+
+    expect(fullView).toEqual({ width: 1600, height: 3200 });
+    expect(zoomedView).toEqual({ width: 320, height: 640 });
+    expect(zoomedView.height).toBe(zoomedView.width * 2);
+    expect(centeredViewOrigin(fullView, { width: 1600, height: 900 })).toEqual({ x: 0, y: -1150 });
+    expect(
+      anchoredViewOriginAfterZoom(
+        { x: 0, y: 0 },
+        { x: 150, y: 300 },
+        canvasSize,
+        fullView,
+        zoomedView,
+      ),
+    ).toEqual({ x: 640, y: 1280 });
+    expect(
+      viewOriginAfterPan(
+        { x: 0, y: 0 },
+        { x: 150, y: 300 },
+        { x: 150, y: 450 },
+        canvasSize,
+        fullView,
+      ).y,
+    ).toBeCloseTo(-800);
+  });
+
+  it("can centre the plan on the visible screen point instead of the full tall canvas", () => {
+    const canvasSize = { width: 300, height: 600 };
+    const fullView = planViewBoxSize(canvasSize, 1);
+
+    expect(
+      centeredViewOriginAtCanvasPoint(
+        fullView,
+        { width: 1600, height: 900 },
+        canvasSize,
+        { x: 150, y: 150 },
+      ),
+    ).toEqual({ x: 0, y: -350 });
+  });
+
+  it("converts screen pixels to SVG units so edit handles keep apparent size across zoom", () => {
+    const canvasSize = { width: 300, height: 600 };
+    const fullView = planViewBoxSize(canvasSize, 1);
+    const zoomedView = planViewBoxSize(canvasSize, 5);
+
+    expect(screenPixelsToSvgUnits(canvasSize, fullView, 12)).toBeCloseTo(64);
+    expect(screenPixelsToSvgUnits(canvasSize, zoomedView, 12)).toBeCloseTo(12.8);
+    expect((screenPixelsToSvgUnits(canvasSize, fullView, 12) / fullView.width) * canvasSize.width).toBeCloseTo(12);
+    expect((screenPixelsToSvgUnits(canvasSize, zoomedView, 12) / zoomedView.width) * canvasSize.width).toBeCloseTo(12);
+  });
+
+  it("measures rotation from object centre in SVG space", () => {
+    const bounds = objectBoundsSvg(object, transform);
+
+    expect(angleDegFromCenter({ x: bounds.cx, y: bounds.cy - 20 }, bounds)).toBe(270);
+    expect(angleDegFromCenter({ x: bounds.cx + 20, y: bounds.cy }, bounds)).toBe(0);
+  });
+
+  it("converts drag deltas into rotated object space for resize handles", () => {
+    const local = rotateDeltaIntoObjectSpace({ x: 0, y: 27.16 }, 90, transform);
+
+    expect(local.deltaWidthM).toBeCloseTo(1, 2);
+    expect(local.deltaDepthM).toBeCloseTo(0, 2);
+  });
+});

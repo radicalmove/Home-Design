@@ -23,6 +23,7 @@ body,
 
 body {
   min-width: 320px;
+  overflow: hidden;
 }
 
 button {
@@ -33,7 +34,9 @@ button {
   display: grid;
   grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
   width: 100%;
+  height: 100%;
   min-height: 100%;
+  overflow: hidden;
   background: #eef1f3;
 }
 
@@ -41,8 +44,10 @@ button {
   display: flex;
   flex-direction: column;
   gap: 24px;
-  min-height: 100vh;
+  height: 100vh;
+  min-height: 0;
   padding: 28px 22px;
+  overflow: auto;
   color: #f6f8f9;
   background: #24323a;
   border-right: 1px solid rgba(255, 255, 255, 0.12);
@@ -96,6 +101,86 @@ button {
   line-height: 1.45;
 }
 
+.model-summary,
+.audit-summary {
+  display: grid;
+  gap: 12px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+}
+
+.model-summary strong,
+.model-summary p,
+.audit-summary strong {
+  margin: 0;
+}
+
+.model-summary p {
+  color: rgba(246, 248, 249, 0.7);
+  font-size: 0.78rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.model-summary.warning {
+  border-color: rgba(242, 165, 128, 0.58);
+}
+
+.model-state,
+.audit-state {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: #f6f8f9;
+  font-size: 0.85rem;
+}
+
+.model-state span,
+.audit-state span {
+  color: rgba(246, 248, 249, 0.66);
+  font-size: 0.75rem;
+}
+
+.model-state .invalid {
+  color: #f2a580;
+}
+
+.model-summary dl,
+.audit-summary dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.model-summary dl div,
+.audit-summary dl div {
+  min-width: 0;
+}
+
+.model-summary dt,
+.model-summary dd,
+.audit-summary dt,
+.audit-summary dd {
+  margin: 0;
+}
+
+.model-summary dt,
+.audit-summary dt {
+  color: rgba(246, 248, 249, 0.62);
+  font-size: 0.68rem;
+}
+
+.model-summary dd,
+.audit-summary dd {
+  color: #f6f8f9;
+  font-size: 1rem;
+  font-weight: 740;
+}
+
 .eyebrow {
   color: #3c7a6b;
   font-size: 0.72rem;
@@ -108,9 +193,80 @@ button {
   color: #85d0bf;
 }
 
+.design-navigation {
+  display: grid;
+  gap: 12px;
+}
+
+.design-group {
+  display: grid;
+  gap: 8px;
+}
+
+.design-group-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 11px 13px;
+  color: #edf4f6;
+  text-align: left;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+}
+
+.design-group-heading:hover,
+.design-group-heading:focus-visible {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(133, 208, 191, 0.8);
+  outline: none;
+}
+
+.design-group.active .design-group-heading {
+  border-color: rgba(133, 208, 191, 0.78);
+}
+
+.design-group-heading > span:first-child {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.design-group-heading strong {
+  font-size: 0.88rem;
+}
+
+.design-group-heading small {
+  color: rgba(237, 244, 246, 0.7);
+  font-size: 0.72rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.design-group-meta {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+  color: rgba(237, 244, 246, 0.72);
+  font-weight: 740;
+}
+
+.design-group-meta small {
+  padding: 2px 6px;
+  color: #10201c;
+  background: #b7dcd3;
+  border-radius: 999px;
+}
+
 .view-tabs {
   display: grid;
-  gap: 10px;
+  gap: 8px;
+  padding-left: 10px;
 }
 
 .view-tabs button {
@@ -165,8 +321,10 @@ button {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   min-width: 0;
-  min-height: 100vh;
+  height: 100vh;
+  min-height: 0;
   padding: 24px;
+  overflow: hidden;
   gap: 18px;
 }
 
@@ -183,6 +341,13 @@ button {
   color: #1d2a30;
   font-size: 1.55rem;
   font-weight: 760;
+}
+
+.workspace-subtitle {
+  margin: 5px 0 0;
+  color: #4d6068;
+  font-size: 0.94rem;
+  font-weight: 650;
 }
 
 .asset-path {
@@ -236,18 +401,28 @@ button {
 }
 
 @media (max-width: 760px) {
+  body {
+    overflow: auto;
+  }
+
   .app-shell {
     grid-template-columns: 1fr;
+    height: auto;
+    overflow: visible;
   }
 
   .sidebar {
+    height: auto;
     min-height: auto;
     padding: 20px;
+    overflow: visible;
   }
 
   .workspace {
+    height: auto;
     min-height: calc(100vh - 260px);
     padding: 18px;
+    overflow: visible;
   }
 
   .workspace-header {

@@ -1,4 +1,5 @@
 import unittest
+from xml.etree import ElementTree
 
 from CODE.home_design.model import load_model
 from CODE.home_design.reference_plan import (
@@ -13,6 +14,39 @@ from CODE.home_design.reference_plan import (
 
 
 class ReferencePlanRenderTests(unittest.TestCase):
+    def dimension_line_for_source(self, svg: str, source: str) -> tuple[float, float, float, float]:
+        root = ElementTree.fromstring(svg)
+        for element in root.iter():
+            if element.attrib.get("data-ref-dimension-source") != source:
+                continue
+            for child in element:
+                if child.attrib.get("class") == "ref-dimension-line":
+                    return (
+                        float(child.attrib["x1"]),
+                        float(child.attrib["y1"]),
+                        float(child.attrib["x2"]),
+                        float(child.attrib["y2"]),
+                    )
+        self.fail(f"Missing dimension line for {source}")
+
+    def assert_dimension_axis_matches_clear_faces(
+        self,
+        svg: str,
+        source: str,
+        axis: str,
+        start: float,
+        end: float,
+    ) -> None:
+        x1, y1, x2, y2 = self.dimension_line_for_source(svg, source)
+        if axis == "horizontal":
+            self.assertAlmostEqual(x1, start, delta=0.06, msg=source)
+            self.assertAlmostEqual(x2, end, delta=0.06, msg=source)
+            self.assertAlmostEqual(y1, y2, delta=0.06, msg=source)
+        else:
+            self.assertAlmostEqual(y1, start, delta=0.06, msg=source)
+            self.assertAlmostEqual(y2, end, delta=0.06, msg=source)
+            self.assertAlmostEqual(x1, x2, delta=0.06, msg=source)
+
     def test_reference_plan_uses_layered_rendering_style(self):
         model = load_model("DATA/house_model.json")
         svg = render_reference_plan_svg(model)
@@ -1224,9 +1258,11 @@ class ReferencePlanRenderTests(unittest.TestCase):
         )
         self.assertIn('pattern id="lawn-soft"', svg)
         self.assertIn('class="ref-room-label"', svg)
-        self.assertIn("font-size: 9px;", svg)
         self.assertIn(".ref-room-label, .ref-site-label { text-anchor: middle; dominant-baseline: middle; font-weight: 500; }", svg)
-        self.assertNotIn("paint-order: stroke", svg)
+        room_label_rule = svg.split(".ref-room-label {", 1)[1].split("}", 1)[0]
+        self.assertIn("font-size: 9px;", room_label_rule)
+        self.assertNotIn("paint-order: stroke", room_label_rule)
+        self.assertNotIn("stroke-width", room_label_rule)
         self.assertIn('class="ref-room-label" x="710.0" y="389.4"', svg)
         self.assertIn('class="ref-room-label" x="580.5" y="512.0"', svg)
         self.assertIn('class="ref-room-label" x="687.0" y="554.0"', svg)
@@ -1253,6 +1289,132 @@ class ReferencePlanRenderTests(unittest.TestCase):
         self.assertIn('<line class="ref-scale-tick" x1="1065.0" y1="624.0" x2="1065.0" y2="632.0"/>', svg)
         self.assertIn('<line class="ref-scale-tick" x1="1091.5" y1="624.0" x2="1091.5" y2="632.0"/>', svg)
         self.assertNotIn('<line class="ref-scale-line" x1="958.0" y1="628.0" x2="1011.0" y2="628.0"/>', svg)
+
+    def test_reference_plan_includes_hidden_dimension_layer(self):
+        model = load_model("DATA/house_model.json")
+        svg = render_reference_plan_svg(model)
+
+        self.assertIn('id="reference-dimension-layer"', svg)
+        self.assertIn('style="display:none"', svg)
+        self.assertLess(svg.index('id="reference-dimension-layer"'), svg.index('id="reference-label-layer"'))
+
+    def test_reference_plan_dimension_layer_contains_external_and_internal_metres(self):
+        model = load_model("DATA/house_model.json")
+        svg = render_reference_plan_svg(model)
+
+        self.assertIn('data-ref-dimension-kind="external"', svg)
+        self.assertIn('data-ref-dimension-kind="internal"', svg)
+        self.assertIn('data-ref-dimension="overall-master-to-laundry"', svg)
+        self.assertIn('data-ref-dimension="master-bedroom-clear-width"', svg)
+        self.assertIn(">16.10 m<", svg)
+        self.assertIn(">3.30 m<", svg)
+
+    def test_reference_plan_dimension_layer_covers_measured_current_rooms(self):
+        model = load_model("DATA/house_model.json")
+        svg = render_reference_plan_svg(model)
+
+        expected_sources = [
+            "room:kitchen_dining.length",
+            "room:kitchen_dining.width",
+            "room:lounge.length",
+            "room:lounge.width",
+            "room:hallway.length",
+            "room:hallway.width",
+            "room:master_bedroom.length",
+            "room:master_bedroom.width",
+            "room:office.length",
+            "room:office.width",
+            "room:bathroom.length",
+            "room:bathroom.width",
+            "room:bedroom_2.length",
+            "room:bedroom_2.width",
+            "room:entrance.length",
+            "room:entrance.width",
+            "room:laundry.length",
+            "room:laundry.width",
+            "room:toilet.length",
+            "room:toilet.width",
+        ]
+        for source in expected_sources:
+            self.assertIn(f'data-ref-dimension-source="{source}"', svg)
+
+    def test_reference_plan_internal_dimensions_draw_between_clear_wall_faces(self):
+        model = load_model("DATA/house_model.json")
+        svg = render_reference_plan_svg(model)
+
+        ext = EXTERIOR_WALL_STROKE_PX / 2
+        interior = INTERIOR_WALL_STROKE_PX / 2
+        thin_ext = THIN_EXTERIOR_WALL_STROKE_PX / 2
+        thin_int = THIN_INTERIOR_WALL_STROKE_PX / 2
+        toilet_ext = TOILET_EXTERIOR_WALL_STROKE_PX / 2
+
+        horizontal_dimensions = {
+            "room:kitchen_dining.width": (760.9 + interior, 833.0 - ext),
+            "room:lounge.width": (659.1 + interior, 760.9 - interior),
+            "room:hallway.length": (627.1 + ext, 760.9 - interior),
+            "room:master_bedroom.length": (533.9 + ext, 627.1 - thin_int),
+            "built_in:master_bedroom_wardrobe": (627.1 + thin_int, 646.8 - thin_int),
+            "room:office.length": (646.8 + thin_int, 727.1 - thin_int),
+            "room:bathroom.length": (727.1 + thin_int, 773.9 - thin_int),
+            "room:bedroom_2.length": (773.9 + thin_int, 902.8 - interior),
+            "room:entrance.length": (803.7 + thin_int, 902.8 - interior),
+            "room:laundry.width": (902.8 + interior, 956.4 - ext),
+            "room:toilet.width": (902.8 + interior, 956.4 - ext),
+        }
+        for source, (start, end) in horizontal_dimensions.items():
+            self.assert_dimension_axis_matches_clear_faces(svg, source, "horizontal", start, end)
+
+        vertical_dimensions = {
+            "room:kitchen_dining.length": (302.3 + ext, 523.3 - thin_int),
+            "room:lounge.length": (348.8 + ext, 484.6 - interior),
+            "room:hallway.width": (484.6 + interior, 523.0 - interior),
+            "room:master_bedroom.width": (482.4 + ext, 601.8 - ext),
+            "room:office.width": (523.0 + thin_int, 601.8 - ext),
+            "room:bathroom.width": (523.0 + thin_int, 601.8 - ext),
+            "room:bedroom_2.width": (523.3 + thin_int, 601.8 - ext),
+            "room:entrance.width": (489.1 + thin_ext, 523.3 - thin_int),
+            "room:laundry.length": (489.1 + thin_ext, 572.9 - thin_int),
+            "room:toilet.length": (572.9 + thin_int, 602.2 - toilet_ext),
+        }
+        for source, (start, end) in vertical_dimensions.items():
+            self.assert_dimension_axis_matches_clear_faces(svg, source, "vertical", start, end)
+
+    def test_reference_plan_kitchen_dining_length_dimension_follows_long_axis(self):
+        model = load_model("DATA/house_model.json")
+        svg = render_reference_plan_svg(model)
+
+        self.assertIn('data-ref-dimension="kitchen-dining-clear-length"', svg)
+        self.assertIn('data-ref-dimension-source="room:kitchen_dining.length"', svg)
+        self.assertIn('<line class="ref-dimension-line" x1="863.0" y1="306.3" x2="863.0" y2="521.6"/>', svg)
+        self.assertIn('<text class="ref-dimension-label measured" x="863.0" y="414.0">8.12 m</text>', svg)
+        self.assertNotIn('<line class="ref-dimension-line" x1="758.8" y1="313.0" x2="833.0" y2="313.0"/>', svg)
+
+    def test_reference_plan_dimension_labels_have_readability_stroke(self):
+        model = load_model("DATA/house_model.json")
+        svg = render_reference_plan_svg(model)
+
+        self.assertIn("paint-order: stroke", svg)
+        self.assertIn("stroke: #fffdf8", svg)
+        self.assertIn("stroke-width: 3px", svg)
+
+    def test_reference_plan_dimension_labels_have_background_boxes(self):
+        model = load_model("DATA/house_model.json")
+        svg = render_reference_plan_svg(model)
+
+        self.assertIn(".ref-dimension-label-bg { fill: #fffdf8;", svg)
+        self.assertIn('class="ref-dimension-label-bg measured"', svg)
+        self.assertEqual(
+            svg.count('class="ref-dimension-label-bg'),
+            svg.count('class="ref-dimension-label '),
+        )
+
+    def test_reference_plan_dimension_layer_marks_approximate_dimensions(self):
+        model = load_model("DATA/house_model.json")
+        svg = render_reference_plan_svg(model)
+
+        self.assertIn('data-ref-dimension-confidence="measured"', svg)
+        self.assertIn('data-ref-dimension-confidence="approximate"', svg)
+        self.assertIn('class="ref-dimension-label approximate"', svg)
 
     def test_reference_plan_includes_orientation_compass_near_scale(self):
         model = load_model("DATA/house_model.json")

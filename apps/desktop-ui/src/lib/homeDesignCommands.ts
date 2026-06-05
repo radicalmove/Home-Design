@@ -1,5 +1,13 @@
 import { invoke } from "@tauri-apps/api/core";
-import type { AppStatus, ProjectManifest } from "../types";
+import type {
+  AppStatus,
+  BuiltInModelStatus,
+  DesignReviewData,
+  FurnitureCatalog,
+  FurnitureLayout,
+  FurnitureLayoutLoadResult,
+  ProjectManifest,
+} from "../types";
 
 const fallbackStatus: AppStatus = {
   app_name: "Home Design",
@@ -15,7 +23,7 @@ const fallbackProject: ProjectManifest = {
   views: [
     {
       id: "base-view",
-      label: "Base View",
+      label: "2D Plan",
       mode: "base_plan",
       asset_path: "/views/reference_plan.html",
       available: true,
@@ -28,14 +36,41 @@ const fallbackProject: ProjectManifest = {
       available: true,
     },
     {
-      id: "design-report",
-      label: "Design Report",
-      mode: "design_report",
-      asset_path: "/views/calibration_report.html",
+      id: "furniture-editor",
+      label: "Furniture Editor",
+      mode: "furniture_editor",
+      asset_path: "/views/reference_plan.svg",
+      available: true,
+    },
+    {
+      id: "design-review",
+      label: "Design Review",
+      mode: "design_review",
+      asset_path: "",
       available: true,
     },
   ],
-  scenarios: [],
+  scenarios: [
+    {
+      id: "current",
+      label: "Design 1 - Current House",
+      short_label: "Design 1",
+      summary: "The current measured house, furniture layout, daylight review, and 3D navigation model.",
+      source_design: null,
+      rank: 1,
+      complete: true,
+    },
+    {
+      id: "back-side-living-sunroom-bedroom",
+      label: "Design 2 - Back-Side Living Rebuild + Sunroom Bedroom Replacement",
+      short_label: "Design 2",
+      summary:
+        "Bedroom 2 and the service end become the stronger living/dining/day room, while the current lounge and sunroom footprints become bedrooms.",
+      source_design: "current",
+      rank: 2,
+      complete: false,
+    },
+  ],
   layers: [],
   object_catalogs: [],
   analysis_outputs: [],
@@ -66,4 +101,30 @@ function isMissingTauriRuntime(reason: unknown): boolean {
   }
   const message = reason.message.toLowerCase();
   return message.includes("invoke") && message.includes("undefined");
+}
+
+export function loadBuiltinModelStatus(): Promise<BuiltInModelStatus> {
+  return invoke<BuiltInModelStatus>("load_builtin_model_status");
+}
+
+export function loadFurnitureCatalog(): Promise<FurnitureCatalog> {
+  return invoke<FurnitureCatalog>("load_furniture_catalog");
+}
+
+export function loadFurnitureLayout(
+  projectId: string,
+  scenarioId: string,
+): Promise<FurnitureLayoutLoadResult> {
+  return invoke<FurnitureLayoutLoadResult>("load_furniture_layout", { projectId, scenarioId });
+}
+
+export function saveFurnitureLayout(layout: FurnitureLayout): Promise<void> {
+  return invoke<void>("save_furniture_layout", { layout });
+}
+
+export function loadDesignReviewData(
+  projectId: string,
+  scenarioId = "current",
+): Promise<DesignReviewData> {
+  return invoke<DesignReviewData>("load_design_review_data", { projectId, scenarioId });
 }

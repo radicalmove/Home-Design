@@ -1,0 +1,47 @@
+{
+  "id": "two-living-room-family",
+  "label": "Design 5 - Two-Living-Room Family Plan",
+  "rank": 5,
+  "status": "draft",
+  "transition_from": "current",
+  "cost_band": "Medium-high to high",
+  "summary": "A staged value option that tests back-side daytime living while keeping the current lounge as an evening media room and avoiding the most expensive decisions immediately.",
+  "room_changes": [
+    "A daytime family room is created from Bedroom 2 plus some bright service-end space if possible.",
+    "The current lounge stays as an evening media room.",
+    "Bedroom count is kept stable only if the sunroom can become a genuine office/guest/retreat or if Bedroom 2 remains partly flexible.",
+    "Laundry and WC are compacted or relocated only as much as the budget requires.",
+    "The sunroom is retained, upgraded, or removed later."
+  ],
+  "daylight_strategy": [
+    "Test whether the family uses a brighter back-side daytime room before committing to a full rebuild.",
+    "Keep the current lounge useful for lower-light evening media use.",
+    "Use deck improvements to make the daytime family room and outdoor area work together."
+  ],
+  "movement_strategy": [
+    "Strengthen the back-entry-to-family-room route.",
+    "Keep evening/media use away from main daytime traffic.",
+    "Avoid overcommitting to wet-area relocation until the back-side living pattern proves itself."
+  ],
+  "build_scope": [
+    "Selective wall/opening changes around Bedroom 2, entrance, laundry, and toilet.",
+    "Possible compact laundry/WC alterations.",
+    "Furniture, lighting, and deck shade changes to test the living pattern.",
+    "No immediate requirement for a full new bedroom envelope if staged carefully."
+  ],
+  "risks": [
+    "May not solve bedroom count or office needs.",
+    "Could become a half-measure if the service end cannot be released enough.",
+    "The sunroom comfort problem remains unless separately upgraded.",
+    "Needs clear staging rules so money is not spent on temporary work that will be removed later."
+  ],
+  "cost_notes": [
+    "Broad planning band: NZD 60k to 180k+ depending on how much plumbing and wall work is included."
+  ],
+  "transition_mapping": [
+    { "from": "bedroom_2", "to": "daytime_family_room_or_flexible_lounge" },
+    { "from": "lounge", "to": "evening_media_room" },
+    { "from": "laundry", "to": "compacted_or_partly_released_service_space" },
+    { "from": "sunroom", "to": "later_stage_retreat_office_or_removal" }
+  ]
+}
