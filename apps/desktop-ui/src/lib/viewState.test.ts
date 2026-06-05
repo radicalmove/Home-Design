@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 import type { ProjectManifest } from "../types";
-import { activeView, firstAvailableViewId, selectAvailableView } from "./viewState";
+import {
+  activeScenario,
+  activeView,
+  firstAvailableViewId,
+  firstScenarioId,
+  selectAvailableScenario,
+  selectAvailableScenarioView,
+  selectAvailableView,
+} from "./viewState";
 
 const project: ProjectManifest = {
   id: "current-house",
@@ -10,7 +18,7 @@ const project: ProjectManifest = {
   views: [
     {
       id: "base-view",
-      label: "Base View",
+      label: "2D Plan",
       mode: "base_plan",
       asset_path: "/views/reference_plan.html",
       available: true,
@@ -30,7 +38,26 @@ const project: ProjectManifest = {
       available: true,
     },
   ],
-  scenarios: [],
+  scenarios: [
+    {
+      id: "current",
+      label: "Design 1 - Current House",
+      short_label: "Design 1",
+      summary: "Current house",
+      source_design: null,
+      rank: 1,
+      complete: true,
+    },
+    {
+      id: "back-side-living-sunroom-bedroom",
+      label: "Design 2 - Back-Side Living Rebuild + Sunroom Bedroom Replacement",
+      short_label: "Design 2",
+      summary: "Bedroom 2 becomes the living/dining/day room.",
+      source_design: "current",
+      rank: 2,
+      complete: false,
+    },
+  ],
   layers: [],
   object_catalogs: [],
   analysis_outputs: [],
@@ -63,5 +90,44 @@ describe("view state helpers", () => {
   it("selects the furniture editor native view when available", () => {
     expect(selectAvailableView(project, "furniture-editor")).toBe("furniture-editor");
     expect(activeView(project, "furniture-editor")?.mode).toBe("furniture_editor");
+  });
+
+  it("defaults to the current scenario", () => {
+    expect(firstScenarioId(project)).toBe("current");
+    expect(selectAvailableScenario(project, null)).toBe("current");
+  });
+
+  it("falls back to the current scenario when a requested scenario is unknown", () => {
+    expect(selectAvailableScenario(project, "missing-design")).toBe("current");
+    expect(activeScenario(project, "missing-design")?.id).toBe("current");
+  });
+
+  it("selects a scenario and view together", () => {
+    expect(
+      selectAvailableScenarioView(project, "back-side-living-sunroom-bedroom", "three-d-navigation"),
+    ).toEqual({
+      scenarioId: "back-side-living-sunroom-bedroom",
+      viewId: "three-d-navigation",
+    });
+  });
+
+  it("falls back to an available view while preserving the selected scenario", () => {
+    const unavailableProject = {
+      ...project,
+      views: project.views.map((view) =>
+        view.id === "three-d-navigation" ? { ...view, available: false } : view,
+      ),
+    };
+
+    expect(
+      selectAvailableScenarioView(
+        unavailableProject,
+        "back-side-living-sunroom-bedroom",
+        "three-d-navigation",
+      ),
+    ).toEqual({
+      scenarioId: "back-side-living-sunroom-bedroom",
+      viewId: "base-view",
+    });
   });
 });

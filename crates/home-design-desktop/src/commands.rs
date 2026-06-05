@@ -1,8 +1,8 @@
+use crate::furniture_storage::{FurnitureLayoutLoadResult, load_furniture_layout_from_root};
 use home_design_core::{
     AppStatus, HouseModel, HouseModelSummary, ProjectManifest, app_status,
     built_in_project_manifest, summarize_house_model, validate_house_model,
 };
-use crate::furniture_storage::{FurnitureLayoutLoadResult, load_furniture_layout_from_root};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::path::Path;
@@ -53,8 +53,8 @@ pub fn load_design_review_data_from_root(
     project_id: &str,
     scenario_id: &str,
 ) -> Result<DesignReviewData, String> {
-    let house_model = HouseModel::from_json_str(BUILT_IN_MODEL_JSON)
-        .map_err(|error| error.to_string())?;
+    let house_model =
+        HouseModel::from_json_str(BUILT_IN_MODEL_JSON).map_err(|error| error.to_string())?;
     let validation = validate_house_model(&house_model);
     if !validation.ok() {
         return Err(format!(

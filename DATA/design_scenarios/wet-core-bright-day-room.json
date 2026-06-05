@@ -1,0 +1,48 @@
+{
+  "id": "wet-core-bright-day-room",
+  "label": "Design 3 - Office-Side Service Rooms + Bright Service-End Day Room",
+  "rank": 3,
+  "status": "draft",
+  "transition_from": "current",
+  "cost_band": "High",
+  "summary": "A less extreme but still structural option: sacrifice the office to make separated laundry/WC/bathroom service rooms, then turn the bright laundry/entrance/toilet end into a useful day room or back-entry sitting zone.",
+  "room_changes": [
+    "Bedroom 2 stays as the teenage bedroom for this version.",
+    "The office is largely absorbed into separated adjacent bathroom, laundry, WC, and storage rooms.",
+    "The current laundry/toilet/entrance area becomes a bright day room, study nook, or back-entry sitting space.",
+    "The current lounge becomes a more deliberate evening media room.",
+    "The sunroom is retained, upgraded, or removed in a later stage.",
+    "The renovated kitchen stays."
+  ],
+  "daylight_strategy": [
+    "Recover useful light from the current laundry/toilet area without immediately needing a new bedroom.",
+    "Give the family a small bright daytime sitting or reading zone near the real back arrival.",
+    "Keep the sunroom comfort problem visible as a later-stage issue rather than pretending it is solved."
+  ],
+  "movement_strategy": [
+    "Make the back entry feel more welcoming and less like entering through service rooms.",
+    "Improve bathroom, laundry, and WC logic for the three residents and visitors.",
+    "Preserve Bedroom 2 privacy while adding a better-used light zone nearby."
+  ],
+  "build_scope": [
+    "Replan the office and bathroom side as separated service rooms for bathroom, laundry, WC, and storage.",
+    "Move or replace laundry and WC services.",
+    "Alter walls and doors around the office, bathroom, laundry, and entrance.",
+    "Refinish the released service area as a day room or back-entry sitting space."
+  ],
+  "risks": [
+    "Losing the office removes a valuable enclosed quiet room.",
+    "The service-room cluster could make the central hallway feel tight if not designed carefully.",
+    "It improves light use but may not fully solve the main lounge problem.",
+    "A replacement quiet/work room needs to be deliberately planned."
+  ],
+  "cost_notes": [
+    "Broad planning band: NZD 140k to 280k+ depending on drainage, waterproofing, and wall changes."
+  ],
+  "transition_mapping": [
+    { "from": "office", "to": "expanded_separated_service_rooms" },
+    { "from": "laundry", "to": "bright_day_room_or_back_entry_sitting" },
+    { "from": "toilet", "to": "relocated_wc_in_service_zone" },
+    { "from": "lounge", "to": "evening_media_room" }
+  ]
+}

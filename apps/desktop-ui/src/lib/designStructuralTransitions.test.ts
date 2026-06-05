@@ -1,0 +1,207 @@
+import { describe, expect, it } from "vitest";
+import { structuralTransitionForScenario } from "./designStructuralTransitions";
+
+describe("design structural transitions", () => {
+  it("describes Design 2 room, wall, and door changes for the 2D transition overlay", () => {
+    const transition = structuralTransitionForScenario("back-side-living-sunroom-bedroom");
+
+    expect(transition?.proposedRooms.map((room) => room.id)).toEqual(expect.arrayContaining([
+      "bedroom-2-living-dining",
+      "sunroom-replacement-bedroom",
+      "office-wet-core",
+      "current-lounge-bedroom",
+      "kitchen-dining-chill-zone",
+    ]));
+    expect(transition?.proposedRooms.find((room) => room.id === "bedroom-2-living-dining")).toMatchObject({
+      label: "Living / dining day room",
+      floor: "vinyl",
+    });
+    expect(transition?.proposedRooms.find((room) => room.id === "current-lounge-bedroom")).toMatchObject({
+      label: "Bedroom",
+      floor: "carpet",
+    });
+    expect(transition?.proposedRooms.find((room) => room.id === "kitchen-dining-chill-zone")).toMatchObject({
+      label: "Kitchen chill / reading edge",
+      floor: "vinyl",
+    });
+    expect(transition?.proposedRooms.find((room) => room.id === "sunroom-replacement-bedroom")).toMatchObject({
+      x: 533.9,
+      y: 348.8,
+      width: 129.2,
+      height: 133.6,
+    });
+    const dayRoomFloor = transition?.floorAreas.find((area) => area.id === "design-2-continuous-day-room-floor");
+    expect(transition?.floorAreas.map((area) => area.id)).toEqual(expect.arrayContaining([
+      "design-2-continuous-day-room-floor",
+      "design-2-kitchen-chill-edge-floor",
+    ]));
+    expect(dayRoomFloor?.d).toBe(
+      "M 805.55 490.95 L 952.4 490.95 L 952.4 597.8 L 775.75 597.8 L 775.75 524.85 L 805.55 524.85 Z",
+    );
+    expect(transition?.openings.map((opening) => opening.id)).toEqual(expect.arrayContaining([
+      "design-2-new-bedroom-front-windows",
+      "design-2-new-bedroom-side-window",
+      "design-2-lounge-bedroom-north-window",
+      "design-2-wet-core-office-south-window",
+      "design-2-wet-core-bathroom-south-window",
+      "design-2-main-lounge-south-window",
+      "design-2-day-room-north-window",
+      "design-2-day-room-east-window",
+      "design-2-day-room-frosted-east-window",
+      "design-2-main-lounge-deck-doors",
+      "design-2-kitchen-day-room-opening",
+      "design-2-wet-core-door",
+    ]));
+    expect(transition?.openings.map((opening) => opening.id)).not.toEqual(expect.arrayContaining([
+      "design-2-new-bedroom-hall-door",
+      "design-2-lounge-bedroom-door",
+    ]));
+    expect(transition?.openings.find((opening) => opening.id === "design-2-main-lounge-deck-doors")).toMatchObject({
+      kind: "door",
+      label: "main entry / deck doors",
+    });
+    expect(transition?.openings.find((opening) => opening.id === "design-2-day-room-wide-opening")).toMatchObject({
+      kind: "opening",
+      x1: 803.7,
+      x2: 902.8,
+    });
+    expect(transition?.openings.find((opening) => opening.id === "design-2-kitchen-day-room-opening")).toMatchObject({
+      kind: "opening",
+      x1: 803.7,
+      y1: 499.7,
+      y2: 519.5,
+    });
+    expect(transition?.openings.find((opening) => opening.id === "design-2-lounge-bedroom-north-window")).toMatchObject({
+      kind: "window",
+      x1: 676,
+      x2: 748,
+      y1: 348.8,
+      y2: 348.8,
+    });
+    expect(transition?.openings.find((opening) => opening.id === "design-2-wet-core-office-south-window")).toMatchObject({
+      y1: 601.8,
+      y2: 601.8,
+    });
+    expect(transition?.openings.find((opening) => opening.id === "design-2-main-lounge-south-window")).toMatchObject({
+      y1: 601.8,
+      y2: 601.8,
+    });
+    expect(transition?.openings.find((opening) => opening.id === "design-2-day-room-east-window")).toMatchObject({
+      x1: 956.4,
+      x2: 956.4,
+    });
+    expect(transition?.openings.find((opening) => opening.id === "design-2-new-bedroom-front-windows")).toMatchObject({
+      strokeWidth: 8,
+      x1: 545,
+      x2: 657,
+      y1: 348.8,
+      y2: 348.8,
+    });
+    expect(transition?.openings.find((opening) => opening.id === "design-2-new-bedroom-side-window")).toMatchObject({
+      strokeWidth: 8,
+      x1: 533.9,
+      x2: 533.9,
+    });
+    expect(transition?.openings.find((opening) => opening.id === "design-2-lounge-bedroom-north-window")).toMatchObject({
+      strokeWidth: 8,
+    });
+    expect(transition?.openings.find((opening) => opening.id === "design-2-day-room-north-window")).toMatchObject({
+      strokeWidth: 3.7,
+    });
+    expect(transition?.wallMasks.map((wall) => wall.id)).toEqual(expect.arrayContaining([
+      "bedroom-2-laundry-wall-removal",
+      "bedroom2-entry-wall-removal",
+    ]));
+    expect(transition?.wallMasks.find((wall) => wall.id === "bedroom2-entry-wall-removal")).toMatchObject({
+      x1: 803.7,
+      x2: 902.8,
+    });
+    expect(transition?.wallMasks.map((wall) => wall.id)).not.toContain("office-wet-core-openings");
+    expect(transition?.futureWalls.map((wall) => wall.id)).toEqual(expect.arrayContaining([
+      "replacement-bedroom-envelope",
+      "lounge-bedroom-chill-wall-infill",
+    ]));
+    expect(transition?.futureWalls.map((wall) => wall.id)).not.toEqual(expect.arrayContaining([
+      "day-room-retained-east-exterior-wall",
+      "day-room-retained-private-south-wall",
+      "day-room-retained-toilet-south-wall",
+      "wet-core-retained-south-exterior-wall",
+      "living-dining-retained-deck-wall",
+      "lounge-bedroom-north-exterior-wall",
+      "lounge-bedroom-hall-wall",
+    ]));
+    expect(transition?.futureWalls.find((wall) => wall.id === "replacement-bedroom-envelope")?.path)
+      .toBe("M 533.9 482.4 L 533.9 348.8 L 663.1 348.8 L 663.1 482.4 M 533.9 482.4 L 635.2 482.4 M 655.4 482.4 L 663.1 482.4");
+    expect(transition?.futureWalls.find((wall) => wall.id === "replacement-bedroom-envelope")).toMatchObject({
+      strokeWidth: 8,
+    });
+    expect(transition?.futureWalls.find((wall) => wall.id === "lounge-bedroom-chill-wall-infill")).toMatchObject({
+      path: "M 760.9 361.3 L 760.9 392.4",
+      strokeWidth: 6,
+    });
+    expect(transition?.futureWalls.map((wall) => wall.id)).not.toContain("wet-core-new-divider");
+    expect(transition?.doorMarkers.map((door) => door.id)).toEqual(expect.arrayContaining([
+      "relocated-wc-door",
+    ]));
+    expect(transition?.retainedDoorTraces?.map((door) => door.id)).toEqual(expect.arrayContaining([
+      "retained-hallway-to-lounge-bedroom-door",
+    ]));
+    expect(transition?.retainedDoorTraces?.find((door) => door.id === "retained-hallway-to-lounge-bedroom-door")).toMatchObject({
+      leafPath: "M 701.5 484.6 L 701.5 462.6",
+      arcPath: "M 723.5 484.6 A 22.0 22.0 0 0 0 701.5 462.6",
+    });
+    expect(transition?.doorMarkers.map((door) => door.id)).not.toEqual(expect.arrayContaining([
+      "new-bedroom-hall-door",
+      "lounge-bedroom-door",
+    ]));
+    expect(transition?.doorMarkers.map((door) => door.id)).not.toContain("future-front-door");
+    expect(transition?.planLabels.map((label) => label.id)).toEqual(expect.arrayContaining([
+      "design-2-living-dining-label",
+      "design-2-bedroom-label",
+      "design-2-laundry-label",
+      "design-2-wc-label",
+      "design-2-current-lounge-bedroom-label",
+      "design-2-kitchen-chill-label",
+    ]));
+    expect(transition?.planLabels.map((label) => label.id)).not.toContain("design-2-wet-core-label");
+    expect(transition?.planLabels.find((label) => label.id === "design-2-laundry-label")).toMatchObject({
+      lines: ["Laundry"],
+      x: 687,
+      y: 562,
+    });
+    expect(transition?.planLabels.find((label) => label.id === "design-2-wc-label")).toMatchObject({
+      lines: ["WC"],
+      x: 750.5,
+      y: 562,
+    });
+  });
+
+  it("returns no structural overlay for the current design", () => {
+    expect(structuralTransitionForScenario("current")).toBeNull();
+  });
+
+  it("describes structural overlays for every future design container", () => {
+    const futureScenarioIds = [
+      "back-side-living-sunroom-bedroom",
+      "wet-core-bright-day-room",
+      "kitchen-kept-social-spine",
+      "two-living-room-family",
+      "new-bedroom-pod-bedroom2-lounge",
+    ];
+
+    for (const scenarioId of futureScenarioIds) {
+      const transition = structuralTransitionForScenario(scenarioId);
+
+      expect(transition, scenarioId).not.toBeNull();
+      if (!transition) {
+        throw new Error(`Missing structural transition for ${scenarioId}`);
+      }
+      expect(transition.proposedRooms.length, scenarioId).toBeGreaterThan(0);
+      expect(transition.floorAreas.length, scenarioId).toBeGreaterThan(0);
+      expect(transition.openings.length, scenarioId).toBeGreaterThan(0);
+      expect(transition.planLabels.length, scenarioId).toBeGreaterThan(0);
+      expect(transition.wallMasks.length, scenarioId).toBeGreaterThan(0);
+      expect(transition.futureWalls.length + transition.doorMarkers.length, scenarioId).toBeGreaterThan(0);
+    }
+  });
+});

@@ -38,6 +38,8 @@ describe("furniture canvas interaction layout", () => {
   });
 
   it("hides furniture abbreviation labels by default behind a toggle", () => {
+    expect(editorSource).toContain("scenarioId: string;");
+    expect(editorSource).toContain("loadFurnitureEditorData(projectId, scenarioId)");
     expect(editorSource).toContain("let labelsVisible = $state(false);");
     expect(editorSource).toContain("labelsVisible={labelsVisible}");
     expect(editorSource).toContain("showLabels={labelsVisible}");
@@ -309,6 +311,21 @@ describe("furniture canvas interaction layout", () => {
     expect(planCanvasSource).toContain("circle:not(.symbol-body):not(.rotate-handle)");
     expect(rotateHandleStyle).toContain("fill: #ffffff;");
     expect(rotateHandleStyle).toContain("pointer-events: all;");
+  });
+
+  it("preserves the yellow sunlight overlay from generic furniture symbol styling", () => {
+    const sunlightRayStyle = cssBlock(planCanvasSource, ".sunlight-ray");
+    const borrowedLightStyle = cssBlock(planCanvasSource, ".sunlight-ray.borrowed");
+
+    expect(planCanvasSource).toContain('class="sunlight-sun-core"');
+    expect(planCanvasSource).toContain("line:not(.rotate-stem):not(.wall-removal-mask):not(.door-marker-leaf):not(.proposed-plan-opening):not(.sunlight-sun-ray)");
+    expect(planCanvasSource).toContain("ellipse:not(.symbol-body):not(.toilet-bowl):not(.toilet-inlay):not(.sunlight-sun-path)");
+    expect(planCanvasSource).toContain("circle:not(.symbol-body):not(.rotate-handle):not(.sunlight-sun-core)");
+    expect(planCanvasSource).toContain("path:not(.symbol-body):not(.l-sofa-outline):not(.future-wall):not(.wall-removal-mask):not(.door-marker-arc):not(.retained-door-trace-leaf):not(.retained-door-trace-arc):not(.proposed-plan-floor-area):not(.sunlight-ray)");
+    expect(sunlightRayStyle).toContain("fill: rgba(255, 198, 76, 0.46);");
+    expect(sunlightRayStyle).toContain("stroke: rgba(227, 156, 32, 0.35);");
+    expect(borrowedLightStyle).toContain("fill: rgba(255, 213, 102, 0.28);");
+    expect(borrowedLightStyle).toContain("stroke: rgba(227, 156, 32, 0.22);");
   });
 
   it("keeps collapsed catalog groups stacked at the top of the scroll panel", () => {

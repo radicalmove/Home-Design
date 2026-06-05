@@ -57,6 +57,30 @@ describe("furniture store helpers", () => {
     expect(data).toEqual({ catalog, layoutResult });
   });
 
+  it("loads catalog and a requested future scenario layout together", async () => {
+    const futureLayoutResult: FurnitureLayoutLoadResult = {
+      ...layoutResult,
+      layout: {
+        ...layoutResult.layout,
+        scenario_id: "back-side-living-sunroom-bedroom",
+      },
+    };
+    loadCatalogMock.mockResolvedValueOnce(catalog);
+    loadLayoutMock.mockResolvedValueOnce(futureLayoutResult);
+
+    const data = await loadFurnitureEditorData(
+      "current-house",
+      "back-side-living-sunroom-bedroom",
+    );
+
+    expect(loadCatalogMock).toHaveBeenCalledWith();
+    expect(loadLayoutMock).toHaveBeenCalledWith(
+      "current-house",
+      "back-side-living-sunroom-bedroom",
+    );
+    expect(data).toEqual({ catalog, layoutResult: futureLayoutResult });
+  });
+
   it("persists layout edits through the command wrapper", async () => {
     saveLayoutMock.mockResolvedValueOnce(undefined);
 

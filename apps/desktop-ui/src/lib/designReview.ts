@@ -1,4 +1,11 @@
 import { svgToMetres } from "./furnitureGeometry";
+import { CURRENT_SCENARIO_ID } from "./designScenarios";
+import {
+  FURNITURE_REUSE_CATEGORY_LABELS,
+  designScenarioConceptById,
+  type DesignScenarioFurnitureReuse,
+  type DesignScenarioConcept,
+} from "./designScenarioConcepts";
 import type { DesignReviewData, FurnitureLayout, FurnitureObject, PlanPoint, PlanTransform } from "../types";
 
 type JsonRecord = Record<string, unknown>;
@@ -49,6 +56,58 @@ export type DesignReviewReportSection = {
   points: string[];
 };
 
+export type DesignReviewSummarySection = {
+  id: string;
+  title: string;
+  points: string[];
+};
+
+export type DesignReviewOverallAssessment = {
+  title: string;
+  paragraphs: string[];
+  priorities: string[];
+};
+
+export type DesignReviewPracticalFinding = {
+  id: string;
+  severity: ReviewSeverity;
+  title: string;
+  body: string;
+};
+
+export type DesignReviewRoomAnalysis = {
+  id: string;
+  name: string;
+  dimensions: string;
+  use: string;
+  light: string;
+  furniture: string;
+  improvement: string;
+};
+
+export type DesignReviewMovementPoint = {
+  x: number;
+  y: number;
+  label: string;
+};
+
+export type DesignReviewMovementScenario = {
+  id: string;
+  person: string;
+  routine: string;
+  rooms: string[];
+  points: DesignReviewMovementPoint[];
+  colour: string;
+  note: string;
+};
+
+export type DesignReviewExpertReview = {
+  role: string;
+  pushback: string;
+  added: string;
+  passedBy: string;
+};
+
 export type DesignReviewSnippet = {
   id: string;
   title: string;
@@ -71,6 +130,13 @@ export type DesignReviewAnalysis = {
   modelSource: string;
   layoutSource: "seed" | "saved";
   metrics: DesignReviewMetrics;
+  overallAssessment: DesignReviewOverallAssessment;
+  summarySections: DesignReviewSummarySection[];
+  practicalFindings: DesignReviewPracticalFinding[];
+  roomAnalyses: DesignReviewRoomAnalysis[];
+  movementMapViewBox: string;
+  movementScenarios: DesignReviewMovementScenario[];
+  expertReview: DesignReviewExpertReview[];
   rooms: ReviewRoom[];
   assignedObjects: AssignedFurnitureObject[];
   offPlanObjects: AssignedFurnitureObject[];
@@ -112,6 +178,13 @@ function asString(value: unknown, fallback = ""): string {
 
 function asNumber(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function titleFromId(id: string): string {
+  return id
+    .split("_")
+    .map((word) => word.length > 0 ? `${word[0].toUpperCase()}${word.slice(1)}` : word)
+    .join(" ");
 }
 
 function roomNameById(model: JsonRecord): Map<string, string> {
@@ -169,6 +242,69 @@ function roomGeometries(model: JsonRecord): RoomGeometry[] {
     const geometry = geometryFromRecord(space.display_px);
     return id && geometry ? [{ id, geometry }] : [];
   });
+}
+
+function geometryCenterSvg(geometry: Geometry): PlanPoint {
+  if (geometry.type === "rect") {
+    return {
+      x: geometry.x + geometry.width / 2,
+      y: geometry.y + geometry.height / 2,
+    };
+  }
+
+  const points = geometry.type === "polygon"
+    ? geometry.points
+    : geometry.polygons.flatMap((polygon) => polygon);
+  const xs = points.map((point) => asNumber(point[0])).filter((value): value is number => value !== null);
+  const ys = points.map((point) => asNumber(point[1])).filter((value): value is number => value !== null);
+  if (xs.length === 0 || ys.length === 0) {
+    return { x: 0, y: 0 };
+  }
+  return {
+    x: (Math.min(...xs) + Math.max(...xs)) / 2,
+    y: (Math.min(...ys) + Math.max(...ys)) / 2,
+  };
+}
+
+function roomSvgCenters(model: JsonRecord): Map<string, PlanPoint> {
+  return new Map(roomGeometries(model).map(({ id, geometry }) => [id, geometryCenterSvg(geometry)]));
+}
+
+function displayGeometryById(value: unknown, targetId: string): Geometry | null {
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const geometry = displayGeometryById(item, targetId);
+      if (geometry) {
+        return geometry;
+      }
+    }
+    return null;
+  }
+
+  const record = asRecord(value);
+  if (Object.keys(record).length === 0) {
+    return null;
+  }
+
+  if (asString(record.id) === targetId) {
+    const geometry = geometryFromRecord(record.display_px);
+    if (geometry) {
+      return geometry;
+    }
+  }
+
+  for (const nested of Object.values(record)) {
+    const geometry = displayGeometryById(nested, targetId);
+    if (geometry) {
+      return geometry;
+    }
+  }
+  return null;
+}
+
+function featureCenterSvg(model: JsonRecord, featureId: string): PlanPoint | null {
+  const geometry = displayGeometryById(model, featureId);
+  return geometry ? geometryCenterSvg(geometry) : null;
 }
 
 function pointInPolygon(point: PlanPoint, polygon: PlanPoint[]): boolean {
@@ -280,6 +416,49 @@ function lowWinterLightRooms(model: JsonRecord, names: Map<string, string>): str
   });
 }
 
+const DAYLIGHT_LEVEL_SCORES: Record<string, number> = {
+  low: 0,
+  medium: 1,
+  high: 2,
+  unknown: 0,
+};
+
+const DAYLIGHT_SEASONS = ["summer", "autumn", "winter", "spring"];
+const ACTIVE_DAYLIGHT_TIMES = ["morning", "midday"];
+const LOW_USE_LIGHT_ROOM_IDS = new Set(["entrance", "laundry"]);
+
+function daylightRoomFor(model: JsonRecord, roomId: string): JsonRecord {
+  return asRecord(asRecord(asRecord(model.daylight).rooms)[roomId]);
+}
+
+function daylightScoreForTime(daylightRoom: JsonRecord, season: string, timeBand: string): number | null {
+  const level = asString(asRecord(daylightRoom[season])[timeBand]);
+  if (!level) {
+    return null;
+  }
+  return DAYLIGHT_LEVEL_SCORES[level] ?? 0;
+}
+
+function averageDaylightScore(daylightRoom: JsonRecord, seasons: string[], timeBands: string[]): number {
+  const scores = seasons.flatMap((season) =>
+    timeBands.flatMap((timeBand) => {
+      const score = daylightScoreForTime(daylightRoom, season, timeBand);
+      return score === null ? [] : [score];
+    }));
+  if (scores.length === 0) {
+    return 0;
+  }
+  return scores.reduce((total, score) => total + score, 0) / scores.length;
+}
+
+function usefulLowUseLightRoomNames(model: JsonRecord, rooms: ReviewRoom[]): string[] {
+  return rooms
+    .filter((room) => LOW_USE_LIGHT_ROOM_IDS.has(room.id))
+    .filter((room) =>
+      averageDaylightScore(daylightRoomFor(model, room.id), DAYLIGHT_SEASONS, ACTIVE_DAYLIGHT_TIMES) >= 0.7)
+    .map((room) => room.name);
+}
+
 function buildRooms(model: JsonRecord, assignedObjects: AssignedFurnitureObject[]): ReviewRoom[] {
   const definitions = roomDefinitionById(model);
   const names = roomNameById(model);
@@ -352,6 +531,162 @@ function buildWarnings(
   return warnings.filter((warning): warning is DesignReviewWarning => warning !== null);
 }
 
+function buildOverallAssessment(
+  rooms: ReviewRoom[],
+  metrics: DesignReviewMetrics,
+  serviceLightRooms: string[],
+): DesignReviewOverallAssessment {
+  const bedroom2 = rooms.find((room) => room.id === "bedroom_2");
+  return {
+    title: "Overall Assessment",
+    paragraphs: [
+      "Overall, the house reads as a compact, workable family home with a real lifestyle upside, but its main design weakness is a threshold problem. The front door sequence is unclear, the sunroom is visually important but seasonally unstable, the deck is appealing but exposed, and the lounge is asked to be both the main sitting room and a through-route.",
+      `The best part of the plan is the connected kitchen, dining, lounge, sunroom, and deck sequence: it gives the house a social heart and useful flexibility. The tension is that some of the better morning and early-afternoon light lands in ${serviceLightRooms.length > 0 ? serviceLightRooms.join(" and ") : "the service end of the house"}, while the lounge, Bedroom 2, office, and hallway need more deliberate furniture placement and lighting.`,
+      `The current furniture layout is close enough to review seriously, with ${metrics.totalFurnitureObjects} placed objects${bedroom2 ? ` and Bedroom 2 working within ${bedroom2.dimensionsLabel}` : ""}. The next improvement should not be more furniture. The best move is to simplify and clarify: make arrival obvious, make the sunroom/deck reliable enough to use, protect lounge circulation, and keep Bedroom 2 calm enough for a teenager to sleep, study, store belongings, and retreat without the room feeling packed.`,
+    ],
+    priorities: [
+      "Clarify arrival and the front door before making major furniture or redesign decisions.",
+      "Decide whether the sunroom and deck are true daily living spaces or seasonal overflow; if they are daily spaces, solve thermal comfort, shade, wind, and glare first.",
+      "Protect the lounge as a sitting room by reducing route conflict between kitchen/dining, hallway, and sunroom.",
+      "Treat the laundry and entrance daylight as useful service light, not as a substitute for better living-room and bedroom comfort.",
+      "Treat the lack of a second toilet as a practical design issue; if the bathroom is redesigned, test whether a second WC can be added without compromising shower, basin, storage, ventilation, or circulation clearances.",
+      "Edit Bedroom 2 around one clear movement path, one calm wall, and reliable task lighting instead of filling every edge with storage.",
+    ],
+  };
+}
+
+function buildSummarySections(
+  rooms: ReviewRoom[],
+  metrics: DesignReviewMetrics,
+  offPlanObjects: AssignedFurnitureObject[],
+  serviceLightRooms: string[],
+): DesignReviewSummarySection[] {
+  const bedroom2 = rooms.find((room) => room.id === "bedroom_2");
+  const lounge = rooms.find((room) => room.id === "lounge");
+  const kitchen = rooms.find((room) => room.id === "kitchen_dining");
+
+  return [
+    {
+      id: "strengths",
+      title: "Strengths",
+      points: [
+        "The basic zoning is sensible: adults in the Master Bedroom, a teenager in Bedroom 2, and shared living through the kitchen/dining, lounge, and sunroom sequence.",
+        "The sunroom and deck-side dining edge give the house a real lifestyle asset for reading, casual sitting, plants, music, and overflow entertaining.",
+        `The fixed furniture mostly sits where fixed furniture should sit: kitchen, laundry, bathroom, toilet, and wardrobe zones, leaving moveable furniture to do the lifestyle work.`,
+        offPlanObjects.length === 0
+          ? "The current saved layout is fully on the plan, so the review can now focus on design quality rather than cleanup."
+          : `${offPlanObjects.length} furniture item${offPlanObjects.length === 1 ? "" : "s"} still need placement cleanup before the review is fully reliable.`,
+      ],
+    },
+    {
+      id: "weaknesses",
+      title: "Weaknesses",
+      points: [
+        serviceLightRooms.length > 0
+          ? `${serviceLightRooms.join(" and ")} receive useful morning to early-afternoon daylight, but they are low-use service or transition rooms. That means some of the house's best light is not landing in the places people linger.`
+          : "The daylight model suggests the best light is unevenly distributed, so furniture decisions should be made room by room rather than assuming the whole house behaves the same.",
+        "The hallway, entrance, kitchen/dining strip, and Bedroom 2 are all narrow enough that furniture can technically fit while still making daily movement feel tight.",
+        lounge
+          ? "The lounge is a particular pressure point: it is expected to be the main sitting room, but it also has large openings to kitchen/dining and sunroom, acts as a movement junction, and relies heavily on borrowed rather than abundant direct light."
+          : "The main sitting room should be checked for both comfort and movement pressure, not just furniture fit.",
+        "The original front door sits awkwardly inside the sunroom and leads into the hallway, so visitors may not get a clear, intuitive arrival sequence. The deck/entrance side also functions like a daily entry, but not necessarily like an obvious formal front door.",
+        "The sunroom and deck both have seasonal comfort issues: the sunroom can be too cold in winter or too hot in summer, while the deck is useful as an outdoor sitting area but lacks reliable shade and wind-stable shelter.",
+        "The house currently has only one toilet, accessed through the laundry. For two adults, a teenager, and guests, that is a practical bottleneck; the likely solution is redoing the bathroom layout to include a second WC, subject to fixture clearances, ventilation, and not making the wet-area layout feel cramped.",
+        bedroom2
+          ? `Bedroom 2 is ${bedroom2.dimensionsLabel} and has to support sleeping, storage, study/media, and teenage privacy in one long room. It needs clear floor space more than extra furniture.`
+          : "Bedroom 2 is the room most likely to feel overloaded if storage and study furniture are allowed to creep into every wall.",
+        "Winter and afternoon light are weaker in several of the rooms people are likely to use for relaxing, working, or studying, so finishes and task lighting matter.",
+      ],
+    },
+    {
+      id: "moveable-opportunities",
+      title: "Moveable Furniture Opportunities",
+      points: [
+        bedroom2
+          ? "In Bedroom 2, prioritise fewer but better pieces: a slimmer dresser, low book storage, and a desk/reading setup that does not block the window or the door-to-bed route."
+          : "In Bedroom 2, test whether a smaller dresser, lower storage, or a different desk position would give better floor space and daylight access.",
+        lounge
+          ? `In the lounge, keep the sofa/media/fireplace relationship simple and protect the route to the sunroom. If a chair, bookcase, or music piece crowds that route, it is a candidate to move toward the brighter sunroom edge.`
+          : "In the lounge, treat any extra chair, bookcase, or music piece as optional unless it improves sitting, reading, or entertaining without blocking the sunroom connection.",
+        kitchen
+          ? "In kitchen/dining, use visually lighter dining chairs or stools and avoid tall moveable storage near the dining/window end, because the room is already doing a lot in a narrow strip."
+          : "In kitchen/dining, favour smaller, lighter moveable pieces over bulky storage so the room still feels like a place to eat rather than a corridor with appliances.",
+        "For the deck, test flexible seating only if shade and wind are solved. A basic umbrella is not enough if it becomes unusable in wind or misses the sun angle at the times you want to sit there.",
+        `Because there are ${metrics.moveableFurnitureObjects} moveable objects, the most valuable next exercise is not adding more. It is testing two or three simplified layouts and comparing circulation, daylight, and comfort.`,
+      ],
+    },
+  ];
+}
+
+function buildPracticalFindings(
+  rooms: ReviewRoom[],
+  lowLightRooms: string[],
+  serviceLightRooms: string[],
+): DesignReviewPracticalFinding[] {
+  const bedroom2 = rooms.find((room) => room.id === "bedroom_2");
+  const findings: DesignReviewPracticalFinding[] = [];
+
+  if (serviceLightRooms.length > 0) {
+    findings.push({
+      id: "service-light-mismatch",
+      severity: "watch",
+      title: "Good daylight is partly landing in low-use service spaces",
+      body: `${serviceLightRooms.join(" and ")} get comparatively useful morning to early-afternoon light, but they are short-stay rooms. That light is still helpful for arrival, laundry tasks, and visual freshness, but the design should not treat it as equal to daylight in the lounge, Bedroom 2, office, or main dining area.`,
+    });
+  }
+
+  if (lowLightRooms.length > 0) {
+    findings.push({
+      id: "winter-use-rooms",
+      severity: "watch",
+      title: "Winter light needs to be matched with actual room use",
+      body: `${lowLightRooms.join(", ")} show consistently low winter light. The practical response is layered lighting, lighter finishes, clear window zones, and avoiding tall dark furniture in places used for study, reading, grooming, or circulation.`,
+    });
+  }
+
+  const lounge = rooms.find((room) => room.id === "lounge");
+  if (lounge) {
+    findings.push({
+      id: "lounge-circulation-light",
+      severity: "watch",
+      title: "The lounge is a sitting room and a movement junction",
+      body: "The lounge has large openings to kitchen/dining and the sunroom, plus it sits on the main internal movement route. Its daylight is mostly borrowed light from the sunroom and related openings, so it should not be overloaded with furniture that narrows routes or makes the room feel darker.",
+    });
+  }
+
+  if (bedroom2) {
+    findings.push({
+      id: "teen-room-pressure",
+      severity: "watch",
+      title: "Bedroom 2 needs editing more than filling",
+      body: `Bedroom 2 is ${bedroom2.dimensionsLabel}, long and narrow, and currently has ${bedroom2.objects.length} assigned furniture objects. It can work for a teenager if the layout protects one clear movement line and one calm wall, rather than treating every edge as storage.`,
+    });
+  }
+
+  findings.push(
+    {
+      id: "sunroom-seasonal-comfort",
+      severity: "watch",
+      title: "Sunroom comfort is seasonal",
+      body: "The sunroom is a major daylight and lifestyle asset, but it may be too cold in winter and too hot in summer. Treat it as a flexible seasonal room unless insulation, ventilation, shading, and heating/cooling are improved.",
+    },
+    {
+      id: "front-door-ambiguity",
+      severity: "problem",
+      title: "The front door sequence is not obvious",
+      body: "The original front door is inside the sunroom and awkwardly leads to the hallway. For visitors, that can make arrival feel unclear: the house has entries, but not a legible front door moment.",
+    },
+    {
+      id: "deck-shade-wind",
+      severity: "watch",
+      title: "Deck use depends on shade and wind control",
+      body: "The Deck should be considered as an outdoor sitting area connected to kitchen/dining and entrance, but the current shade is weak. A basic umbrella does not solve wind or low-angle sun, so a better fixed, retractable, or wind-stable shade strategy should be assessed.",
+    },
+  );
+
+  return findings;
+}
+
 function buildReportSections(rooms: ReviewRoom[], metrics: DesignReviewMetrics): DesignReviewReportSection[] {
   const bedroom2 = rooms.find((room) => room.id === "bedroom_2");
   const lounge = rooms.find((room) => room.id === "lounge");
@@ -359,70 +694,288 @@ function buildReportSections(rooms: ReviewRoom[], metrics: DesignReviewMetrics):
 
   return [
     {
-      id: "executive-view",
-      title: "Executive View",
-      summary: "The house now reads as a compact, practical family layout with a strong light-side living sequence and a more private bedroom/service band.",
+      id: "useful-light-rhythm",
+      title: "Useful Light And Daily Rhythm",
+      summary: "The daylight model is most useful when read against daily routines: breakfast, work or study, after-school use, evening sitting, and weekend entertaining.",
       points: [
-        "For two adults in the master bedroom and a teenage girl in Bedroom 2, the basic zoning is sensible: adults at one end, teen bedroom near the service/entrance end, and shared living in the middle.",
-        `The current saved layout has ${metrics.totalFurnitureObjects} furniture objects, split across ${metrics.fixedFurnitureObjects} fixed and ${metrics.moveableFurnitureObjects} moveable items.`,
-        "The best design asset is the connected kitchen/dining, lounge, and sunroom sequence. The main weakness is that circulation and storage are tight, so small furniture shifts matter.",
+        "Morning to early-afternoon light is not automatically valuable if it lands in rooms people pass through quickly. The laundry and entrance light is useful, but the main lifestyle value still needs to be created in the lounge, sunroom, dining area, office, and Bedroom 2.",
+        "The sunroom should be treated as the house's main daylight asset: reading, plants, coffee, quiet time, music, or overflow entertaining are better uses than dead storage.",
+        "Bedroom 2 is likely to be used most after school, in the evening, and on weekends. Because its afternoon and winter light are weaker, the desk or reading position should have deliberate task lighting and should not be buried behind tall storage.",
       ],
     },
     {
-      id: "movement-flow",
-      title: "Movement Flow",
-      summary: "Movement is workable but depends on keeping the hallway, kitchen door line, and lounge-to-sunroom slider free of clutter.",
+      id: "movement-furniture-priorities",
+      title: "Movement And Furniture Priorities",
+      summary: "The layout works best when furniture reinforces the main walking routes rather than just filling available wall space.",
       points: [
-        "The hallway is the key internal spine. It connects the adults' room, office, bathroom, lounge, kitchen/dining, entrance, laundry, and toilet, so it has little tolerance for overflow storage.",
-        "The kitchen/dining strip is long and narrow. It suits a linear kitchen, but dining chairs, stools, and open appliance doors need to stay out of the work aisle.",
+        "Keep the hallway as a clean spine. It is the route between bedrooms, bathroom, lounge, kitchen, entrance, laundry, and toilet, so it should not become an overflow storage zone.",
+        "The kitchen/dining strip suits a linear working arrangement, but dining chairs, stools, appliance doors, and tall storage need to respect the work aisle.",
         lounge
-          ? `The lounge currently carries ${lounge.objects.length} furniture objects. That is acceptable if the sofa, coffee table, media unit, and work chair do not block the sunroom slider.`
-          : "The lounge should be reviewed as the main social sitting space and as the passage to the sunroom.",
+          ? `The lounge has ${lounge.objects.length} assigned furniture objects. That can work, but only if the sofa, media/fireplace wall, and sunroom route read as one simple sitting arrangement.`
+          : "The lounge should be judged by whether it creates a simple sitting arrangement and a clean route to the sunroom.",
       ],
     },
     {
-      id: "light-and-seasons",
-      title: "Light And Seasons",
-      summary: "The sunlight model is qualitative, but it is useful enough to identify which spaces should be bright, which need task lighting, and where seasonal comfort risks sit.",
-      points: [
-        "The sunroom is the primary daylight room and likely the strongest place for reading, plants, casual work, and relaxed sitting.",
-        "Kitchen/dining has useful light through the deck-side glazing and dining window, but winter morning and afternoon light are weaker in the model.",
-        "Bedroom 2, bathroom, hallway, and toilet are the least forgiving in winter. Keep window areas clear and use deliberate task lighting rather than relying on ambient light.",
-      ],
-    },
-    {
-      id: "room-by-room-review",
-      title: "Room-By-Room Review",
-      summary: "The room roles mostly make sense, but the narrow rooms need furniture to support movement rather than simply fit on paper.",
+      id: "room-priority-checks",
+      title: "Room Priorities Worth Checking",
+      summary: "These are the checks that are more useful than a raw room-by-room object list.",
       points: [
         kitchen
-          ? `Kitchen / Dining is ${kitchen.dimensionsLabel}. The fixed cabinetry works with the galley shape, but the dining end should remain visually lighter.`
+          ? `Kitchen / Dining is ${kitchen.dimensionsLabel}. Check dining-chair pull-out, stool clearance, and whether the window end stays visually lighter than the kitchen work run.`
           : "Kitchen / Dining should remain the practical work and meals zone rather than absorbing too much storage.",
         bedroom2
-          ? `Bedroom 2 is ${bedroom2.dimensionsLabel} and currently has ${bedroom2.objects.length} assigned objects. This is the room most likely to feel crowded if every wall becomes storage.`
+          ? `Bedroom 2 is ${bedroom2.dimensionsLabel}. Check whether the bed, dresser, desk/media, and wardrobe pieces still leave a clear daily path and one uncluttered visual zone.`
           : "Bedroom 2 should prioritise bed position, desk or reading use, and clean access to the window.",
-        "The master bedroom has the right role for two adults, but it benefits from balanced bedside clearance and keeping the window/wardrobe circulation legible.",
+        `There are ${metrics.fixedFurnitureObjects} fixed and ${metrics.moveableFurnitureObjects} moveable items. The high-value review is whether moveable pieces improve a room's purpose, not whether every item has a place on the drawing.`,
       ],
     },
+  ];
+}
+
+function buildScenarioReportSections(scenarioId: string): DesignReviewReportSection[] {
+  if (scenarioId === CURRENT_SCENARIO_ID) {
+    return [];
+  }
+
+  const concept: DesignScenarioConcept | null = designScenarioConceptById(scenarioId);
+  if (!concept) {
+    return [];
+  }
+
+  const sections: DesignReviewReportSection[] = [
     {
-      id: "furniture-fit",
-      title: "Furniture Fit",
-      summary: "The furniture plan is strongest where pieces support clear zones: sleeping, cooking, sitting, work, storage, and service tasks.",
+      id: `scenario-${concept.id}`,
+      title: concept.label,
+      summary: `${concept.room_changes[0] ?? concept.summary} ${concept.summary}`,
       points: [
-        "Built-in and fixed items are doing useful work in the kitchen, wet areas, wardrobes, and laundry. They should define edges without narrowing already-tight routes.",
-        "Moveable furniture adds the real lifestyle value: lounge seating, books, piano, desks, and bedroom storage. The tradeoff is visual and circulation density.",
-        "The layout should keep at least one obvious walking line through each room. If a room only works when chairs are tucked perfectly, it will feel frustrating in daily use.",
+        `Cost band: ${concept.cost_band}.`,
+        ...concept.room_changes,
+        ...concept.daylight_strategy.map((point) => `Daylight: ${point}`),
+        ...concept.movement_strategy.map((point) => `Movement: ${point}`),
+        ...concept.build_scope.map((point) => `Build scope: ${point}`),
+        ...concept.risks,
       ],
     },
+  ];
+
+  const reuseSection = buildFurnitureReuseSection(concept);
+  if (reuseSection) {
+    sections.push(reuseSection);
+  }
+
+  return sections;
+}
+
+function furnitureReusePoint(entry: DesignScenarioFurnitureReuse): string {
+  const label = FURNITURE_REUSE_CATEGORY_LABELS[entry.category];
+  const locationSuffix = entry.proposed_location && entry.category !== "new_required"
+    ? ` -> ${entry.proposed_location}`
+    : "";
+  return `${label}: ${entry.item}${locationSuffix}.`;
+}
+
+function buildFurnitureReuseSection(
+  concept: DesignScenarioConcept,
+): DesignReviewReportSection | null {
+  if (!concept.furniture_reuse || concept.furniture_reuse.length === 0) {
+    return null;
+  }
+
+  return {
+    id: `scenario-furniture-reuse-${concept.id}`,
+    title: "Furniture Reuse And New Items",
+    summary: "This option should reuse as much of the current furniture and joinery as possible, but only where the reused item supports the new room purpose rather than cluttering it.",
+    points: concept.furniture_reuse.map(furnitureReusePoint),
+  };
+}
+
+function countLabel(count: number, singular: string, plural = `${singular}s`): string {
+  return `${count} ${count === 1 ? singular : plural}`;
+}
+
+function roomUseAnalysis(room: ReviewRoom): string {
+  switch (room.id) {
+    case "kitchen_dining":
+      return "Daily meals, food preparation, household gathering, and the route between the living areas and service end.";
+    case "lounge":
+      return "Main sitting room, shared screen/fireplace zone, and movement junction between kitchen/dining, hallway, and sunroom.";
+    case "sunroom":
+      return "Flexible daylight room: reading, quiet sitting, plants, music, casual work, visitor arrival spillover, and seasonal overflow entertaining.";
+    case "hallway":
+      return "Primary circulation spine rather than a room to furnish. It needs to stay visually and physically clear.";
+    case "master_bedroom":
+      return "Adult sleeping and dressing room for two people, with a need for calm, balanced bedside and wardrobe circulation.";
+    case "office":
+      return "Small work, study, or overflow quiet room. Its success depends on desk position, lighting, and avoiding spare-room clutter.";
+    case "bathroom":
+      return "Compact wet room where grooming, showering, and bath use compete for a small footprint.";
+    case "bedroom_2":
+      return "Teen bedroom for sleeping, privacy, storage, study/media, and retreat. It has to do more than its narrow shape naturally wants to do.";
+    case "entrance":
+      return "Daily arrival, shoes, coats, and transition from deck/driveway into the kitchen and laundry side, but not a clear formal front-door sequence.";
+    case "laundry":
+      return "Service room for laundry, cleaning storage, and back-of-house tasks, with more useful daylight than its use pattern normally deserves.";
+    case "toilet":
+      return "Short-stay service room. It needs clarity, ventilation, and easy access more than extra visual treatment.";
+    default:
+      return `${room.name} should be treated according to its main daily purpose before adding more furniture.`;
+  }
+}
+
+function roomLightAnalysis(room: ReviewRoom): string {
+  switch (room.id) {
+    case "lounge":
+      return `${room.daylightSummary}. This is borrowed light rather than a bright, direct-light lounge, so pale finishes and uncluttered openings matter.`;
+    case "entrance":
+    case "laundry":
+      return `${room.daylightSummary}. This is useful light, but it lands in a short-stay service/transition area rather than a room people occupy for long periods.`;
+    case "sunroom":
+      return `${room.daylightSummary}. Treat this as the main daylight asset, but test heat gain, glare, winter cold, and ventilation before relying on it as an all-season sitting room.`;
+    case "bedroom_2":
+      return `${room.daylightSummary}. Because use is likely after school, evening, and weekends, task lighting matters as much as daytime sun.`;
+    default:
+      return room.daylightSummary;
+  }
+}
+
+function roomFurnitureAnalysis(room: ReviewRoom): string {
+  const layerSummary = `${countLabel(room.fixedCount, "fixed item")} and ${countLabel(room.moveableCount, "moveable item")}`;
+  if (room.objects.length === 0) {
+    return "No saved furniture is assigned to this room yet.";
+  }
+  const keyObjects = room.objects
+    .slice(0, 5)
+    .map((object) => object.label)
+    .join(", ");
+  return `${layerSummary}. Main placed pieces: ${keyObjects}${room.objects.length > 5 ? ", and related smaller pieces" : ""}.`;
+}
+
+function roomImprovementAnalysis(room: ReviewRoom): string {
+  switch (room.id) {
+    case "kitchen_dining":
+      return "Keep dining furniture light, preserve chair pull-out space, and avoid tall moveable storage near the brighter dining/window end.";
+    case "lounge":
+      return "Simplify the sitting group and protect routes to the kitchen/dining opening, hallway side, and sunroom doors. Any optional chair or storage should earn its place.";
+    case "sunroom":
+      return "Use it deliberately as a light-rich retreat or overflow entertaining zone, but solve summer heat, winter cold, and visitor-entry awkwardness before treating it as a normal living room.";
+    case "hallway":
+      return "Do not allow furniture creep. Keep wall storage shallow, doors unobstructed, and sightlines simple.";
+    case "master_bedroom":
+      return "Keep bedside clearance balanced for two adults and avoid blocking the wardrobe/window circulation line.";
+    case "office":
+      return "Place the desk to make the most of morning light, then add task lighting so the room remains useful later in the day.";
+    case "bathroom":
+      return "Prioritise clear wet-area movement, pale finishes, and practical lighting over extra storage.";
+    case "bedroom_2":
+      return "Reduce visual load where possible: slimmer storage, one clear movement line, and a desk or reading zone with reliable task lighting.";
+    case "entrance":
+      return "Clarify the front door experience for visitors, then keep storage disciplined so the narrow entry/deck-side arrival path does not become a bottleneck.";
+    case "laundry":
+      return "Use the daylight for practical tasks, but do not over-invest lifestyle value here unless it supports storage, cleaning, or garden access.";
+    case "toilet":
+      return "Keep it simple, bright, and easy to clean; avoid adding visual clutter to a very small service room.";
+    default:
+      return "Test whether the current furniture improves use, light, and movement before adding anything else.";
+  }
+}
+
+function buildRoomAnalyses(rooms: ReviewRoom[]): DesignReviewRoomAnalysis[] {
+  return rooms.map((room) => ({
+    id: room.id,
+    name: room.name,
+    dimensions: room.dimensionsLabel,
+    use: roomUseAnalysis(room),
+    light: roomLightAnalysis(room),
+    furniture: roomFurnitureAnalysis(room),
+    improvement: roomImprovementAnalysis(room),
+  }));
+}
+
+function buildMovementScenarios(model: JsonRecord): DesignReviewMovementScenario[] {
+  const names = roomNameById(model);
+  const centers = roomSvgCenters(model);
+  const deckPoint = featureCenterSvg(model, "rear_timber_deck");
+  const namedPoint = (roomId: string): DesignReviewMovementPoint[] => {
+    const point = roomId === "deck" ? deckPoint : centers.get(roomId);
+    if (!point) {
+      return [];
+    }
+    return [{
+      ...point,
+      label: roomId === "deck" ? "Deck" : names.get(roomId) ?? titleFromId(roomId),
+    }];
+  };
+
+  const scenarios = [
     {
-      id: "priority-actions",
-      title: "Priority Actions",
-      summary: "The practical next step is not major building work yet. It is clearance checking, daylight checking, and furniture simplification in the highest-pressure zones.",
-      points: [
-        "First check the off-plan or unassigned furniture items, then review the kitchen/dining chair clearances and Bedroom 2 floor space.",
-        "Second, compare winter morning and afternoon light for Bedroom 2, hallway, bathroom, and kitchen/dining before choosing darker finishes or tall furniture near windows.",
-        "Third, preserve the sunroom as the flexible high-value space: reading, overflow entertaining, piano/creative use, and seasonal daylight rather than pure storage.",
-      ],
+      id: "adult-1-morning",
+      person: "Adult 1",
+      routine: "Morning start",
+      roomIds: ["master_bedroom", "hallway", "bathroom", "kitchen_dining", "entrance"],
+      colour: "#2f6f9f",
+      note: "Shows the adult route from sleeping to bathroom, breakfast, and leaving the house.",
+    },
+    {
+      id: "adult-2-home-evening",
+      person: "Adult 2",
+      routine: "Evening home loop",
+      roomIds: ["entrance", "deck", "kitchen_dining", "lounge", "sunroom", "master_bedroom"],
+      colour: "#8b5d9f",
+      note: "Shows arrival, deck use if shade/wind allow it, dinner, sitting, daylight/quiet time, and return to the bedroom end.",
+    },
+    {
+      id: "teen-after-school",
+      person: "Teenager",
+      routine: "After-school pattern",
+      roomIds: ["bedroom_2", "bathroom", "kitchen_dining", "lounge", "bedroom_2"],
+      colour: "#c46f2d",
+      note: "Shows the likely teen loop between bedroom, bathroom, food, shared sitting, and retreat.",
+    },
+  ];
+
+  return scenarios.map((scenario) => ({
+    id: scenario.id,
+    person: scenario.person,
+    routine: scenario.routine,
+    rooms: scenario.roomIds.map((roomId) => roomId === "deck" ? "Deck" : names.get(roomId) ?? titleFromId(roomId)),
+    points: scenario.roomIds.flatMap(namedPoint),
+    colour: scenario.colour,
+    note: scenario.note,
+  }));
+}
+
+function movementMapViewBox(layout: FurnitureLayout, scenarios: DesignReviewMovementScenario[]): string {
+  const points = scenarios.flatMap((scenario) => scenario.points);
+  if (points.length === 0) {
+    return `0 0 ${layout.plan_transform.svg_width_px} ${layout.plan_transform.svg_height_px}`;
+  }
+  const padding = 48;
+  const minX = Math.max(0, Math.min(...points.map((point) => point.x)) - padding);
+  const minY = Math.max(0, Math.min(...points.map((point) => point.y)) - padding);
+  const maxX = Math.min(layout.plan_transform.svg_width_px, Math.max(...points.map((point) => point.x)) + padding);
+  const maxY = Math.min(layout.plan_transform.svg_height_px, Math.max(...points.map((point) => point.y)) + padding);
+  return `${minX.toFixed(1)} ${minY.toFixed(1)} ${(maxX - minX).toFixed(1)} ${(maxY - minY).toFixed(1)}`;
+}
+
+function buildExpertReview(): DesignReviewExpertReview[] {
+  return [
+    {
+      role: "Interior Designer",
+      pushback: "Do not call a room successful just because furniture fits on the plan. The report must judge comfort, visual calm, visitor arrival, and whether the best light supports real daily habits.",
+      added: "The revised report leads with strengths, weaknesses, and moveable-furniture opportunities, then gives each room a practical use/light/furniture/improvement analysis including the sunroom, front door ambiguity, and deck use.",
+      passedBy: "It now treats the lounge, sunroom, deck, and Bedroom 2 as lived-in places with competing demands, not just measured rectangles.",
+    },
+    {
+      role: "Builder / Renovation Practicality",
+      pushback: "Separate furniture changes from building issues. Do not imply structural work before checking whether movement, entry clarity, shade, and storage can be improved with lighter interventions.",
+      added: "The report prioritises furniture simplification, circulation protection, door/opening clearance, a clearer front door sequence, and deck shade/wind control before recommending major redesign.",
+      passedBy: "It flags constraints that matter to buildability: narrow hall, lounge openings, unclear original front door, kitchen/dining aisle, compact wet/service rooms, and seasonal sunroom comfort.",
+    },
+    {
+      role: "Daylight And Movement Planner",
+      pushback: "Daylight should be weighted by time of day, likely occupancy, thermal comfort, and outdoor usability. A bright laundry or unshaded deck is not equal to a comfortable living zone.",
+      added: "The report now calls out the service-light mismatch, sunroom overheating/cold risk, deck shade problem, and includes a cropped theoretical movement map for two adults and a teenager.",
+      passedBy: "It connects light, movement, room use, and seasonal comfort, especially where the lounge is a circulation junction with only moderate borrowed light.",
     },
   ];
 }
@@ -503,6 +1056,8 @@ export function buildDesignReviewAnalysis(data: DesignReviewData): DesignReviewA
   const unassignedObjects = assignedObjects.filter((object) => !object.roomId && !isOffPlan(object, layout));
   const rooms = buildRooms(model, assignedObjects);
   const lowLightRooms = lowWinterLightRooms(model, roomNameById(model));
+  const serviceLightRooms = usefulLowUseLightRoomNames(model, rooms);
+  const movementScenarios = buildMovementScenarios(model);
   const metrics: DesignReviewMetrics = {
     totalFurnitureObjects: layout.objects.length,
     fixedFurnitureObjects: layout.objects.filter((object) => object.layer === "fixed").length,
@@ -516,12 +1071,22 @@ export function buildDesignReviewAnalysis(data: DesignReviewData): DesignReviewA
     modelSource: data.model_source,
     layoutSource: data.furniture_layout.source,
     metrics,
+    overallAssessment: buildOverallAssessment(rooms, metrics, serviceLightRooms),
+    summarySections: buildSummarySections(rooms, metrics, offPlanObjects, serviceLightRooms),
+    practicalFindings: buildPracticalFindings(rooms, lowLightRooms, serviceLightRooms),
+    roomAnalyses: buildRoomAnalyses(rooms),
+    movementMapViewBox: movementMapViewBox(layout, movementScenarios),
+    movementScenarios,
+    expertReview: buildExpertReview(),
     rooms,
     assignedObjects,
     offPlanObjects,
     unassignedObjects,
     dynamicWarnings: buildWarnings(rooms, offPlanObjects, lowLightRooms),
-    reportSections: buildReportSections(rooms, metrics),
+    reportSections: [
+      ...buildScenarioReportSections(layout.scenario_id),
+      ...buildReportSections(rooms, metrics),
+    ],
     snippets: buildSnippets(rooms),
     photoEvidence: photoEvidence(model),
   };

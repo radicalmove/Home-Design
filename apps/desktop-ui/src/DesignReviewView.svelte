@@ -1,24 +1,26 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import { objectBoundsSvg } from "./lib/furnitureGeometry";
   import { buildDesignReviewAnalysis } from "./lib/designReview";
   import { loadDesignReviewData } from "./lib/homeDesignCommands";
   import type {
     DesignReviewAnalysis,
+    DesignReviewMovementScenario,
     DesignReviewSnippet,
   } from "./lib/designReview";
   import type { DesignReviewData, FurnitureObject } from "./types";
 
   type Props = {
     projectId: string;
+    scenarioId: string;
   };
 
-  let { projectId }: Props = $props();
+  let { projectId, scenarioId }: Props = $props();
 
   let reviewData = $state<DesignReviewData | null>(null);
   let loading = $state(true);
   let error = $state<string | null>(null);
   let refreshedAt = $state<string | null>(null);
+  let latestRefreshRequest = 0;
 
   let analysis = $derived<DesignReviewAnalysis | null>(
     reviewData ? buildDesignReviewAnalysis(reviewData) : null,
@@ -29,19 +31,29 @@
   }
 
   async function refreshReview() {
+    const refreshRequest = latestRefreshRequest + 1;
+    latestRefreshRequest = refreshRequest;
     loading = true;
     error = null;
     try {
-      reviewData = await loadDesignReviewData(projectId);
+      const data = await loadDesignReviewData(projectId, scenarioId);
+      if (refreshRequest !== latestRefreshRequest) {
+        return;
+      }
+      reviewData = data;
       refreshedAt = new Intl.DateTimeFormat(undefined, {
         hour: "2-digit",
         minute: "2-digit",
         second: "2-digit",
       }).format(new Date());
     } catch (reason: unknown) {
-      error = toErrorMessage(reason);
+      if (refreshRequest === latestRefreshRequest) {
+        error = toErrorMessage(reason);
+      }
     } finally {
-      loading = false;
+      if (refreshRequest === latestRefreshRequest) {
+        loading = false;
+      }
     }
   }
 
@@ -65,6 +77,10 @@
     return bounds ? `rotate(${object.rotation_deg} ${bounds.cx} ${bounds.cy})` : "";
   }
 
+  function routePoints(scenario: DesignReviewMovementScenario): string {
+    return scenario.points.map((point) => `${point.x},${point.y}`).join(" ");
+  }
+
   function severityLabel(severity: string): string {
     if (severity === "good") {
       return "Strength";
@@ -72,7 +88,9 @@
     return severity === "problem" ? "Problem" : "Watch";
   }
 
-  onMount(() => {
+  $effect(() => {
+    projectId;
+    scenarioId;
     void refreshReview();
   });
 </script>
@@ -107,39 +125,38 @@
       <p class="inline-error">{error}</p>
     {/if}
 
-    <section class="metric-grid" aria-label="Review metrics">
-      <article>
-        <span>Rooms</span>
-        <strong>{analysis.metrics.roomCount}</strong>
-      </article>
-      <article>
-        <span>Furniture</span>
-        <strong>{analysis.metrics.totalFurnitureObjects}</strong>
-      </article>
-      <article>
-        <span>Fixed</span>
-        <strong>{analysis.metrics.fixedFurnitureObjects}</strong>
-      </article>
-      <article>
-        <span>Moveable</span>
-        <strong>{analysis.metrics.moveableFurnitureObjects}</strong>
-      </article>
-      <article>
-        <span>Winter Light Watch</span>
-        <strong>{analysis.metrics.lowWinterLightRooms.length}</strong>
-      </article>
-      <article>
-        <span>Off Plan</span>
-        <strong>{analysis.offPlanObjects.length}</strong>
-      </article>
+    <section class="overall-assessment" aria-label="Overall design assessment">
+      <span class="eyebrow">Assessment</span>
+      <h3>{analysis.overallAssessment.title}</h3>
+      {#each analysis.overallAssessment.paragraphs as paragraph}
+        <p>{paragraph}</p>
+      {/each}
+      <ol>
+        {#each analysis.overallAssessment.priorities as priority}
+          <li>{priority}</li>
+        {/each}
+      </ol>
     </section>
 
-    <section class="warning-grid" aria-label="Key observations">
-      {#each analysis.dynamicWarnings as warning}
-        <article class:problem={warning.severity === "problem"} class:good={warning.severity === "good"}>
-          <span>{severityLabel(warning.severity)}</span>
-          <h4>{warning.title}</h4>
-          <p>{warning.body}</p>
+    <section class="summary-list" aria-label="Strengths, weaknesses, and furniture opportunities">
+      {#each analysis.summarySections as section}
+        <article>
+          <h4>{section.title}</h4>
+          <ul>
+            {#each section.points as point}
+              <li>{point}</li>
+            {/each}
+          </ul>
+        </article>
+      {/each}
+    </section>
+
+    <section class="finding-grid" aria-label="Practical findings">
+      {#each analysis.practicalFindings as finding}
+        <article class:problem={finding.severity === "problem"} class:good={finding.severity === "good"}>
+          <span>{severityLabel(finding.severity)}</span>
+          <h4>{finding.title}</h4>
+          <p>{finding.body}</p>
         </article>
       {/each}
     </section>
@@ -156,6 +173,86 @@
           </ul>
         </article>
       {/each}
+    </section>
+
+    <section class="movement-section" aria-label="Theoretical movement map">
+      <div class="section-heading">
+        <span class="eyebrow">Movement Map</span>
+        <h3>Theoretical Movement Map</h3>
+      </div>
+      <div class="movement-layout">
+        <svg
+          viewBox={analysis.movementMapViewBox}
+          role="img"
+          aria-label="Theoretical movement routes for two adults and a teenager"
+        >
+          <image
+            href="/views/reference_plan.svg"
+            x="0"
+            y="0"
+            width={reviewData.furniture_layout.layout.plan_transform.svg_width_px}
+            height={reviewData.furniture_layout.layout.plan_transform.svg_height_px}
+          />
+          {#each analysis.movementScenarios as scenario}
+            {#if scenario.points.length > 1}
+              <polyline
+                points={routePoints(scenario)}
+                stroke={scenario.colour}
+                stroke-width="8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              {#each scenario.points as point, index}
+                <circle cx={point.x} cy={point.y} r="10" fill={scenario.colour} />
+                <text x={point.x} y={point.y + 4}>{index + 1}</text>
+              {/each}
+            {/if}
+          {/each}
+        </svg>
+        <div class="movement-routes">
+          {#each analysis.movementScenarios as scenario}
+            <article style={`--route-colour: ${scenario.colour}`}>
+              <span>{scenario.person}</span>
+              <h4>{scenario.routine}</h4>
+              <p>{scenario.rooms.join(" -> ")}</p>
+              <small>{scenario.note}</small>
+            </article>
+          {/each}
+        </div>
+      </div>
+    </section>
+
+    <section class="data-section" aria-label="Data snapshot">
+      <div class="section-heading">
+        <span class="eyebrow">Data Snapshot</span>
+        <h3>What The Review Is Reading</h3>
+      </div>
+      <div class="metric-grid">
+        <article>
+          <span>Rooms</span>
+          <strong>{analysis.metrics.roomCount}</strong>
+        </article>
+        <article>
+          <span>Furniture</span>
+          <strong>{analysis.metrics.totalFurnitureObjects}</strong>
+        </article>
+        <article>
+          <span>Fixed</span>
+          <strong>{analysis.metrics.fixedFurnitureObjects}</strong>
+        </article>
+        <article>
+          <span>Moveable</span>
+          <strong>{analysis.metrics.moveableFurnitureObjects}</strong>
+        </article>
+        <article>
+          <span>Winter Light Watch</span>
+          <strong>{analysis.metrics.lowWinterLightRooms.length}</strong>
+        </article>
+        <article>
+          <span>Off Plan</span>
+          <strong>{analysis.offPlanObjects.length}</strong>
+        </article>
+      </div>
     </section>
 
     <section class="snippet-section" aria-label="Plan snippets">
@@ -197,38 +294,53 @@
       </div>
     </section>
 
-    <section class="room-review" aria-label="Room-by-room review">
+    <section class="room-review" aria-label="Room-by-room analysis">
       <div class="section-heading">
-        <span class="eyebrow">Room-By-Room Review</span>
-        <h3>Use, Light, And Furniture Fit</h3>
+        <span class="eyebrow">Room-By-Room Analysis</span>
+        <h3>Use, Light, Furniture, And Improvements</h3>
       </div>
       <div class="room-table">
-        {#each analysis.rooms as room}
+        {#each analysis.roomAnalyses as room}
           <article>
             <div>
               <h4>{room.name}</h4>
-              <span>{room.dimensionsLabel}</span>
+              <span>{room.dimensions}</span>
             </div>
-            <p>{room.daylightSummary}</p>
-            <dl>
+            <dl class="analysis-list">
               <div>
-                <dt>Fixed</dt>
-                <dd>{room.fixedCount}</dd>
+                <dt>Use</dt>
+                <dd>{room.use}</dd>
               </div>
               <div>
-                <dt>Moveable</dt>
-                <dd>{room.moveableCount}</dd>
+                <dt>Light</dt>
+                <dd>{room.light}</dd>
               </div>
               <div>
-                <dt>Total</dt>
-                <dd>{room.objects.length}</dd>
+                <dt>Furniture</dt>
+                <dd>{room.furniture}</dd>
+              </div>
+              <div>
+                <dt>Improve</dt>
+                <dd>{room.improvement}</dd>
               </div>
             </dl>
-            {#if room.objects.length > 0}
-              <p class="object-list">
-                {room.objects.map((object) => object.label).join(", ")}
-              </p>
-            {/if}
+          </article>
+        {/each}
+      </div>
+    </section>
+
+    <section class="expert-section" aria-label="Expert review lens">
+      <div class="section-heading">
+        <span class="eyebrow">Expert Review Lens</span>
+        <h3>Version Checked Against Three Expert Pushbacks</h3>
+      </div>
+      <div class="expert-list">
+        {#each analysis.expertReview as review}
+          <article>
+            <h4>{review.role}</h4>
+            <p><strong>Pushback:</strong> {review.pushback}</p>
+            <p><strong>Added:</strong> {review.added}</p>
+            <p><strong>Passes because:</strong> {review.passedBy}</p>
           </article>
         {/each}
       </div>
@@ -236,22 +348,15 @@
 
     <section class="evidence-section" aria-label="Photo evidence used">
       <div class="section-heading">
-        <span class="eyebrow">Photo Evidence</span>
-        <h3>Reviewed Project Photos</h3>
+        <span class="eyebrow">Evidence Inputs</span>
+        <h3>Photos And Model Notes Used</h3>
       </div>
       <div class="evidence-list">
         {#each analysis.photoEvidence as evidence}
           <article>
             <h4>{evidence.id.replaceAll("_", " ")}</h4>
             <p>{evidence.summary}</p>
-            <ul>
-              {#each evidence.photos as photo}
-                <li>
-                  <strong>{photo.path}</strong>
-                  <span>{photo.view}</span>
-                </li>
-              {/each}
-            </ul>
+            <span>{evidence.photos.length} supporting photo{evidence.photos.length === 1 ? "" : "s"} checked</span>
           </article>
         {/each}
       </div>
@@ -285,8 +390,12 @@
 
   .review-hero h3,
   .section-heading h3,
+  .overall-assessment h3,
+  .summary-list h4,
+  .finding-grid h4,
   .review-report h4,
-  .warning-grid h4,
+  .movement-routes h4,
+  .expert-list h4,
   .snippet-grid h4,
   .room-table h4,
   .evidence-list h4 {
@@ -301,10 +410,12 @@
   }
 
   .review-hero p,
+  .overall-assessment p,
+  .finding-grid p,
   .review-report p,
-  .warning-grid p,
+  .movement-routes p,
+  .expert-list p,
   .snippet-grid p,
-  .room-table p,
   .evidence-list p {
     margin: 0;
     line-height: 1.5;
@@ -361,8 +472,12 @@
   }
 
   .metric-grid article,
-  .warning-grid article,
+  .overall-assessment,
+  .summary-list article,
+  .finding-grid article,
   .review-report article,
+  .movement-routes article,
+  .expert-list article,
   .snippet-grid article,
   .room-table article,
   .evidence-list article {
@@ -378,7 +493,7 @@
   }
 
   .metric-grid span,
-  .warning-grid span,
+  .finding-grid span,
   .room-table span {
     color: #667780;
     font-size: 0.76rem;
@@ -392,28 +507,88 @@
     line-height: 1;
   }
 
-  .warning-grid {
+  .overall-assessment {
+    display: grid;
+    gap: 12px;
+    padding: 20px 22px;
+    background: #ffffff;
+    border: 1px solid #d7e0e4;
+    border-left: 5px solid #2d6f64;
+    border-radius: 8px;
+  }
+
+  .overall-assessment h3 {
+    font-size: 1.18rem;
+  }
+
+  .overall-assessment p {
+    max-width: 980px;
+    color: #31444d;
+    font-size: 1rem;
+  }
+
+  .overall-assessment ol {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding-left: 22px;
+  }
+
+  .overall-assessment li {
+    line-height: 1.45;
+  }
+
+  .summary-list {
+    display: grid;
+    gap: 12px;
+  }
+
+  .summary-list article {
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    padding: 17px;
+  }
+
+  .summary-list h4 {
+    font-size: 1.05rem;
+  }
+
+  .summary-list ul {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding-left: 20px;
+  }
+
+  .summary-list li {
+    line-height: 1.45;
+  }
+
+  .finding-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 12px;
   }
 
-  .warning-grid article {
+  .finding-grid article {
     display: grid;
     gap: 8px;
     padding: 15px;
     border-left: 4px solid #d99a38;
   }
 
-  .warning-grid article.good {
+  .finding-grid article.good {
     border-left-color: #3c8f75;
   }
 
-  .warning-grid article.problem {
+  .finding-grid article.problem {
     border-left-color: #cf6044;
   }
 
-  .warning-grid h4,
+  .finding-grid h4,
+  .movement-routes h4,
+  .expert-list h4,
   .snippet-grid h4,
   .room-table h4,
   .evidence-list h4 {
@@ -435,8 +610,7 @@
     font-size: 1.12rem;
   }
 
-  .review-report ul,
-  .evidence-list ul {
+  .review-report ul {
     display: grid;
     gap: 8px;
     margin: 0;
@@ -452,11 +626,72 @@
     gap: 4px;
   }
 
+  .data-section,
+  .movement-section,
   .snippet-section,
   .room-review,
+  .expert-section,
   .evidence-section {
     display: grid;
     gap: 12px;
+  }
+
+  .movement-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
+    gap: 12px;
+    align-items: start;
+  }
+
+  .movement-layout svg {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    background: #f5f0e7;
+    border: 1px solid #d4dde1;
+    border-radius: 8px;
+  }
+
+  .movement-layout polyline {
+    fill: none;
+    opacity: 0.75;
+  }
+
+  .movement-layout circle {
+    stroke: #ffffff;
+    stroke-width: 3;
+  }
+
+  .movement-layout text {
+    fill: #ffffff;
+    font-size: 10px;
+    font-weight: 800;
+    text-anchor: middle;
+  }
+
+  .movement-routes,
+  .expert-list {
+    display: grid;
+    gap: 12px;
+  }
+
+  .movement-routes article {
+    display: grid;
+    gap: 6px;
+    padding: 14px;
+    border-left: 5px solid var(--route-colour);
+  }
+
+  .movement-routes span {
+    color: var(--route-colour);
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  .movement-routes small {
+    color: #667780;
+    line-height: 1.4;
   }
 
   .snippet-grid {
@@ -508,31 +743,43 @@
     gap: 12px;
   }
 
-  .room-table dl {
+  .room-table .analysis-list {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 8px;
+    gap: 10px;
     margin: 0;
   }
 
-  .room-table dt,
-  .room-table dd {
+  .analysis-list div {
+    display: grid;
+    gap: 3px;
+  }
+
+  .analysis-list dt,
+  .analysis-list dd {
     margin: 0;
   }
 
-  .room-table dt {
+  .analysis-list dt {
     color: #667780;
     font-size: 0.72rem;
+    font-weight: 760;
+    text-transform: uppercase;
   }
 
-  .room-table dd {
-    font-size: 1.08rem;
-    font-weight: 780;
+  .analysis-list dd {
+    color: #31444d;
+    font-size: 0.9rem;
+    line-height: 1.42;
   }
 
-  .object-list {
-    color: #52636c;
-    font-size: 0.86rem;
+  .expert-list article {
+    display: grid;
+    gap: 8px;
+    padding: 15px;
+  }
+
+  .expert-list strong {
+    color: #233640;
   }
 
   .evidence-list {
@@ -546,27 +793,16 @@
     padding: 14px;
   }
 
-  .evidence-list li {
-    display: grid;
-    gap: 2px;
-    line-height: 1.35;
-  }
-
-  .evidence-list strong {
-    color: #2e4651;
-    font-size: 0.82rem;
-    overflow-wrap: anywhere;
-  }
-
   .evidence-list span {
     color: #667780;
     font-size: 0.84rem;
   }
 
   @media (max-width: 980px) {
-    .review-hero,
-    .metric-grid,
-    .warning-grid,
+     .review-hero,
+     .metric-grid,
+    .finding-grid,
+    .movement-layout,
     .snippet-grid,
     .room-table {
       grid-template-columns: 1fr;

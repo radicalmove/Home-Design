@@ -1,6 +1,8 @@
 <script lang="ts">
+  import { untrack } from "svelte";
   import {
     anchoredViewOriginAfterZoom,
+    centeredViewOriginAtCanvasPoint,
     angleDegFromCenter,
     centeredViewOrigin,
     dimensionLabel,
@@ -24,7 +26,11 @@
     fixedDepthForObject,
     sortedFurnitureObjects,
   } from "./lib/furnitureState";
+  import { structuralTransitionForScenario, type ProposedPlanFloor } from "./lib/designStructuralTransitions";
+  import { transitionStageProgress } from "./lib/designTransitions";
   import { symbolForFurnitureObject } from "./lib/furnitureSymbols";
+  import { roomLabelsForScenario } from "./lib/roomLabels";
+  import { sunlightOverlayForPlan } from "./lib/sunlight";
   import type { ResizeHandleName, WallDistanceGuide, WallSegment } from "./lib/furnitureGeometry";
   import type { FurnitureLShapeDimensions, FurnitureLayout, FurnitureObject, PlanPoint } from "./types";
 
@@ -50,13 +56,6 @@
     startOrigin: PlanPoint;
   };
 
-  type RoomLabel = {
-    id: string;
-    x: number;
-    y: number;
-    lines: string[];
-  };
-
   type Props = {
     layout: FurnitureLayout;
     backgroundAssetPath: string;
@@ -65,7 +64,15 @@
     moveableVisible: boolean;
     showLabels: boolean;
     showRoomLabels: boolean;
+    showSunlight?: boolean;
+    sunlightYearIndex?: number;
+    sunlightTimeMinutes?: number;
     zoom: number;
+    structuralTransitionProgress?: number;
+    structuralTransitionScenarioId?: string | null;
+    initialCenterMode?: "canvas" | "visible";
+    resetKey?: number;
+    readOnly?: boolean;
     onSelectObject: (objectId: string | null) => void;
     onMoveObject: (objectId: string, point: PlanPoint) => void;
     onResizeObject: (objectId: string, size: FurnitureSize, point?: PlanPoint) => void;
@@ -93,19 +100,10 @@
     { name: "nw", x: 0, y: 0, label: "top left corner" },
   ];
 
-  const ROOM_LABELS: RoomLabel[] = [
-    { id: "sunroom", x: 608.2, y: 415.0, lines: ["Sunroom"] },
-    { id: "lounge", x: 710.0, y: 389.4, lines: ["Lounge"] },
-    { id: "kitchen-dining", x: 796.5, y: 372.0, lines: ["Kitchen / Dining"] },
-    { id: "entrance", x: 853.2, y: 506.2, lines: ["Entrance"] },
-    { id: "laundry", x: 929.6, y: 558.0, lines: ["Laundry"] },
-    { id: "toilet", x: 929.6, y: 587.5, lines: ["Toilet"] },
-    { id: "hallway", x: 684.0, y: 504.0, lines: ["Hallway"] },
-    { id: "master-bedroom", x: 580.5, y: 512.0, lines: ["Master", "Bedroom"] },
-    { id: "office", x: 687.0, y: 554.0, lines: ["Office"] },
-    { id: "bathroom", x: 750.5, y: 562.4, lines: ["Bathroom"] },
-    { id: "bedroom-2", x: 838.4, y: 592.0, lines: ["Bedroom 2"] },
-  ];
+  const WINDOW_GUIDE_OFFSET_PX = 2;
+  const WINDOW_GUIDE_STROKE_WIDTH_PX = 0.9;
+  const WINDOW_CUTOUT_COLOUR = "#fffdf8";
+  const WINDOW_GUIDE_COLOUR = "#777b80";
 
   const WALL_THICKNESS_PX = {
     exterior: 8,
@@ -282,7 +280,15 @@
     moveableVisible,
     showLabels,
     showRoomLabels,
+    showSunlight = false,
+    sunlightYearIndex = 0,
+    sunlightTimeMinutes = 720,
     zoom,
+    structuralTransitionProgress = 0,
+    structuralTransitionScenarioId = null,
+    initialCenterMode = "canvas",
+    resetKey = 0,
+    readOnly = false,
     onSelectObject,
     onMoveObject,
     onResizeObject,
@@ -329,17 +335,78 @@
   let rotateHandleOffset = $derived(screenPixelsToSvgUnits(canvasSize, viewBoxSize, 25));
   let wallDistanceLabelFontSize = $derived(screenPixelsToSvgUnits(canvasSize, viewBoxSize, 11));
   let wallDistanceLabelStrokeWidth = $derived(screenPixelsToSvgUnits(canvasSize, viewBoxSize, 3));
+  let structuralTransition = $derived(structuralTransitionForScenario(structuralTransitionScenarioId));
+  let structuralTransitionOpacity = $derived(Math.min(1, Math.max(0, structuralTransitionProgress)));
+  let wallRemovalOpacity = $derived(transitionStageProgress(structuralTransitionProgress, 0, 0.22));
+  let floorOverlayOpacity = $derived(transitionStageProgress(structuralTransitionProgress, 0.12, 0.35));
+  let futureWallOpacity = $derived(transitionStageProgress(structuralTransitionProgress, 0.22, 0.45));
+  let openingOpacity = $derived(transitionStageProgress(structuralTransitionProgress, 0.3, 0.52));
+  let roomLabels = $derived(roomLabelsForScenario(structuralTransitionScenarioId));
+  let sunlightOverlay = $derived(
+    showSunlight
+      ? sunlightOverlayForPlan({ yearIndex: sunlightYearIndex, timeMinutes: sunlightTimeMinutes })
+      : null,
+  );
+  let showStructuralTransitionOverlay = $derived(
+    Boolean(structuralTransition) && structuralTransitionOpacity > 0,
+  );
+
+  function proposedFloorFill(floor: ProposedPlanFloor, fallback: string): string {
+    if (floor === "vinyl") {
+      return "url(#plan-overlay-vinyl-planks)";
+    }
+    if (floor === "tile") {
+      return "url(#plan-overlay-tile)";
+    }
+    if (floor === "carpet") {
+      return "url(#plan-overlay-carpet)";
+    }
+    return fallback;
+  }
+
+  function openingCutoutStrokeWidth(opening: {
+    kind: "door" | "opening" | "window";
+    strokeWidth: number;
+  }): number {
+    return opening.kind === "window" ? opening.strokeWidth : opening.strokeWidth + 0.8;
+  }
+
+  function initialViewOrigin(): PlanPoint {
+    const sourceSize = {
+      width: layout.plan_transform.svg_width_px,
+      height: layout.plan_transform.svg_height_px,
+    };
+
+    if (initialCenterMode === "visible" && canvasElement && typeof window !== "undefined") {
+      const visibleCenter = visibleCanvasCenterOffset(canvasElement.getBoundingClientRect(), {
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+
+      return centeredViewOriginAtCanvasPoint(viewBoxSize, sourceSize, canvasSize, visibleCenter);
+    }
+
+    return centeredViewOrigin(viewBoxSize, sourceSize);
+  }
 
   $effect(() => {
     if (viewOriginInitialised || canvasWidth <= 0 || canvasHeight <= 0) {
       return;
     }
 
-    viewOrigin = centeredViewOrigin(viewBoxSize, {
-      width: layout.plan_transform.svg_width_px,
-      height: layout.plan_transform.svg_height_px,
-    });
+    viewOrigin = initialViewOrigin();
     viewOriginInitialised = true;
+  });
+
+  $effect(() => {
+    resetKey;
+    layout.scenario_id;
+    untrack(() => {
+      viewOriginInitialised = false;
+      internallyAnchoredZoom = null;
+      previousZoom = zoom;
+      wallDistanceGuides = [];
+    });
   });
 
   $effect(() => {
@@ -507,6 +574,9 @@
   }
 
   function startMove(event: PointerEvent, object: FurnitureObject) {
+    if (readOnly) {
+      return;
+    }
     event.preventDefault();
     event.stopPropagation();
     onBeginObjectEdit(object.id);
@@ -521,6 +591,9 @@
   }
 
   function startResize(event: PointerEvent, object: FurnitureObject, handle: ResizeHandleName) {
+    if (readOnly) {
+      return;
+    }
     event.preventDefault();
     event.stopPropagation();
     onBeginObjectEdit(object.id);
@@ -538,6 +611,9 @@
   }
 
   function startRotate(event: PointerEvent, object: FurnitureObject) {
+    if (readOnly) {
+      return;
+    }
     event.preventDefault();
     event.stopPropagation();
     const startSvg = svgPointFromEvent(event);
@@ -657,11 +733,231 @@
     onpointercancel={finishPointer}
     onpointerdown={startBackgroundPan}
   >
-    <image href={backgroundAssetPath} width="1600" height="900" preserveAspectRatio="xMidYMid meet" />
+    <defs>
+      <pattern id="plan-overlay-vinyl-planks" width="22" height="46" patternUnits="userSpaceOnUse">
+        <rect width="22" height="46" fill="#bda684" />
+        <path d="M7 0 V46 M15 0 V46" stroke="#92785c" stroke-width="0.55" opacity="0.62" />
+        <path d="M0 15 H7 M15 31 H22" stroke="#a48b6a" stroke-width="0.5" opacity="0.55" />
+      </pattern>
+      <pattern id="plan-overlay-carpet" width="18" height="18" patternUnits="userSpaceOnUse">
+        <rect width="18" height="18" fill="#efe4d2" />
+        <path d="M3 5 H5 M8 12 H10 M13 7 H15 M1 15 H2" stroke="#d9c4a5" stroke-width="0.45" opacity="0.32" />
+        <path d="M5 2 H6 M11 4 H13 M15 14 H16" stroke="#fbf4ea" stroke-width="0.4" opacity="0.42" />
+      </pattern>
+      <pattern id="plan-overlay-tile" width="34" height="34" patternUnits="userSpaceOnUse">
+        <rect width="34" height="34" fill="#eef1f0" />
+        <path d="M0 0 L34 34 M34 0 L0 34" stroke="#cfd6d6" stroke-width="1" opacity="0.75" />
+      </pattern>
+      {#if sunlightOverlay}
+        {#each sunlightOverlay.roomClips as clip (clip.id)}
+          <clipPath id={clip.id} clipPathUnits="userSpaceOnUse">
+            <path d={clip.path} />
+          </clipPath>
+        {/each}
+      {/if}
+    </defs>
+
+    <image
+      class="plan-reference-underlay"
+      href={backgroundAssetPath}
+      width="1600"
+      height="900"
+      preserveAspectRatio="xMidYMid meet"
+    />
+
+    {#if structuralTransition && showStructuralTransitionOverlay}
+      <g class="structural-transition-layer" opacity={structuralTransitionOpacity} aria-hidden="true">
+        {#each structuralTransition.wallMasks as wall (wall.id)}
+          <line
+            class="wall-removal-mask"
+            x1={wall.x1}
+            y1={wall.y1}
+            x2={wall.x2}
+            y2={wall.y2}
+            stroke-width={wall.strokeWidth}
+            opacity={wallRemovalOpacity}
+          />
+        {/each}
+
+        <g class="proposed-plan-layer" opacity={floorOverlayOpacity}>
+          {#each structuralTransition.floorAreas as area (area.id)}
+            <path
+              class={`proposed-plan-floor-area ${area.floor}`}
+              d={area.d}
+              fill={proposedFloorFill(area.floor, area.fill)}
+            />
+          {/each}
+          {#each structuralTransition.proposedRooms as room (room.id)}
+            <rect
+              class={`proposed-plan-room ${room.floor}`}
+              x={room.x}
+              y={room.y}
+              width={room.width}
+              height={room.height}
+              fill={proposedFloorFill(room.floor, room.fill)}
+            />
+          {/each}
+        </g>
+
+        {#each structuralTransition.futureWalls as wall (wall.id)}
+          <path
+            class="future-wall"
+            d={wall.path}
+            stroke-width={wall.strokeWidth}
+            opacity={futureWallOpacity}
+          />
+        {/each}
+
+        {#each structuralTransition.openings as opening (opening.id)}
+          <g class={`proposed-plan-opening proposed-plan-${opening.kind}`}>
+            <line
+              class={`proposed-plan-opening proposed-plan-opening-cutout proposed-plan-${opening.kind}`}
+              x1={opening.x1}
+              y1={opening.y1}
+              x2={opening.x2}
+              y2={opening.y2}
+              stroke-width={openingCutoutStrokeWidth(opening)}
+              stroke={opening.kind === "window" ? WINDOW_CUTOUT_COLOUR : undefined}
+              opacity={openingOpacity}
+            />
+            {#if opening.kind === "window"}
+              {#if Math.abs(opening.y1 - opening.y2) < 0.1}
+                <line
+                  class="proposed-plan-opening proposed-plan-window-guide"
+                  x1={opening.x1}
+                  y1={opening.y1 - WINDOW_GUIDE_OFFSET_PX}
+                  x2={opening.x2}
+                  y2={opening.y2 - WINDOW_GUIDE_OFFSET_PX}
+                  stroke={WINDOW_GUIDE_COLOUR}
+                  stroke-width={WINDOW_GUIDE_STROKE_WIDTH_PX}
+                  opacity={openingOpacity}
+                />
+                <line
+                  class="proposed-plan-opening proposed-plan-window-guide"
+                  x1={opening.x1}
+                  y1={opening.y1 + WINDOW_GUIDE_OFFSET_PX}
+                  x2={opening.x2}
+                  y2={opening.y2 + WINDOW_GUIDE_OFFSET_PX}
+                  stroke={WINDOW_GUIDE_COLOUR}
+                  stroke-width={WINDOW_GUIDE_STROKE_WIDTH_PX}
+                  opacity={openingOpacity}
+                />
+              {:else}
+                <line
+                  class="proposed-plan-opening proposed-plan-window-guide"
+                  x1={opening.x1 - WINDOW_GUIDE_OFFSET_PX}
+                  y1={opening.y1}
+                  x2={opening.x2 - WINDOW_GUIDE_OFFSET_PX}
+                  y2={opening.y2}
+                  stroke={WINDOW_GUIDE_COLOUR}
+                  stroke-width={WINDOW_GUIDE_STROKE_WIDTH_PX}
+                  opacity={openingOpacity}
+                />
+                <line
+                  class="proposed-plan-opening proposed-plan-window-guide"
+                  x1={opening.x1 + WINDOW_GUIDE_OFFSET_PX}
+                  y1={opening.y1}
+                  x2={opening.x2 + WINDOW_GUIDE_OFFSET_PX}
+                  y2={opening.y2}
+                  stroke={WINDOW_GUIDE_COLOUR}
+                  stroke-width={WINDOW_GUIDE_STROKE_WIDTH_PX}
+                  opacity={openingOpacity}
+                />
+              {/if}
+            {:else if opening.kind === "opening"}
+              <line
+                class="proposed-plan-opening proposed-plan-opening-gap"
+                x1={opening.x1}
+                y1={opening.y1}
+                x2={opening.x2}
+                y2={opening.y2}
+                opacity={openingOpacity}
+              />
+            {:else}
+              <line
+                class="proposed-plan-opening proposed-plan-door-gap"
+                x1={opening.x1}
+                y1={opening.y1}
+                x2={opening.x2}
+                y2={opening.y2}
+                opacity={openingOpacity}
+              />
+            {/if}
+          </g>
+        {/each}
+
+        {#each structuralTransition.doorMarkers as door (door.id)}
+          <g
+            class="door-marker"
+            transform={`translate(${door.x}, ${door.y}) rotate(${door.rotationDeg})`}
+            opacity={openingOpacity}
+          >
+            <line class="door-marker-leaf" x1={-door.width / 2} y1="0" x2={door.width / 2} y2="0" />
+            <path class="door-marker-arc" d={`M ${-door.width / 2} 0 A ${door.width} ${door.width} 0 0 1 ${door.width / 2} ${door.width}`} />
+          </g>
+        {/each}
+
+        {#each structuralTransition.retainedDoorTraces ?? [] as door (door.id)}
+          <g class="retained-door-trace" opacity={openingOpacity} aria-label={door.label}>
+            <path class="retained-door-trace-leaf" d={door.leafPath} />
+            <path class="retained-door-trace-arc" d={door.arcPath} />
+          </g>
+        {/each}
+      </g>
+    {/if}
+
+    {#if sunlightOverlay}
+      <g class="sunlight-overlay-layer" aria-hidden="true">
+        <rect
+          class="sunlight-dark-layer"
+          x="0"
+          y="0"
+          width="1600"
+          height="900"
+          opacity={sunlightOverlay.darkOpacity}
+        />
+        <g class="sunlight-ray-layer">
+          {#each sunlightOverlay.rays as ray (ray.id)}
+            <path
+              class={ray.className}
+              d={ray.path}
+              clip-path={ray.clipId ? `url(#${ray.clipId})` : undefined}
+            />
+          {/each}
+        </g>
+        {#if sunlightOverlay.sunMarker}
+          <g class="sunlight-direction-marker">
+            <ellipse
+              class="sunlight-sun-path"
+              cx={sunlightOverlay.sunMarker.pathCx}
+              cy={sunlightOverlay.sunMarker.pathCy}
+              rx={sunlightOverlay.sunMarker.pathRx}
+              ry={sunlightOverlay.sunMarker.pathRy}
+            />
+            <g
+              class="sunlight-sun-marker"
+              transform={`translate(${sunlightOverlay.sunMarker.sunX} ${sunlightOverlay.sunMarker.sunY})`}
+            >
+              <circle class="sunlight-sun-core" r={sunlightOverlay.sunMarker.sunRadius} />
+              {#each Array.from({ length: 8 }) as _, rayIndex}
+                {@const rayAngle = rayIndex * Math.PI / 4}
+                <line
+                  class="sunlight-sun-ray"
+                  x1={Math.cos(rayAngle) * (sunlightOverlay.sunMarker.sunRadius + 4)}
+                  y1={Math.sin(rayAngle) * (sunlightOverlay.sunMarker.sunRadius + 4)}
+                  x2={Math.cos(rayAngle) * (sunlightOverlay.sunMarker.sunRadius + 11)}
+                  y2={Math.sin(rayAngle) * (sunlightOverlay.sunMarker.sunRadius + 11)}
+                />
+              {/each}
+            </g>
+          </g>
+        {/if}
+      </g>
+    {/if}
 
     {#if showRoomLabels}
       <g class="room-label-layer" aria-hidden="true">
-        {#each ROOM_LABELS as roomLabel (roomLabel.id)}
+        {#each roomLabels as roomLabel (roomLabel.id)}
           <text class="room-label" x={roomLabel.x} y={roomLabel.y}>
             {#if roomLabel.lines.length === 1}
               {roomLabel.lines[0]}
@@ -909,7 +1205,7 @@
             {/if}
           {/if}
 
-          {#if selectedObjectId === object.id}
+          {#if !readOnly && selectedObjectId === object.id}
             <line
               class="rotate-stem"
               x1={bounds.cx}
@@ -1011,6 +1307,129 @@
     -webkit-user-select: none;
   }
 
+  .plan-reference-underlay {
+    opacity: 1;
+  }
+
+  .structural-transition-layer {
+    pointer-events: none;
+  }
+
+  .proposed-plan-layer {
+    pointer-events: none;
+  }
+
+  .sunlight-overlay-layer,
+  .sunlight-ray-layer,
+  .sunlight-direction-marker {
+    pointer-events: none;
+  }
+
+  .sunlight-dark-layer {
+    fill: #12100c;
+  }
+
+  .sunlight-ray {
+    fill: rgba(255, 198, 76, 0.46);
+    stroke: rgba(227, 156, 32, 0.35);
+    stroke-width: 1;
+    stroke-linejoin: round;
+    pointer-events: none;
+  }
+
+  .sunlight-ray.borrowed {
+    fill: rgba(255, 213, 102, 0.28);
+    stroke: rgba(227, 156, 32, 0.22);
+  }
+
+  .sunlight-sun-path {
+    fill: none;
+    stroke: rgba(215, 146, 34, 0.22);
+    stroke-width: 1.5;
+    stroke-dasharray: 6 7;
+    pointer-events: none;
+  }
+
+  .sunlight-sun-marker circle {
+    fill: #ffc447;
+    stroke: #b06f09;
+    stroke-width: 2;
+    filter: drop-shadow(0 2px 3px rgba(61, 39, 9, 0.28));
+    pointer-events: none;
+  }
+
+  .sunlight-sun-marker line {
+    stroke: #b06f09;
+    stroke-width: 2;
+    stroke-linecap: round;
+    pointer-events: none;
+  }
+
+  .proposed-plan-room {
+    stroke: none;
+  }
+
+  .proposed-plan-floor-area {
+    stroke: none;
+  }
+
+  .proposed-plan-opening {
+    fill: none;
+    stroke-linecap: butt;
+  }
+
+  .proposed-plan-opening-cutout {
+    stroke: #fffaf1;
+    stroke-linecap: butt;
+  }
+
+  .proposed-plan-window-guide {
+    stroke-linecap: butt;
+  }
+
+  .proposed-plan-door-gap,
+  .proposed-plan-opening-gap {
+    stroke: #111;
+    stroke-width: 1.25;
+  }
+
+  .proposed-plan-opening-gap {
+    stroke: transparent;
+  }
+
+  .wall-removal-mask {
+    stroke: #f8f1e5;
+    stroke-linecap: butt;
+  }
+
+  .future-wall {
+    fill: none;
+    stroke: #455057;
+    stroke-linecap: butt;
+    stroke-linejoin: miter;
+  }
+
+  .door-marker-leaf,
+  .door-marker-arc,
+  .retained-door-trace-leaf,
+  .retained-door-trace-arc {
+    fill: none;
+    stroke: #111;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .door-marker-leaf,
+  .retained-door-trace-leaf {
+    stroke-width: 1.4;
+  }
+
+  .door-marker-arc,
+  .retained-door-trace-arc {
+    stroke-width: 1.1;
+    stroke-dasharray: 4 4;
+  }
+
   .furniture-object {
     cursor: grab;
   }
@@ -1088,10 +1507,10 @@
     fill-opacity: 0.96;
   }
 
-  line:not(.rotate-stem),
-  ellipse:not(.symbol-body):not(.toilet-bowl):not(.toilet-inlay),
-  circle:not(.symbol-body):not(.rotate-handle),
-  path:not(.symbol-body):not(.l-sofa-outline),
+  .furniture-object line:not(.rotate-stem):not(.wall-removal-mask):not(.door-marker-leaf):not(.proposed-plan-opening):not(.sunlight-sun-ray),
+  .furniture-object ellipse:not(.symbol-body):not(.toilet-bowl):not(.toilet-inlay):not(.sunlight-sun-path),
+  .furniture-object circle:not(.symbol-body):not(.rotate-handle):not(.sunlight-sun-core),
+  .furniture-object path:not(.symbol-body):not(.l-sofa-outline):not(.future-wall):not(.wall-removal-mask):not(.door-marker-arc):not(.retained-door-trace-leaf):not(.retained-door-trace-arc):not(.proposed-plan-floor-area):not(.sunlight-ray),
   .furniture-object rect:not(.symbol-body):not(.resize-handle):not(.symbol-hit-target):not(.toilet-tank):not(.wardrobe-door-panel) {
     fill: none;
     stroke: #203139;

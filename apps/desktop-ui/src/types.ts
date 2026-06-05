@@ -14,13 +14,23 @@ export type ViewDescriptor = {
   available: boolean;
 };
 
+export type DesignScenarioDescriptor = {
+  id: string;
+  label: string;
+  short_label: string;
+  summary: string;
+  source_design: string | null;
+  rank: number;
+  complete: boolean;
+};
+
 export type ProjectManifest = {
   id: string;
   name: string;
   model_version: string;
   model_source: string;
   views: ViewDescriptor[];
-  scenarios: string[];
+  scenarios: DesignScenarioDescriptor[];
   layers: string[];
   object_catalogs: string[];
   analysis_outputs: string[];

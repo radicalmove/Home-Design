@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onDestroy } from "svelte";
   import DimensionBadge from "./DimensionBadge.svelte";
   import FurnitureCatalogPanel from "./FurnitureCatalogPanel.svelte";
   import FurnitureLayerControls from "./FurnitureLayerControls.svelte";
@@ -47,10 +47,11 @@
 
   type Props = {
     projectId: string;
+    scenarioId: string;
     backgroundAssetPath: string;
   };
 
-  let { projectId, backgroundAssetPath }: Props = $props();
+  let { projectId, scenarioId, backgroundAssetPath }: Props = $props();
 
   let catalog = $state<FurnitureCatalog | null>(null);
   let layout = $state<FurnitureLayout | null>(null);
@@ -313,20 +314,26 @@
     planZoom = 1;
   }
 
-  onMount(() => {
+  $effect(() => {
+    projectId;
+    scenarioId;
     let cancelled = false;
 
     async function loadData() {
       loading = true;
       loadError = null;
       try {
-        const data = await loadFurnitureEditorData(projectId);
+        const data = await loadFurnitureEditorData(projectId, scenarioId);
         if (cancelled) {
           return;
         }
         catalog = data.catalog;
         const normalisedLayout = normaliseFurnitureLayout(data.layoutResult.layout);
         layout = normalisedLayout;
+        selectedObjectId = null;
+        dimensionBadge = { label: null, x: 0, y: 0 };
+        currentViewportCenter = null;
+        activeObjectEditSnapshot = null;
         history = { undoStack: [], redoStack: [] };
         saveState = data.layoutResult.source === "saved" ? "saved" : "idle";
         if (JSON.stringify(normalisedLayout) !== JSON.stringify(data.layoutResult.layout)) {
@@ -349,8 +356,16 @@
       cancelled = true;
       if (saveTimer) {
         clearTimeout(saveTimer);
+        saveTimer = null;
       }
     };
+  });
+
+  onDestroy(() => {
+    if (saveTimer) {
+      clearTimeout(saveTimer);
+      saveTimer = null;
+    }
   });
 </script>
 

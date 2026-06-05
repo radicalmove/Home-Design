@@ -193,9 +193,80 @@ button {
   color: #85d0bf;
 }
 
+.design-navigation {
+  display: grid;
+  gap: 12px;
+}
+
+.design-group {
+  display: grid;
+  gap: 8px;
+}
+
+.design-group-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 11px 13px;
+  color: #edf4f6;
+  text-align: left;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+}
+
+.design-group-heading:hover,
+.design-group-heading:focus-visible {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(133, 208, 191, 0.8);
+  outline: none;
+}
+
+.design-group.active .design-group-heading {
+  border-color: rgba(133, 208, 191, 0.78);
+}
+
+.design-group-heading > span:first-child {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.design-group-heading strong {
+  font-size: 0.88rem;
+}
+
+.design-group-heading small {
+  color: rgba(237, 244, 246, 0.7);
+  font-size: 0.72rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.design-group-meta {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+  color: rgba(237, 244, 246, 0.72);
+  font-weight: 740;
+}
+
+.design-group-meta small {
+  padding: 2px 6px;
+  color: #10201c;
+  background: #b7dcd3;
+  border-radius: 999px;
+}
+
 .view-tabs {
   display: grid;
-  gap: 10px;
+  gap: 8px;
+  padding-left: 10px;
 }
 
 .view-tabs button {
@@ -270,6 +341,13 @@ button {
   color: #1d2a30;
   font-size: 1.55rem;
   font-weight: 760;
+}
+
+.workspace-subtitle {
+  margin: 5px 0 0;
+  color: #4d6068;
+  font-size: 0.94rem;
+  font-weight: 650;
 }
 
 .asset-path {

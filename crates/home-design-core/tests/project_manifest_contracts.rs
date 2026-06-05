@@ -14,7 +14,7 @@ fn built_in_project_manifest_exposes_current_house_views() {
         .iter()
         .find(|view| view.id == "base-view")
         .expect("base view");
-    assert_eq!(base_view.label, "Base View");
+    assert_eq!(base_view.label, "2D Plan");
     assert_eq!(base_view.mode, ViewMode::BasePlan);
     assert_eq!(base_view.asset_path, "/views/reference_plan.html");
     assert!(base_view.available);
@@ -49,7 +49,43 @@ fn built_in_project_manifest_exposes_current_house_views() {
     assert_eq!(design_review_view.asset_path, "");
     assert!(design_review_view.available);
 
-    assert!(manifest.scenarios.is_empty());
+    let scenario_ids: Vec<_> = manifest
+        .scenarios
+        .iter()
+        .map(|scenario| scenario.id.as_str())
+        .collect();
+    assert_eq!(
+        scenario_ids,
+        vec![
+            "current",
+            "back-side-living-sunroom-bedroom",
+            "wet-core-bright-day-room",
+            "kitchen-kept-social-spine",
+            "two-living-room-family",
+            "new-bedroom-pod-bedroom2-lounge",
+        ],
+    );
+
+    let current_design = manifest
+        .scenarios
+        .iter()
+        .find(|scenario| scenario.id == "current")
+        .expect("current design scenario");
+    assert_eq!(current_design.label, "Design 1 - Current House");
+    assert_eq!(current_design.short_label, "Design 1");
+    assert_eq!(current_design.source_design, None);
+    assert_eq!(current_design.rank, 1);
+    assert!(current_design.complete);
+
+    for scenario in manifest
+        .scenarios
+        .iter()
+        .filter(|scenario| scenario.id != "current")
+    {
+        assert_eq!(scenario.source_design.as_deref(), Some("current"));
+        assert!(!scenario.complete);
+    }
+
     assert!(manifest.layers.is_empty());
     assert!(manifest.object_catalogs.is_empty());
     assert!(manifest.analysis_outputs.is_empty());

@@ -430,7 +430,17 @@
       "between": ["lounge", "kitchen_dining"],
       "width_m": 1.3,
       "height_m": 1.95,
-      "confidence": "measured"
+      "confidence": "measured",
+      "display_px": {
+        "type": "polygon",
+        "points": [
+          [757.9, 365.2],
+          [763.9, 365.2],
+          [763.9, 400.6],
+          [757.9, 400.6]
+        ]
+      },
+      "notes": "Display geometry anchors the lounge to kitchen/dining opening to the upper divider gap shown in the 2D plan rather than allowing the 3D scene to synthesize it at the midpoint of the full shared wall."
     },
     {
       "id": "sunroom_to_lounge_slider",

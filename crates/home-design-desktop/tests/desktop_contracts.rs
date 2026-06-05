@@ -1,6 +1,8 @@
+use home_design_core::seed_current_furniture_layout;
 use home_design_desktop::{
-    get_app_status, load_builtin_model_status, load_builtin_project, load_design_review_data_from_root,
-    load_furniture_catalog, load_furniture_layout_from_root, save_furniture_layout_to_root,
+    get_app_status, load_builtin_model_status, load_builtin_project,
+    load_design_review_data_from_root, load_furniture_catalog, load_furniture_layout_from_root,
+    save_furniture_layout_to_root,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -93,6 +95,95 @@ fn load_furniture_layout_returns_seed_when_no_saved_file_exists() {
             .iter()
             .any(|object| object.id == "lounge_sofa")
     );
+}
+
+#[test]
+fn load_furniture_layout_returns_seed_for_known_future_scenario() {
+    let root = isolated_storage_root("future-seed");
+
+    let loaded =
+        load_furniture_layout_from_root(&root, "current-house", "back-side-living-sunroom-bedroom")
+            .expect("load future seeded layout");
+
+    assert_eq!(loaded.source, "seed");
+    assert_eq!(loaded.layout.project_id, "current-house");
+    assert_eq!(
+        loaded.layout.scenario_id,
+        "back-side-living-sunroom-bedroom"
+    );
+    assert!(
+        loaded
+            .layout
+            .objects
+            .iter()
+            .any(|object| object.id == "lounge_sofa")
+    );
+}
+
+#[test]
+fn future_seed_derives_from_saved_current_layout_when_available() {
+    let root = isolated_storage_root("future-seed-from-current");
+    let mut current = seed_current_furniture_layout();
+    let mut custom_sofa = current
+        .objects
+        .iter()
+        .find(|object| object.id == "lounge_sofa")
+        .expect("seed sofa")
+        .clone();
+    custom_sofa.id = "custom-current-sofa".to_string();
+    custom_sofa.x_m = 6.2;
+    custom_sofa.y_m = 2.4;
+    current.objects.push(custom_sofa);
+
+    save_furniture_layout_to_root(&root, &current).expect("save current layout");
+
+    let future =
+        load_furniture_layout_from_root(&root, "current-house", "back-side-living-sunroom-bedroom")
+            .expect("load future layout from current saved seed");
+
+    assert_eq!(future.source, "seed");
+    assert_eq!(
+        future.layout.scenario_id,
+        "back-side-living-sunroom-bedroom"
+    );
+    assert!(
+        future
+            .layout
+            .objects
+            .iter()
+            .any(|object| object.id == "custom-current-sofa")
+    );
+
+    let relocated = future
+        .layout
+        .objects
+        .iter()
+        .find(|object| object.id == "custom-current-sofa")
+        .expect("relocated custom sofa");
+    assert!((9.4..=16.1).contains(&relocated.x_m));
+    assert!((6.45..=10.6).contains(&relocated.y_m));
+}
+
+#[test]
+fn load_furniture_layout_rejects_unknown_scenario_id() {
+    let root = isolated_storage_root("unknown-scenario-load");
+
+    let error = load_furniture_layout_from_root(&root, "current-house", "typo-design")
+        .expect_err("unknown scenarios should fail");
+
+    assert!(error.contains("unknown scenario_id"));
+}
+
+#[test]
+fn save_furniture_layout_rejects_unknown_scenario_id() {
+    let root = isolated_storage_root("unknown-scenario-save");
+    let mut layout = home_design_core::seed_current_furniture_layout();
+    layout.scenario_id = "typo-design".to_string();
+
+    let error = save_furniture_layout_to_root(&root, &layout)
+        .expect_err("unknown scenarios should not be saved");
+
+    assert!(error.contains("unknown scenario_id"));
 }
 
 #[test]

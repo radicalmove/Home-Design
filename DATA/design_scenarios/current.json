@@ -1,0 +1,38 @@
+{
+  "id": "current",
+  "label": "Design 1 - Current House",
+  "rank": 1,
+  "status": "complete",
+  "transition_from": null,
+  "cost_band": "Existing",
+  "summary": "The current measured house with the saved fixed and moveable furniture layout, current daylight assumptions, and current 3D model.",
+  "room_changes": [
+    "No room-purpose changes.",
+    "The current lounge remains the main sitting room.",
+    "Bedroom 2 remains the teenage bedroom.",
+    "The sunroom remains a seasonal glazed space.",
+    "Laundry, toilet, bathroom, office, and kitchen remain in their current locations."
+  ],
+  "daylight_strategy": [
+    "Use as the baseline for comparing where light currently lands.",
+    "Track the mismatch between good back-side light and low-use service rooms.",
+    "Track the darker, route-heavy lounge as the benchmark weakness."
+  ],
+  "movement_strategy": [
+    "Use current garage/back arrival and deck movement as the baseline.",
+    "Preserve current hallway, lounge, kitchen, laundry, toilet, and bedroom routes for comparison."
+  ],
+  "build_scope": [
+    "No construction work.",
+    "Only furniture and review data changes are expected in the app."
+  ],
+  "risks": [
+    "Baseline retains all known current-house weaknesses.",
+    "Sunroom remains thermally weak without further work.",
+    "Deck remains exposed without proper shade or wind control."
+  ],
+  "cost_notes": [
+    "No capital works assumed."
+  ],
+  "transition_mapping": []
+}

@@ -1,0 +1,49 @@
+{
+  "id": "kitchen-kept-social-spine",
+  "label": "Design 4 - Kitchen-Kept Social Spine Rebuild",
+  "rank": 4,
+  "status": "draft",
+  "transition_from": "current",
+  "cost_band": "Very high",
+  "summary": "A kitchen-preserving architectural reset that treats kitchen/dining, deck, Bedroom 2, service rooms, current lounge, and sunroom as one connected social-spine redesign.",
+  "room_changes": [
+    "The renovated kitchen is retained unless minor threshold or opening work is essential.",
+    "Kitchen/dining opens more deliberately to the deck and back-side living route.",
+    "Bedroom 2 and the service end can become a new back lounge/day room.",
+    "Laundry and WC move toward separated service rooms on the office/bathroom side.",
+    "The current lounge becomes media, guest overflow, or secondary quiet living.",
+    "The sunroom is removed, reduced, or replaced by a proper bedroom depending on the final concept."
+  ],
+  "daylight_strategy": [
+    "Use the deck/back/service side for daily social life while protecting the kitchen investment.",
+    "Design deck cover/shade so it improves outdoor use without darkening kitchen/dining.",
+    "Avoid making the kitchen the only good social space."
+  ],
+  "movement_strategy": [
+    "Create a clearer social route from garage/back arrival to kitchen, deck, and lounge.",
+    "Reduce confusing front-door/sunroom arrival signals.",
+    "Separate daytime social flow from quieter evening/media use."
+  ],
+  "build_scope": [
+    "Internal wall and opening changes around kitchen/dining, Bedroom 2, entrance, laundry, and lounge.",
+    "Laundry/WC relocation into separated service rooms.",
+    "Deck threshold, shade, and wind-control design.",
+    "Possible sunroom demolition or replacement with a new bedroom envelope."
+  ],
+  "risks": [
+    "This is close to a full architectural renovation.",
+    "It could become expensive quickly if kitchen protection still requires adjacent structural work.",
+    "Staging matters: partial work could lock in the wrong final layout.",
+    "Professional concept drawings and structural review are needed early."
+  ],
+  "cost_notes": [
+    "Broad planning band: NZD 280k to 500k+ if sunroom replacement and service-room relocation are included."
+  ],
+  "transition_mapping": [
+    { "from": "kitchen_dining", "to": "retained_kitchen_social_spine" },
+    { "from": "bedroom_2", "to": "back_lounge_or_day_room" },
+    { "from": "laundry", "to": "released_service_end_or_relocated_service" },
+    { "from": "lounge", "to": "media_guest_secondary_living" },
+    { "from": "sunroom", "to": "removed_reduced_or_replaced_bedroom" }
+  ]
+}

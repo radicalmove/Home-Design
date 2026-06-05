@@ -3,6 +3,7 @@ import {
   anchoredViewOriginAfterZoom,
   angleDegFromCenter,
   centeredViewOrigin,
+  centeredViewOriginAtCanvasPoint,
   clampPlanZoom,
   dimensionLabel,
   lShapePath,
@@ -285,6 +286,20 @@ describe("furniture geometry", () => {
         fullView,
       ).y,
     ).toBeCloseTo(-800);
+  });
+
+  it("can centre the plan on the visible screen point instead of the full tall canvas", () => {
+    const canvasSize = { width: 300, height: 600 };
+    const fullView = planViewBoxSize(canvasSize, 1);
+
+    expect(
+      centeredViewOriginAtCanvasPoint(
+        fullView,
+        { width: 1600, height: 900 },
+        canvasSize,
+        { x: 150, y: 150 },
+      ),
+    ).toEqual({ x: 0, y: -350 });
   });
 
   it("converts screen pixels to SVG units so edit handles keep apparent size across zoom", () => {

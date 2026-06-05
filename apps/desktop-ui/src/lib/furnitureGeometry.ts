@@ -405,6 +405,21 @@ export function centeredViewOrigin(
   };
 }
 
+export function centeredViewOriginAtCanvasPoint(
+  viewBoxSize: PlanViewportSize,
+  sourceSize: PlanViewportSize,
+  canvasSize: PlanViewportSize,
+  canvasPoint: PlanPoint,
+): PlanPoint {
+  const safeCanvasWidth = Math.max(1, canvasSize.width);
+  const safeCanvasHeight = Math.max(1, canvasSize.height);
+
+  return {
+    x: sourceSize.width / 2 - (canvasPoint.x / safeCanvasWidth) * viewBoxSize.width,
+    y: sourceSize.height / 2 - (canvasPoint.y / safeCanvasHeight) * viewBoxSize.height,
+  };
+}
+
 export function svgPointInViewBox(
   viewOrigin: PlanPoint,
   pointerOffset: PlanPoint,

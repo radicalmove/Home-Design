@@ -827,6 +827,352 @@ pub fn seed_current_furniture_layout() -> FurnitureLayout {
     layout
 }
 
+pub fn seed_furniture_layout_for_scenario(
+    scenario_id: &str,
+    base_layout: &FurnitureLayout,
+) -> FurnitureLayout {
+    let mut layout = base_layout.clone();
+    layout.scenario_id = scenario_id.to_string();
+
+    if scenario_id == "back-side-living-sunroom-bedroom" {
+        apply_back_side_living_furniture_seed(&mut layout);
+    }
+
+    normalise_furniture_z_order(&mut layout);
+    layout
+}
+
+fn apply_back_side_living_furniture_seed(layout: &mut FurnitureLayout) {
+    let mut living_counters = LivingPlacementCounters::default();
+    let mut bedroom_counters = BedroomPlacementCounters::default();
+    let mut wet_core_counters = WetCorePlacementCounters::default();
+    let mut media_counters = MediaPlacementCounters::default();
+
+    for object in &mut layout.objects {
+        if is_reused_lounge_seating(object) {
+            place_back_side_living_object(object, &mut living_counters);
+        } else if is_reused_teen_bedroom_object(object) {
+            place_replacement_bedroom_object(object, &mut bedroom_counters);
+        } else if is_reused_laundry_wet_core_object(object) {
+            place_wet_core_object(object, &mut wet_core_counters);
+        } else if is_reused_office_object(object) {
+            place_media_snug_object(object, &mut media_counters);
+        }
+    }
+}
+
+#[derive(Default)]
+struct LivingPlacementCounters {
+    armchairs: usize,
+    dining_chairs: usize,
+    fallback: usize,
+}
+
+#[derive(Default)]
+struct BedroomPlacementCounters {
+    dressers: usize,
+    bedside_tables: usize,
+    partition_walls: usize,
+    bookcases: usize,
+    fallback: usize,
+}
+
+#[derive(Default)]
+struct WetCorePlacementCounters {
+    base_cabinets: usize,
+    washers: usize,
+    dryers: usize,
+    sinks: usize,
+    fallback: usize,
+}
+
+#[derive(Default)]
+struct MediaPlacementCounters {
+    chairs: usize,
+    bookcases: usize,
+    fallback: usize,
+}
+
+fn catalog_or_type_is(object: &FurnitureObject, ids: &[&str]) -> bool {
+    ids.iter().any(|id| {
+        object.catalog_id.as_deref() == Some(*id) || object.object_type == *id || object.id == *id
+    })
+}
+
+fn is_reused_lounge_seating(object: &FurnitureObject) -> bool {
+    catalog_or_type_is(
+        object,
+        &[
+            "lounge_sofa",
+            "l_sofa",
+            "sofa",
+            "armchair",
+            "coffee_table",
+            "dining_table",
+            "dining_chair",
+        ],
+    )
+}
+
+fn is_in_bedroom_2(object: &FurnitureObject) -> bool {
+    (9.2..=15.0).contains(&object.x_m) && (7.4..=11.0).contains(&object.y_m)
+}
+
+fn is_reused_teen_bedroom_object(object: &FurnitureObject) -> bool {
+    if object.id == "bedroom2_bed" {
+        return true;
+    }
+
+    is_in_bedroom_2(object)
+        && catalog_or_type_is(
+            object,
+            &[
+                "single_bed",
+                "bed",
+                "queen_bed",
+                "dresser_drawers",
+                "bedside_table",
+                "tv",
+                "bookcase",
+                "wardrobe_doors",
+                "partition_wall",
+            ],
+        )
+}
+
+fn is_in_laundry_or_toilet(object: &FurnitureObject) -> bool {
+    (14.0..=16.4).contains(&object.x_m) && (6.3..=10.9).contains(&object.y_m)
+}
+
+fn is_reused_laundry_wet_core_object(object: &FurnitureObject) -> bool {
+    object.id == "laundry_washer"
+        || is_in_laundry_or_toilet(object)
+            && catalog_or_type_is(
+                object,
+                &[
+                    "washer",
+                    "dryer",
+                    "base_cabinet",
+                    "cabinet",
+                    "linen_storage",
+                    "sink",
+                    "toilet",
+                ],
+            )
+}
+
+fn is_reused_office_object(object: &FurnitureObject) -> bool {
+    object.id == "office_desk"
+        || ((4.5..=7.9).contains(&object.x_m)
+            && (7.4..=10.9).contains(&object.y_m)
+            && catalog_or_type_is(
+                object,
+                &[
+                    "l_desk",
+                    "desk",
+                    "office_chair",
+                    "chair",
+                    "bookcase",
+                    "cabinet",
+                ],
+            ))
+}
+
+fn mark_design_2_seed(object: &mut FurnitureObject, action: &str) {
+    let suffix = format!("Design 2 proposed seed: {action}");
+    object.notes = Some(match object.notes.as_deref() {
+        Some(existing) if !existing.trim().is_empty() => format!("{existing} {suffix}"),
+        _ => suffix,
+    });
+}
+
+fn set_furniture_position(object: &mut FurnitureObject, position: (f64, f64, f64)) {
+    let (x, y, rotation) = position;
+    object.x_m = x;
+    object.y_m = y;
+    object.rotation_deg = rotation;
+}
+
+fn fallback_position(candidates: &[(f64, f64, f64)], index: usize) -> (f64, f64, f64) {
+    candidates[index % candidates.len()]
+}
+
+fn place_back_side_living_object(
+    object: &mut FurnitureObject,
+    counters: &mut LivingPlacementCounters,
+) {
+    const ARMCHAIR_POSITIONS: &[(f64, f64, f64)] = &[(14.25, 7.35, 180.0), (14.25, 9.35, 90.0)];
+    const DINING_CHAIR_POSITIONS: &[(f64, f64, f64)] = &[
+        (13.25, 8.75, 0.0),
+        (15.55, 8.75, 180.0),
+        (13.25, 9.75, 0.0),
+        (15.55, 9.75, 180.0),
+    ];
+    const FALLBACK_POSITIONS: &[(f64, f64, f64)] = &[
+        (11.25, 7.65, 180.0),
+        (14.25, 7.35, 180.0),
+        (12.65, 9.05, 0.0),
+        (14.45, 9.25, 90.0),
+        (14.25, 9.35, 90.0),
+    ];
+
+    let position = if catalog_or_type_is(object, &["lounge_sofa", "l_sofa", "sofa"]) {
+        (11.25, 7.65, 180.0)
+    } else if catalog_or_type_is(object, &["armchair"]) {
+        let position = fallback_position(ARMCHAIR_POSITIONS, counters.armchairs);
+        counters.armchairs += 1;
+        position
+    } else if catalog_or_type_is(object, &["coffee_table"]) {
+        (12.65, 9.05, 0.0)
+    } else if catalog_or_type_is(object, &["dining_table"]) {
+        (14.45, 9.25, 90.0)
+    } else if catalog_or_type_is(object, &["dining_chair"]) {
+        let position = fallback_position(DINING_CHAIR_POSITIONS, counters.dining_chairs);
+        counters.dining_chairs += 1;
+        position
+    } else {
+        let position = fallback_position(FALLBACK_POSITIONS, counters.fallback);
+        counters.fallback += 1;
+        position
+    };
+
+    set_furniture_position(object, position);
+    mark_design_2_seed(
+        object,
+        "reused in the brighter rear living/dining/day room.",
+    );
+}
+
+fn place_replacement_bedroom_object(
+    object: &mut FurnitureObject,
+    counters: &mut BedroomPlacementCounters,
+) {
+    const DRESSER_POSITIONS: &[(f64, f64, f64)] = &[(4.55, 2.10, 0.0), (2.05, 2.10, 0.0)];
+    const BEDSIDE_POSITIONS: &[(f64, f64, f64)] = &[(1.60, 4.20, 0.0), (4.40, 4.20, 0.0)];
+    const PARTITION_POSITIONS: &[(f64, f64, f64)] = &[(1.55, 3.35, 90.0), (5.10, 3.35, 90.0)];
+    const BOOKCASE_POSITIONS: &[(f64, f64, f64)] = &[(1.65, 1.75, 0.0), (3.00, 1.75, 0.0)];
+    const FALLBACK_POSITIONS: &[(f64, f64, f64)] = &[
+        (3.05, 4.95, 90.0),
+        (4.55, 2.10, 0.0),
+        (2.05, 2.10, 0.0),
+        (5.10, 3.35, 90.0),
+        (1.65, 1.75, 0.0),
+    ];
+
+    let position = if catalog_or_type_is(object, &["single_bed", "bed", "queen_bed"]) {
+        (3.05, 4.95, 90.0)
+    } else if catalog_or_type_is(object, &["dresser_drawers"]) {
+        let position = fallback_position(DRESSER_POSITIONS, counters.dressers);
+        counters.dressers += 1;
+        position
+    } else if catalog_or_type_is(object, &["tv"]) {
+        (4.55, 1.65, 0.0)
+    } else if catalog_or_type_is(object, &["bedside_table"]) {
+        let position = fallback_position(BEDSIDE_POSITIONS, counters.bedside_tables);
+        counters.bedside_tables += 1;
+        position
+    } else if catalog_or_type_is(object, &["partition_wall"]) {
+        let position = fallback_position(PARTITION_POSITIONS, counters.partition_walls);
+        counters.partition_walls += 1;
+        position
+    } else if catalog_or_type_is(object, &["wardrobe_doors"]) {
+        (5.05, 4.45, 90.0)
+    } else if catalog_or_type_is(object, &["bookcase"]) {
+        let position = fallback_position(BOOKCASE_POSITIONS, counters.bookcases);
+        counters.bookcases += 1;
+        position
+    } else {
+        let position = fallback_position(FALLBACK_POSITIONS, counters.fallback);
+        counters.fallback += 1;
+        position
+    };
+
+    set_furniture_position(object, position);
+    mark_design_2_seed(
+        object,
+        "reused in the replacement insulated bedroom on the sunroom site.",
+    );
+}
+
+fn place_wet_core_object(object: &mut FurnitureObject, counters: &mut WetCorePlacementCounters) {
+    const BASE_CABINET_POSITIONS: &[(f64, f64, f64)] = &[(7.55, 8.05, 0.0), (7.55, 10.15, 0.0)];
+    const WASHER_POSITIONS: &[(f64, f64, f64)] = &[(8.85, 9.00, 0.0), (8.15, 9.00, 0.0)];
+    const DRYER_POSITIONS: &[(f64, f64, f64)] = &[(8.85, 9.85, 0.0), (8.15, 9.85, 0.0)];
+    const SINK_POSITIONS: &[(f64, f64, f64)] = &[(6.55, 9.20, 0.0), (7.25, 9.20, 0.0)];
+    const FALLBACK_POSITIONS: &[(f64, f64, f64)] = &[
+        (5.35, 8.35, 0.0),
+        (5.35, 9.85, 90.0),
+        (7.55, 8.05, 0.0),
+        (8.85, 9.00, 0.0),
+        (8.85, 9.85, 0.0),
+    ];
+
+    let position = if catalog_or_type_is(object, &["linen_storage"]) {
+        (5.35, 8.35, 0.0)
+    } else if catalog_or_type_is(object, &["toilet"]) {
+        (5.35, 9.85, 90.0)
+    } else if catalog_or_type_is(object, &["base_cabinet", "cabinet"]) {
+        let position = fallback_position(BASE_CABINET_POSITIONS, counters.base_cabinets);
+        counters.base_cabinets += 1;
+        position
+    } else if catalog_or_type_is(object, &["washer"]) {
+        let position = fallback_position(WASHER_POSITIONS, counters.washers);
+        counters.washers += 1;
+        position
+    } else if catalog_or_type_is(object, &["dryer"]) {
+        let position = fallback_position(DRYER_POSITIONS, counters.dryers);
+        counters.dryers += 1;
+        position
+    } else if catalog_or_type_is(object, &["sink", "vanity"]) {
+        let position = fallback_position(SINK_POSITIONS, counters.sinks);
+        counters.sinks += 1;
+        position
+    } else {
+        let position = fallback_position(FALLBACK_POSITIONS, counters.fallback);
+        counters.fallback += 1;
+        position
+    };
+
+    set_furniture_position(object, position);
+    mark_design_2_seed(
+        object,
+        "reused or modified in the office-side separated laundry/WC service rooms.",
+    );
+}
+
+fn place_media_snug_object(object: &mut FurnitureObject, counters: &mut MediaPlacementCounters) {
+    const CHAIR_POSITIONS: &[(f64, f64, f64)] = &[(10.15, 5.35, 180.0), (9.35, 3.95, 0.0)];
+    const BOOKCASE_POSITIONS: &[(f64, f64, f64)] = &[(11.10, 2.25, 90.0), (11.10, 3.45, 90.0)];
+    const FALLBACK_POSITIONS: &[(f64, f64, f64)] = &[
+        (9.75, 4.75, 0.0),
+        (10.15, 5.35, 180.0),
+        (11.10, 2.25, 90.0),
+        (11.10, 3.45, 90.0),
+    ];
+
+    let position = if catalog_or_type_is(object, &["l_desk", "desk"]) {
+        (9.75, 4.75, 0.0)
+    } else if catalog_or_type_is(object, &["office_chair", "chair"]) {
+        let position = fallback_position(CHAIR_POSITIONS, counters.chairs);
+        counters.chairs += 1;
+        position
+    } else if catalog_or_type_is(object, &["bookcase", "cabinet"]) {
+        let position = fallback_position(BOOKCASE_POSITIONS, counters.bookcases);
+        counters.bookcases += 1;
+        position
+    } else {
+        let position = fallback_position(FALLBACK_POSITIONS, counters.fallback);
+        counters.fallback += 1;
+        position
+    };
+
+    set_furniture_position(object, position);
+    mark_design_2_seed(
+        object,
+        "reused only if it supports the retained kitchen chill/reading edge.",
+    );
+}
+
 pub fn normalise_furniture_z_order(layout: &mut FurnitureLayout) {
     if layout.objects.is_empty() {
         return;

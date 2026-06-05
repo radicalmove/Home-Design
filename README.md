@@ -63,9 +63,22 @@ cargo test --workspace
 Run frontend checks:
 
 ```bash
+npm run visual-qa --prefix apps/desktop-ui
 npm run test --prefix apps/desktop-ui
 npm run build --prefix apps/desktop-ui
 ```
+
+## Visual QA
+
+For any visual change, follow `VISUAL_QA.md` before calling the work complete. This applies to 2D plans, Design scenarios, transitions, sunlight, furniture, 3D Navigation, Design Review graphics, and visible styling/layout changes.
+
+The desktop UI `check` script verifies that the visual QA gate is present:
+
+```bash
+npm run visual-qa --prefix apps/desktop-ui
+```
+
+This command does not replace human visual inspection. It keeps the workflow embedded in the project; the actual gate is to render or open the affected view, compare it with Design 1 or the relevant reference, inspect nearby context, and report the visual QA evidence.
 
 Run the desktop app in development:
 

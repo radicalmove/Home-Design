@@ -1,8 +1,369 @@
 use home_design_core::{
-    FurnitureLayerKind, FurnitureObject, default_furniture_catalog, seed_current_furniture_layout,
+    FurnitureLayerKind, FurnitureLayout, FurnitureObject, default_furniture_catalog,
+    default_plan_transform, seed_current_furniture_layout, seed_furniture_layout_for_scenario,
     validate_furniture_layout,
 };
 use std::collections::BTreeSet;
+
+#[derive(Debug)]
+struct ObjectFootprint<'a> {
+    id: &'a str,
+    x_min: f64,
+    x_max: f64,
+    y_min: f64,
+    y_max: f64,
+}
+
+fn object_footprint(object: &FurnitureObject) -> ObjectFootprint<'_> {
+    let rotation = object.rotation_deg.rem_euclid(180.0);
+    let quarter_turn = (rotation - 90.0).abs() < 0.001;
+    let width_span = if quarter_turn {
+        object.depth_m
+    } else {
+        object.width_m
+    };
+    let depth_span = if quarter_turn {
+        object.width_m
+    } else {
+        object.depth_m
+    };
+
+    ObjectFootprint {
+        id: object.id.as_str(),
+        x_min: object.x_m - width_span / 2.0,
+        x_max: object.x_m + width_span / 2.0,
+        y_min: object.y_m - depth_span / 2.0,
+        y_max: object.y_m + depth_span / 2.0,
+    }
+}
+
+fn assert_no_large_plan_overlaps(objects: &[&FurnitureObject]) {
+    let footprints: Vec<_> = objects
+        .iter()
+        .map(|object| object_footprint(object))
+        .collect();
+
+    for (index, first) in footprints.iter().enumerate() {
+        for second in footprints.iter().skip(index + 1) {
+            let overlap_x = first.x_max.min(second.x_max) - first.x_min.max(second.x_min);
+            let overlap_y = first.y_max.min(second.y_max) - first.y_min.max(second.y_min);
+
+            assert!(
+                overlap_x <= 0.05 || overlap_y <= 0.05,
+                "{} overlaps {} by {:.2}m x {:.2}m",
+                first.id,
+                second.id,
+                overlap_x,
+                overlap_y
+            );
+        }
+    }
+}
+
+fn sample_object(
+    id: &str,
+    catalog_id: &str,
+    object_type: &str,
+    layer: FurnitureLayerKind,
+    x_m: f64,
+    y_m: f64,
+    width_m: f64,
+    depth_m: f64,
+    rotation_deg: f64,
+) -> FurnitureObject {
+    FurnitureObject {
+        id: id.to_string(),
+        catalog_id: Some(catalog_id.to_string()),
+        layer,
+        z_index: 0,
+        object_type: object_type.to_string(),
+        label: id.to_string(),
+        abbreviation: None,
+        x_m,
+        y_m,
+        width_m,
+        depth_m,
+        rotation_deg,
+        colour: "#cccccc".to_string(),
+        locked: false,
+        notes: None,
+        evidence: None,
+        l_shape: None,
+    }
+}
+
+fn representative_saved_layout_for_design_2_seed() -> FurnitureLayout {
+    FurnitureLayout {
+        project_id: "current-house".to_string(),
+        scenario_id: "current".to_string(),
+        plan_transform: default_plan_transform(),
+        objects: vec![
+            sample_object(
+                "l_sofa-1",
+                "l_sofa",
+                "l_sofa",
+                FurnitureLayerKind::Moveable,
+                7.72,
+                4.19,
+                2.30,
+                2.25,
+                180.0,
+            ),
+            sample_object(
+                "armchair-1",
+                "armchair",
+                "chair",
+                FurnitureLayerKind::Moveable,
+                6.27,
+                3.87,
+                0.67,
+                0.80,
+                180.0,
+            ),
+            sample_object(
+                "coffee_table-1",
+                "coffee_table",
+                "table",
+                FurnitureLayerKind::Moveable,
+                7.29,
+                3.48,
+                1.10,
+                0.55,
+                270.0,
+            ),
+            sample_object(
+                "bedroom2_bed",
+                "single_bed",
+                "bed",
+                FurnitureLayerKind::Moveable,
+                13.22,
+                8.86,
+                1.62,
+                2.17,
+                0.0,
+            ),
+            sample_object(
+                "dresser_drawers-2",
+                "dresser_drawers",
+                "dresser_drawers",
+                FurnitureLayerKind::Moveable,
+                13.34,
+                10.24,
+                1.40,
+                0.39,
+                0.0,
+            ),
+            sample_object(
+                "tv-2",
+                "tv",
+                "tv",
+                FurnitureLayerKind::Moveable,
+                13.39,
+                10.26,
+                1.20,
+                0.20,
+                0.0,
+            ),
+            sample_object(
+                "dresser_drawers-3",
+                "dresser_drawers",
+                "dresser_drawers",
+                FurnitureLayerKind::Moveable,
+                11.75,
+                7.99,
+                1.19,
+                0.40,
+                0.0,
+            ),
+            sample_object(
+                "partition_wall-2",
+                "partition_wall",
+                "partition_wall",
+                FurnitureLayerKind::Fixed,
+                9.76,
+                8.66,
+                0.55,
+                0.03,
+                0.0,
+            ),
+            sample_object(
+                "partition_wall-2-copy-1",
+                "partition_wall",
+                "partition_wall",
+                FurnitureLayerKind::Fixed,
+                9.76,
+                9.48,
+                0.55,
+                0.03,
+                0.0,
+            ),
+            sample_object(
+                "wardrobe_doors-2",
+                "wardrobe_doors",
+                "wardrobe_doors",
+                FurnitureLayerKind::Fixed,
+                10.00,
+                9.07,
+                0.78,
+                0.06,
+                270.0,
+            ),
+            sample_object(
+                "bookcase-2",
+                "bookcase",
+                "bookcase",
+                FurnitureLayerKind::Moveable,
+                9.64,
+                9.99,
+                0.80,
+                0.30,
+                270.0,
+            ),
+            sample_object(
+                "linen_storage-1",
+                "linen_storage",
+                "cabinet",
+                FurnitureLayerKind::Fixed,
+                15.49,
+                9.17,
+                0.59,
+                1.03,
+                90.0,
+            ),
+            sample_object(
+                "toilet-1",
+                "toilet",
+                "toilet",
+                FurnitureLayerKind::Fixed,
+                15.69,
+                10.03,
+                0.42,
+                0.61,
+                90.0,
+            ),
+            sample_object(
+                "base_cabinet-1",
+                "base_cabinet",
+                "cabinet",
+                FurnitureLayerKind::Fixed,
+                15.68,
+                7.69,
+                2.35,
+                0.61,
+                270.0,
+            ),
+            sample_object(
+                "washer-1",
+                "washer",
+                "washer",
+                FurnitureLayerKind::Moveable,
+                15.65,
+                7.46,
+                0.60,
+                0.65,
+                0.0,
+            ),
+            sample_object(
+                "dryer-1",
+                "dryer",
+                "dryer",
+                FurnitureLayerKind::Moveable,
+                15.65,
+                6.84,
+                0.60,
+                0.65,
+                0.0,
+            ),
+            sample_object(
+                "desk-1",
+                "desk",
+                "desk",
+                FurnitureLayerKind::Moveable,
+                5.64,
+                10.15,
+                1.40,
+                0.60,
+                0.0,
+            ),
+            sample_object(
+                "office_chair-1",
+                "office_chair",
+                "chair",
+                FurnitureLayerKind::Moveable,
+                5.59,
+                9.78,
+                0.41,
+                0.40,
+                0.0,
+            ),
+            sample_object(
+                "bookcase-1",
+                "bookcase",
+                "bookcase",
+                FurnitureLayerKind::Moveable,
+                5.23,
+                7.99,
+                0.86,
+                0.40,
+                0.0,
+            ),
+            sample_object(
+                "bookcase-1-copy-1",
+                "bookcase",
+                "bookcase",
+                FurnitureLayerKind::Moveable,
+                6.10,
+                7.99,
+                0.86,
+                0.40,
+                0.0,
+            ),
+        ],
+    }
+}
+
+fn assert_fits_inside_room(
+    object: &FurnitureObject,
+    room: &str,
+    min_x: f64,
+    max_x: f64,
+    min_y: f64,
+    max_y: f64,
+) {
+    let rotation = object.rotation_deg.rem_euclid(180.0);
+    let quarter_turn = (rotation - 90.0).abs() < 0.001;
+    let width_span = if quarter_turn {
+        object.depth_m
+    } else {
+        object.width_m
+    };
+    let depth_span = if quarter_turn {
+        object.width_m
+    } else {
+        object.depth_m
+    };
+
+    assert!(
+        object.x_m - width_span / 2.0 >= min_x && object.x_m + width_span / 2.0 <= max_x,
+        "{} does not fit horizontally inside {}: x={} width_span={} allowed={}..={}",
+        object.id,
+        room,
+        object.x_m,
+        width_span,
+        min_x,
+        max_x
+    );
+    assert!(
+        object.y_m - depth_span / 2.0 >= min_y && object.y_m + depth_span / 2.0 <= max_y,
+        "{} does not fit vertically inside {}: y={} depth_span={} allowed={}..={}",
+        object.id,
+        room,
+        object.y_m,
+        depth_span,
+        min_y,
+        max_y
+    );
+}
 
 #[test]
 fn default_catalog_groups_current_house_first_objects() {
@@ -230,6 +591,128 @@ fn seed_layout_assigns_sequential_furniture_z_index() {
         z_indexes,
         (0..layout.objects.len() as i32).collect::<Vec<_>>()
     );
+}
+
+#[test]
+fn design_2_seed_relocates_reused_furniture_into_proposed_rooms() {
+    let current = seed_current_furniture_layout();
+    let design_2 = seed_furniture_layout_for_scenario("back-side-living-sunroom-bedroom", &current);
+
+    assert_eq!(design_2.project_id, "current-house");
+    assert_eq!(design_2.scenario_id, "back-side-living-sunroom-bedroom");
+    assert_eq!(design_2.objects.len(), current.objects.len());
+
+    let lounge_sofa = design_2
+        .objects
+        .iter()
+        .find(|object| object.id == "lounge_sofa")
+        .expect("reused lounge sofa");
+    assert_fits_inside_room(lounge_sofa, "Design 2 living/dining/day room", 9.4, 16.1, 6.45, 10.6);
+    assert!(
+        lounge_sofa
+            .notes
+            .as_deref()
+            .unwrap_or_default()
+            .contains("Design 2")
+    );
+
+    let bedroom_bed = design_2
+        .objects
+        .iter()
+        .find(|object| object.id == "bedroom2_bed")
+        .expect("reused Bedroom 2 bed");
+    assert_fits_inside_room(bedroom_bed, "Design 2 replacement bedroom", 0.6, 5.35, 1.2, 6.25);
+
+    let dining_table = design_2
+        .objects
+        .iter()
+        .find(|object| object.id == "dining_table")
+        .expect("reused dining table");
+    assert_fits_inside_room(dining_table, "Design 2 living/dining/day room", 9.4, 16.1, 6.45, 10.6);
+
+    let laundry_washer = design_2
+        .objects
+        .iter()
+        .find(|object| object.id == "laundry_washer")
+        .expect("reused laundry washer");
+    assert_fits_inside_room(laundry_washer, "Design 2 office-side service rooms", 4.75, 9.4, 7.7, 10.6);
+
+    let office_desk = design_2
+        .objects
+        .iter()
+        .find(|object| object.id == "office_desk")
+        .expect("reused office desk");
+    assert_fits_inside_room(office_desk, "Design 2 kitchen chill/reading edge", 8.8, 11.7, -0.5, 6.8);
+
+    let kitchen_current = current
+        .objects
+        .iter()
+        .find(|object| object.id == "kitchen_base_cabinets")
+        .expect("current kitchen cabinets");
+    let kitchen_design_2 = design_2
+        .objects
+        .iter()
+        .find(|object| object.id == "kitchen_base_cabinets")
+        .expect("Design 2 kitchen cabinets");
+    assert_eq!(kitchen_design_2.x_m, kitchen_current.x_m);
+    assert_eq!(kitchen_design_2.y_m, kitchen_current.y_m);
+}
+
+#[test]
+fn design_2_seed_spreads_realistic_saved_layout_without_stacking_objects() {
+    let current = representative_saved_layout_for_design_2_seed();
+    let design_2 = seed_furniture_layout_for_scenario("back-side-living-sunroom-bedroom", &current);
+
+    let by_ids = |ids: &[&str]| -> Vec<&FurnitureObject> {
+        ids.iter()
+            .map(|id| {
+                design_2
+                    .objects
+                    .iter()
+                    .find(|object| object.id == *id)
+                    .unwrap_or_else(|| panic!("missing object {id}"))
+            })
+            .collect()
+    };
+
+    let living_objects = by_ids(&["l_sofa-1", "armchair-1", "coffee_table-1"]);
+    for object in &living_objects {
+        assert_fits_inside_room(object, "Design 2 living/dining/day room", 9.4, 16.1, 6.45, 10.6);
+    }
+    assert_no_large_plan_overlaps(&living_objects);
+
+    let bedroom_objects = by_ids(&[
+        "bedroom2_bed",
+        "dresser_drawers-2",
+        "tv-2",
+        "dresser_drawers-3",
+        "partition_wall-2",
+        "partition_wall-2-copy-1",
+        "wardrobe_doors-2",
+        "bookcase-2",
+    ]);
+    for object in &bedroom_objects {
+        assert_fits_inside_room(object, "Design 2 replacement bedroom", 0.6, 5.35, 1.2, 6.25);
+    }
+    assert_no_large_plan_overlaps(&bedroom_objects);
+
+    let wet_core_objects = by_ids(&[
+        "linen_storage-1",
+        "toilet-1",
+        "base_cabinet-1",
+        "washer-1",
+        "dryer-1",
+    ]);
+    for object in &wet_core_objects {
+        assert_fits_inside_room(object, "Design 2 office-side service rooms", 4.75, 9.4, 7.7, 10.6);
+    }
+    assert_no_large_plan_overlaps(&wet_core_objects);
+
+    let chill_objects = by_ids(&["desk-1", "office_chair-1", "bookcase-1", "bookcase-1-copy-1"]);
+    for object in &chill_objects {
+        assert_fits_inside_room(object, "Design 2 kitchen chill/reading edge", 8.8, 11.7, -0.5, 6.8);
+    }
+    assert_no_large_plan_overlaps(&chill_objects);
 }
 
 #[test]

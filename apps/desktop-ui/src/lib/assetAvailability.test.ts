@@ -10,7 +10,7 @@ const project: ProjectManifest = {
   views: [
     {
       id: "base-view",
-      label: "Base View",
+      label: "2D Plan",
       mode: "base_plan",
       asset_path: "/views/reference_plan.html",
       available: true,
