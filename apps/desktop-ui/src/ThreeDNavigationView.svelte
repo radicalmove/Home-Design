@@ -634,7 +634,6 @@
       } else if (isDoubleDoorOpening(opening.type)) {
         addDoubleDoorLeaves(targetScene, visiblePanel, opening, `opening:${opening.id}:${index}:double-door`);
       } else if (!isDoorLikeOpening(opening.type) && !isPlainOpening(opening.type)) {
-        addWindowSideWallReturns(targetScene, visiblePanel, floorElevationM, `opening:${opening.id}:${index}:side-return`);
         addWindowGlass(targetScene, visiblePanel, material, `opening:${opening.id}:${index}`);
       }
       if (isDoubleDoorOpening(opening.type)) {
@@ -756,6 +755,12 @@
   function openingDimensionsForOpening(opening: ThreeDSceneConfig["openings"][number]): { heightM: number; sillHeightM: number } {
     if (isSunroomWraparoundGlazing(opening)) {
       return { heightM: 2.18, sillHeightM: 0.02 };
+    }
+    if (opening.heightM !== null && opening.heightM > 0) {
+      return {
+        heightM: opening.heightM,
+        sillHeightM: opening.type.includes("window") && opening.heightM >= 1.85 ? 0.08 : openingDimensionsForType(opening.type).sillHeightM,
+      };
     }
     if (opening.windowContext === "former_external") {
       return { heightM: 1.18, sillHeightM: 0.78 };

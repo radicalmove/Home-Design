@@ -145,7 +145,8 @@ describe("plan vector model", () => {
     });
     expect(featureIds).toEqual(expect.arrayContaining([
       "future_front_door",
-      "future_lounge_bedroom_north_window",
+      "lounge_north_left_window",
+      "lounge_north_right_window",
       "future_wet_core_office_south_window",
       "future_wet_core_bathroom_south_window",
       "future_main_lounge_south_window",
@@ -161,6 +162,8 @@ describe("plan vector model", () => {
     expect(featureIds).not.toContain("future_day_room_east_window");
     expect(featureIds).not.toContain("future_day_room_frosted_east_window");
     expect(featureIds).not.toContain("future_day_room_east_double_glass_door");
+    expect(featureIds).not.toContain("future_lounge_bedroom_north_window");
+    expect(featureIds).not.toContain("lounge_to_kitchen_dining");
     expect(featureIds).not.toContain("laundry_north_window");
     expect(featureIds).not.toContain("laundry_east_window");
     expect(featureIds).not.toContain("toilet_frosted_window");
@@ -178,13 +181,22 @@ describe("plan vector model", () => {
         [854, 491.6],
       ],
     });
-    expect(model.features.find((feature) => feature.id === "future_lounge_bedroom_north_window")?.shape).toEqual({
+    expect(model.features.find((feature) => feature.id === "lounge_north_left_window")?.shape).toEqual({
       kind: "polygon",
       points: [
-        [676, 344.8],
-        [748, 344.8],
-        [748, 352.8],
-        [676, 352.8],
+        [675.8, 348.8],
+        [687.2, 348.8],
+        [687.2, 354.8],
+        [675.8, 354.8],
+      ],
+    });
+    expect(model.features.find((feature) => feature.id === "lounge_north_right_window")?.shape).toEqual({
+      kind: "polygon",
+      points: [
+        [731.3, 348.8],
+        [742.7, 348.8],
+        [742.7, 354.8],
+        [731.3, 354.8],
       ],
     });
     expect(model.features.find((feature) => feature.id === "future_wet_core_office_south_window")?.shape).toEqual({

@@ -49,6 +49,7 @@
     pointerId: number;
     object: FurnitureObject;
     startSvg: PlanPoint;
+    movePointerOffsetM?: PlanPoint;
     resizeHandle?: ResizeHandleName;
     startAngleDeg?: number;
     startRotationDeg?: number;
@@ -608,12 +609,17 @@
     }
     event.preventDefault();
     event.stopPropagation();
+    const startPointM = svgToMetres(svgPointFromEvent(event), layout.plan_transform);
     onBeginObjectEdit(object.id);
     dragState = {
       kind: "move",
       pointerId: event.pointerId,
       object,
       startSvg: svgPointFromEvent(event),
+      movePointerOffsetM: {
+        x: object.x_m - startPointM.x,
+        y: object.y_m - startPointM.y,
+      },
     };
     updateWallDistanceGuides(object);
     svgElement?.setPointerCapture(event.pointerId);
@@ -674,9 +680,10 @@
     };
 
     if (dragState.kind === "move") {
+      const currentPointM = svgToMetres(currentSvg, layout.plan_transform);
       const nextPoint = {
-        x: dragState.object.x_m + deltaSvg.x / layout.plan_transform.px_per_m,
-        y: dragState.object.y_m + deltaSvg.y / layout.plan_transform.px_per_m,
+        x: currentPointM.x + (dragState.movePointerOffsetM?.x ?? 0),
+        y: currentPointM.y + (dragState.movePointerOffsetM?.y ?? 0),
       };
       updateWallDistanceGuides({
         ...dragState.object,

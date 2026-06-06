@@ -42,8 +42,6 @@ describe("design structural transitions", () => {
     );
     expect(transition?.openings.map((opening) => opening.id)).toEqual(expect.arrayContaining([
       "design-2-new-bedroom-front-windows",
-      "design-2-new-bedroom-side-window",
-      "design-2-lounge-bedroom-north-window",
       "design-2-wet-core-office-south-window",
       "design-2-wet-core-bathroom-south-window",
       "design-2-main-lounge-south-window",
@@ -69,13 +67,8 @@ describe("design structural transitions", () => {
       label: "main entry / deck doors",
       strokeWidth: 8,
     });
-    expect(transition?.openings.find((opening) => opening.id === "design-2-lounge-bedroom-north-window")).toMatchObject({
-      kind: "window",
-      x1: 676,
-      x2: 748,
-      y1: 348.8,
-      y2: 348.8,
-    });
+    expect(transition?.openings.map((opening) => opening.id)).not.toContain("design-2-new-bedroom-side-window");
+    expect(transition?.openings.map((opening) => opening.id)).not.toContain("design-2-lounge-bedroom-north-window");
     expect(transition?.openings.find((opening) => opening.id === "design-2-wet-core-office-south-window")).toMatchObject({
       y1: 601.8,
       y2: 601.8,
@@ -131,14 +124,8 @@ describe("design structural transitions", () => {
       y1: 348.8,
       y2: 348.8,
     });
-    expect(transition?.openings.find((opening) => opening.id === "design-2-new-bedroom-side-window")).toMatchObject({
-      strokeWidth: 8,
-      x1: 533.9,
-      x2: 533.9,
-    });
-    expect(transition?.openings.find((opening) => opening.id === "design-2-lounge-bedroom-north-window")).toMatchObject({
-      strokeWidth: 8,
-    });
+    expect(transition?.openings.map((opening) => opening.id)).not.toContain("design-2-new-bedroom-side-window");
+    expect(transition?.openings.map((opening) => opening.id)).not.toContain("design-2-lounge-bedroom-north-window");
     expect(transition?.wallMasks.map((wall) => wall.id)).toEqual(expect.arrayContaining([
       "bedroom-2-laundry-wall-removal",
       "bedroom2-entry-wall-removal",

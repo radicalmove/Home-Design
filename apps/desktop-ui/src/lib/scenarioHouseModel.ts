@@ -34,10 +34,25 @@ const SCENARIO_FEATURE_METADATA: Record<string, ScenarioFeatureMetadata> = {
     width_m: 0.86,
     height_m: 2.05,
   },
-  future_lounge_bedroom_north_window: {
+  lounge_north_left_window: {
     room: "current_lounge_bedroom",
-    width_m: 2.65,
-    height_m: 1.25,
+    width_m: 0.42,
+    height_m: 1.08,
+  },
+  lounge_north_right_window: {
+    room: "current_lounge_bedroom",
+    width_m: 0.42,
+    height_m: 1.08,
+  },
+  deck_side_dining_window: {
+    room: "kitchen_dining_chill_zone",
+    width_m: 0.57,
+    height_m: 1.08,
+  },
+  dining_west_window: {
+    room: "kitchen_dining_chill_zone",
+    width_m: 0.66,
+    height_m: 1.08,
   },
   future_wet_core_office_south_window: {
     room: "relocated_service_rooms",
@@ -57,7 +72,7 @@ const SCENARIO_FEATURE_METADATA: Record<string, ScenarioFeatureMetadata> = {
   future_day_room_east_full_height_window: {
     room: "future_living_dining_day_room",
     width_m: 1.05,
-    height_m: 1.95,
+    height_m: 2.2,
   },
   future_main_entry_west_floor_window: {
     room: "future_living_dining_day_room",
@@ -72,8 +87,14 @@ const SCENARIO_FEATURE_METADATA: Record<string, ScenarioFeatureMetadata> = {
   future_old_laundry_north_floor_window: {
     room: "future_living_dining_day_room",
     width_m: 1.35,
-    height_m: 1.95,
+    height_m: 1.08,
   },
+};
+
+const SCENARIO_REMOVED_OPENING_IDS: Record<string, Set<string>> = {
+  "back-side-living-sunroom-bedroom": new Set([
+    "lounge_to_kitchen_dining",
+  ]),
 };
 
 const DESIGN_2_DAYLIGHT_ROOM_NOTES: Record<string, string> = {
@@ -187,6 +208,18 @@ function featureFromVectorFeature(feature: PlanVectorFeature): JsonRecord {
   };
 }
 
+function topLevelOpeningsForScenario(model: JsonRecord, scenarioId: string | null | undefined): unknown[] {
+  const removedIds = scenarioId ? SCENARIO_REMOVED_OPENING_IDS[scenarioId] : undefined;
+  if (!removedIds) {
+    return asArray(model.openings);
+  }
+  return asArray(model.openings).filter((openingValue) => {
+    const opening = asRecord(openingValue);
+    const id = opening.id;
+    return typeof id !== "string" || !removedIds.has(id);
+  });
+}
+
 function daylightEntryForRoom(room: PlanVectorRoom): JsonRecord {
   const note = DESIGN_2_DAYLIGHT_ROOM_NOTES[room.id] ?? "Scenario room daylight has not been separately modelled yet.";
   if (room.id === "future_living_dining_day_room") {
@@ -255,6 +288,7 @@ export function houseModelForScenario(
   return {
     ...model,
     rooms: scenarioRooms(model, planModel, pxPerM),
+    openings: topLevelOpeningsForScenario(model, scenarioId),
     current_structure: {
       ...currentStructure,
       spaces: planModel.rooms.map(spaceFromVectorRoom),

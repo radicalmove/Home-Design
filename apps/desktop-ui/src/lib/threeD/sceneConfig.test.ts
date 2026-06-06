@@ -579,13 +579,37 @@ describe("three-dimensional scene config", () => {
     expect(futureConfig.walls.every((wall) => !wall.id.startsWith("measured-wall:"))).toBe(true);
     expect(futureConfig.walls.map((wall) => wall.id)).toContain("plan-vector-wall:replacement-bedroom-envelope");
     expect(futureConfig.walls.some((wall) => wall.sourceRoomIds.includes("future_living_dining_day_room"))).toBe(false);
-    expect(futureConfig.openings.map((opening) => opening.id)).toEqual(expect.arrayContaining([
+    const futureOpeningIds = futureConfig.openings.map((opening) => opening.id);
+    expect(futureOpeningIds).toEqual(expect.arrayContaining([
       "future_front_door",
-      "future_lounge_bedroom_north_window",
+      "lounge_north_left_window",
+      "lounge_north_right_window",
+      "deck_side_dining_window",
+      "dining_west_window",
       "future_day_room_east_full_height_window",
       "future_old_laundry_north_floor_window",
     ]));
-    expect(futureConfig.openings.map((opening) => opening.id)).not.toContain("sunroom_lounge_slider");
+    expect(futureOpeningIds).not.toContain("future_lounge_bedroom_north_window");
+    expect(futureOpeningIds).not.toContain("lounge_to_kitchen_dining");
+    expect(futureOpeningIds).not.toContain("sunroom_lounge_slider");
+    const retainedLoungeLeftWindow = futureConfig.openings.find((opening) => opening.id === "lounge_north_left_window");
+    const retainedLoungeRightWindow = futureConfig.openings.find((opening) => opening.id === "lounge_north_right_window");
+    expect(retainedLoungeLeftWindow?.room).toBe("current_lounge_bedroom");
+    expect(retainedLoungeLeftWindow?.anchor?.widthM).toBeCloseTo(0.42, 2);
+    expect(retainedLoungeRightWindow?.room).toBe("current_lounge_bedroom");
+    expect(retainedLoungeRightWindow?.anchor?.widthM).toBeCloseTo(0.42, 2);
+    expect(futureConfig.openings.find((opening) => opening.id === "deck_side_dining_window")).toMatchObject({
+      room: "kitchen_dining_chill_zone",
+      heightM: expect.closeTo(1.08, 2),
+    });
+    expect(futureConfig.openings.find((opening) => opening.id === "dining_west_window")).toMatchObject({
+      room: "kitchen_dining_chill_zone",
+      heightM: expect.closeTo(1.08, 2),
+    });
+    expect(futureConfig.openings.find((opening) => opening.id === "future_day_room_east_full_height_window")?.heightM)
+      .toBeCloseTo(2.2, 2);
+    expect(futureConfig.openings.find((opening) => opening.id === "future_old_laundry_north_floor_window")?.heightM)
+      .toBeCloseTo(1.08, 2);
     expect(futureConfig.openings.every((opening) => opening.anchor)).toBe(true);
   });
 });

@@ -140,10 +140,11 @@ describe("native 3D navigation view wiring", () => {
     expect(viewSource).toContain('materialFor("paintedWall"');
   });
 
-  it("keeps window cuts tight and fills side reveals beside frames", () => {
+  it("keeps window cuts tight without adding full-height side-return columns to ordinary windows", () => {
     expect(viewSource).toContain("return [start, end];");
     expect(viewSource).toContain("addWindowSideWallReturns");
     expect(viewSource).toContain("const returnWidth = 0.055;");
+    expect(viewSource).not.toContain("addWindowSideWallReturns(targetScene, visiblePanel, floorElevationM, `opening:${opening.id}:${index}:side-return`)");
   });
 
   it("renders exterior double-door groups as glazed side-hinged leaves without a fixed centre column", () => {

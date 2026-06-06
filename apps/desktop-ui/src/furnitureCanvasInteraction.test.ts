@@ -398,6 +398,15 @@ describe("furniture canvas interaction layout", () => {
     expect(planCanvasSource).toContain("onFinishObjectEdit();");
   });
 
+  it("preserves the clicked offset inside a furniture object while moving it", () => {
+    expect(planCanvasSource).toContain("movePointerOffsetM?: PlanPoint;");
+    expect(planCanvasSource).toContain("movePointerOffsetM: {");
+    expect(planCanvasSource).toContain("x: object.x_m - startPointM.x");
+    expect(planCanvasSource).toContain("y: object.y_m - startPointM.y");
+    expect(planCanvasSource).toContain("x: currentPointM.x + (dragState.movePointerOffsetM?.x ?? 0)");
+    expect(planCanvasSource).toContain("y: currentPointM.y + (dragState.movePointerOffsetM?.y ?? 0)");
+  });
+
   it("does not recenter the furniture canvas on every drag-preview layout replacement", () => {
     expect(planCanvasSource).toContain("let lastViewResetKey = $state<number | null>(null);");
     expect(planCanvasSource).toContain("let lastViewScenarioId = $state<string | null>(null);");

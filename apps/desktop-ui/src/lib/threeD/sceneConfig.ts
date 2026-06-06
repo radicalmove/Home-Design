@@ -60,6 +60,7 @@ export type ThreeDOpening = {
   windowContext: string | null;
   room: string | null;
   between: string[];
+  heightM: number | null;
   geometry: SceneGeometry;
   centre: ScenePoint;
   material: string;
@@ -368,6 +369,7 @@ function buildOpenings(model: JsonRecord, transform: PlanTransform): ThreeDOpeni
         windowContext: asString(feature.window_context) || null,
         room: asString(feature.room) || null,
         between: asStringArray(feature.between),
+        heightM: asNumber(feature.height_m),
         geometry,
         centre: sceneGeometryCentre(geometry),
         material: featureMaterial(feature),
@@ -818,6 +820,7 @@ function syntheticOpeningFromTopLevelRecord(record: JsonRecord, walls: ThreeDWal
     windowContext: asString(record.window_context) || null,
     room: asString(record.room) || null,
     between,
+    heightM: asNumber(record.height_m),
     geometry,
     centre: sceneGeometryCentre(geometry),
     material: featureMaterial(record),

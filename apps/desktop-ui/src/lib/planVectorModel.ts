@@ -455,6 +455,7 @@ const DESIGN_2_REMOVED_FEATURE_IDS = new Set([
   "laundry_to_toilet_door",
   "kitchen_dining_to_bedroom2_door",
   "entrance_to_kitchen_dining_door",
+  "lounge_to_kitchen_dining",
 ]);
 
 const DESIGN_2_ADDED_FEATURES: PlanVectorFeature[] = [
@@ -469,20 +470,6 @@ const DESIGN_2_ADDED_FEATURES: PlanVectorFeature[] = [
         [886, 486.6],
         [886, 491.6],
         [854, 491.6],
-      ],
-    },
-  },
-  {
-    id: "future_lounge_bedroom_north_window",
-    type: "window",
-    renderGroup: "window",
-    shape: {
-      kind: "polygon",
-      points: [
-        [676, 344.8],
-        [748, 344.8],
-        [748, 352.8],
-        [676, 352.8],
       ],
     },
   },
