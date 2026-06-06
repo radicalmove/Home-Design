@@ -404,8 +404,12 @@ const DESIGN_2_REMOVED_WALL_IDS = new Set([
   "lounge-sunroom-lower-wall",
   "bedroom2-east-wall",
   "bedroom2-north-wall-east",
+  "kitchen-entrance-return-wall",
   "entrance-north-return-wall",
   "entrance-laundry-wall",
+  "hallway-kitchen-door-wall",
+  "kitchen-entrance-door-wall-upper",
+  "kitchen-entrance-door-wall-lower",
   "laundry-toilet-wall-west",
   "laundry-toilet-wall-east",
 ]);

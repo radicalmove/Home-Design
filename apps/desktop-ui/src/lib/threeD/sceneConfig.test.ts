@@ -585,6 +585,14 @@ describe("three-dimensional scene config", () => {
       .toBe("vinylPlank");
     expect(futureConfig.walls.every((wall) => !wall.id.startsWith("measured-wall:"))).toBe(true);
     expect(futureConfig.walls.map((wall) => wall.id)).toContain("plan-vector-wall:replacement-bedroom-envelope");
+    for (const removedDoorwayWallId of [
+      "plan-vector-wall:kitchen-entrance-return-wall",
+      "plan-vector-wall:hallway-kitchen-door-wall",
+      "plan-vector-wall:kitchen-entrance-door-wall-upper",
+      "plan-vector-wall:kitchen-entrance-door-wall-lower",
+    ]) {
+      expect(futureConfig.walls.map((wall) => wall.id)).not.toContain(removedDoorwayWallId);
+    }
     expect(futureConfig.walls.some((wall) => wall.sourceRoomIds.includes("future_living_dining_day_room"))).toBe(false);
     const futureOpeningIds = futureConfig.openings.map((opening) => opening.id);
     expect(futureOpeningIds).toEqual(expect.arrayContaining([
