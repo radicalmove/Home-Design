@@ -1159,19 +1159,21 @@
     panel: OpeningPanelRenderSpec,
     namePrefix: string,
   ) {
-    const doorMaterial = materialFor("entryDoorPaint", "#d8ead6");
+    const doorMaterial = materialFor("entryDoorPaint", "#b7d8bd");
     const frameMaterial = materialFor("frameWhite", "#f4f5ef");
     const glassMaterial = materialFor("glazing");
     const handleMaterial = materialFor("doorHandle", "#1f2424");
     const rotationDeg = -THREE.MathUtils.radToDeg(panel.rotationY);
     const doorDepth = 0.04;
     const railHeight = Math.max(0.08, panel.heightM * 0.06);
-    const stileWidth = Math.max(0.045, panel.widthM * 0.08);
+    const stileWidth = Math.max(0.055, panel.widthM * 0.09);
     const glassWidth = Math.max(0.12, panel.widthM - stileWidth * 2.4);
-    const glassHeight = Math.max(0.4, panel.heightM * 0.56);
-    const glassYOffsetM = panel.heightM * 0.13;
+    const glassHeight = Math.max(0.78, panel.heightM * 0.6);
+    const glassYOffsetM = panel.heightM * 0.16;
     const lowerPanelHeight = Math.max(0.18, panel.heightM * 0.18);
+    const lowerPanelInsetWidth = panel.widthM * 0.62;
     const lowerPanelYOffsetM = -panel.heightM * 0.29;
+    const borderDepth = doorDepth + 0.018;
 
     addBox(
       targetScene,
@@ -1182,7 +1184,22 @@
       doorMaterial,
       rotationDeg,
       `${namePrefix}:slab`,
-    );
+    ).renderOrder = 18;
+
+    addBox(
+      targetScene,
+      panel.widthM + 0.045,
+      panel.heightM + 0.045,
+      doorDepth * 0.55,
+      {
+        x: panel.position.x,
+        y: panel.position.y,
+        z: panel.position.z,
+      },
+      doorMaterial,
+      rotationDeg,
+      `${namePrefix}:outer-border`,
+    ).renderOrder = 17;
 
     addBox(
       targetScene,
@@ -1197,14 +1214,14 @@
       glassMaterial,
       rotationDeg,
       `${namePrefix}:glass`,
-    );
+    ).renderOrder = 22;
 
     [-panel.widthM / 2 + stileWidth / 2, panel.widthM / 2 - stileWidth / 2].forEach((acrossM, index) => {
       addBox(
         targetScene,
         stileWidth,
         panel.heightM,
-        doorDepth + 0.01,
+        borderDepth,
         offsetOpeningPosition(panel, acrossM, 0),
         frameMaterial,
         rotationDeg,
@@ -1222,7 +1239,7 @@
         targetScene,
         panel.widthM,
         railHeight,
-        doorDepth + 0.01,
+        borderDepth,
         {
           ...panel.position,
           y: panel.position.y + localY,
@@ -1235,9 +1252,9 @@
 
     addBox(
       targetScene,
-      panel.widthM * 0.72,
+      lowerPanelInsetWidth,
       lowerPanelHeight,
-      doorDepth + 0.012,
+      borderDepth,
       {
         x: panel.position.x,
         y: panel.position.y + lowerPanelYOffsetM,

@@ -636,10 +636,20 @@ describe("three-dimensional scene config", () => {
     });
     expect(futureConfig.openings.find((opening) => opening.id === "future_front_door")?.anchor?.sourceWallId)
       .toBe("plan-vector-wall:entrance-deck-wall-east");
+    expect(futureConfig.openings.find((opening) => opening.id === "future_front_door")).toMatchObject({
+      swing: "closed_glazed_entry",
+      heightM: expect.closeTo(2.05, 2),
+    });
+    expect(futureConfig.openings.find((opening) => opening.id === "future_front_door")?.anchor?.widthM)
+      .toBeCloseTo(0.62, 2);
     expect(futureConfig.openings.find((opening) => opening.id === "future_main_entry_west_floor_window")?.anchor?.sourceWallId)
       .toBe("plan-vector-wall:entrance-deck-wall-west");
     expect(futureConfig.openings.find((opening) => opening.id === "future_main_entry_east_floor_window")?.anchor?.sourceWallId)
       .toBe("plan-vector-wall:entrance-deck-wall-east");
+    const futureFrontDoorAnchor = futureConfig.openings.find((opening) => opening.id === "future_front_door")?.anchor;
+    const futureEntryEastWindowAnchor = futureConfig.openings.find((opening) => opening.id === "future_main_entry_east_floor_window")?.anchor;
+    expect(futureFrontDoorAnchor?.centre.x).toBeGreaterThan(9.0);
+    expect(futureEntryEastWindowAnchor?.centre.x).toBeGreaterThan((futureFrontDoorAnchor?.centre.x ?? 0) + 0.45);
     expect(futureConfig.openings.find((opening) => opening.id === "future_day_room_east_full_height_window")?.heightM)
       .toBeCloseTo(2.2, 2);
     expect(futureConfig.openings.find((opening) => opening.id === "future_old_laundry_north_floor_window")?.heightM)

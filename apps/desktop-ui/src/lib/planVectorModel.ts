@@ -470,10 +470,10 @@ const DESIGN_2_ADDED_FEATURES: PlanVectorFeature[] = [
     shape: {
       kind: "polygon",
       points: [
-        [858, 486.6],
-        [882, 486.6],
-        [882, 491.6],
-        [858, 491.6],
+        [881, 486.6],
+        [898, 486.6],
+        [898, 491.6],
+        [881, 491.6],
       ],
     },
   },
@@ -554,10 +554,10 @@ const DESIGN_2_ADDED_FEATURES: PlanVectorFeature[] = [
     shape: {
       kind: "polygon",
       points: [
-        [886, 485.1],
-        [894, 485.1],
-        [894, 493.1],
-        [886, 493.1],
+        [902, 485.1],
+        [910, 485.1],
+        [910, 493.1],
+        [902, 493.1],
       ],
     },
   },

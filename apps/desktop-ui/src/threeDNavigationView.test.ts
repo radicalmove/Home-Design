@@ -171,6 +171,10 @@ describe("native 3D navigation view wiring", () => {
     expect(viewSource).toContain("isClosedGlazedEntryDoor");
     expect(viewSource).toContain('opening.id === "future_front_door"');
     expect(viewSource).toContain("addClosedGlazedEntryDoor(targetScene, visiblePanel");
+    expect(viewSource).toContain('const doorMaterial = materialFor("entryDoorPaint", "#b7d8bd");');
+    expect(viewSource).toContain("const glassHeight = Math.max(0.78, panel.heightM * 0.6);");
+    expect(viewSource).toContain("const lowerPanelInsetWidth = panel.widthM * 0.62;");
+    expect(viewSource).toContain("`${namePrefix}:outer-border`");
     expect(viewSource).toContain("!isClosedGlazedEntryDoor(opening)");
   });
 

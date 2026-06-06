@@ -33,7 +33,7 @@ const SCENARIO_FEATURE_METADATA: Record<string, ScenarioFeatureMetadata> = {
     between: ["future_living_dining_day_room", "deck"],
     swing: "closed_glazed_entry",
     wall_id: "plan-vector-wall:entrance-deck-wall-east",
-    width_m: 0.68,
+    width_m: 0.62,
     height_m: 2.05,
   },
   lounge_north_left_window: {
