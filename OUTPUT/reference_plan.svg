@@ -223,6 +223,11 @@ text { font-family: Arial, sans-serif; fill: #1d2522; }
 <line class="ref-window-guide" data-ref-window-guide="deck_side_dining_window" data-window-context="exterior" x1="835.0" y1="332.5" x2="835.0" y2="347.7"/>
 <line class="ref-window-guide" data-ref-window-guide="deck_side_dining_window" data-window-context="exterior" x1="831.0" y1="332.5" x2="831.0" y2="347.7"/>
 </g>
+<g data-ref-opening="kitchen_window">
+<line class="ref-window-cutout exterior" data-ref-window="kitchen_window" data-window-context="exterior" x1="833.0" y1="410.0" x2="833.0" y2="484.0"/>
+<line class="ref-window-guide" data-ref-window-guide="kitchen_window" data-window-context="exterior" x1="835.0" y1="410.0" x2="835.0" y2="484.0"/>
+<line class="ref-window-guide" data-ref-window-guide="kitchen_window" data-window-context="exterior" x1="831.0" y1="410.0" x2="831.0" y2="484.0"/>
+</g>
 <g data-ref-opening="dining_west_window">
 <line class="ref-window-cutout exterior" data-ref-window="dining_west_window" data-window-context="exterior" x1="758.8" y1="316.8" x2="758.8" y2="334.3"/>
 <line class="ref-window-guide" data-ref-window-guide="dining_west_window" data-window-context="exterior" x1="760.8" y1="316.8" x2="760.8" y2="334.3"/>

@@ -445,6 +445,11 @@ class ReferencePlanRenderTests(unittest.TestCase):
             svg,
         )
         self.assertIn(
+            'data-ref-window="kitchen_window" data-window-context="exterior" '
+            'x1="833.0" y1="410.0" x2="833.0" y2="484.0"',
+            svg,
+        )
+        self.assertIn(
             'data-ref-window="master_street_window" data-window-context="exterior" '
             'x1="534.9" y1="514.0" x2="534.9" y2="571.0"',
             svg,

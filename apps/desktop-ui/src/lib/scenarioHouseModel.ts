@@ -52,6 +52,12 @@ const SCENARIO_FEATURE_METADATA: Record<string, ScenarioFeatureMetadata> = {
     width_m: 0.57,
     height_m: 1.08,
   },
+  kitchen_window: {
+    room: "kitchen_dining_chill_zone",
+    wall_id: "plan-vector-wall:kitchen-dining-east-wall",
+    width_m: 2.7,
+    height_m: 1.08,
+  },
   dining_west_window: {
     room: "kitchen_dining_chill_zone",
     wall_id: "plan-vector-wall:kitchen-dining-west-wall",

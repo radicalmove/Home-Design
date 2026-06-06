@@ -1451,6 +1451,31 @@
         "notes": "Measured short deck-side kitchen/dining window above the double doors. It starts 1.14m below the top-right inside corner and is 0.57m wide along the deck-side wall."
       },
       {
+        "id": "kitchen_window",
+        "type": "window",
+        "room": "kitchen_dining",
+        "status": "restored_reference_plan_window",
+        "wall_id": "plan-vector-wall:kitchen-dining-east-wall",
+        "width_m": 2.7,
+        "height_m": 1.08,
+        "source_reference_opening_id": "kitchen_window",
+        "evidence_check_ids": ["deck_doors_and_kitchen_window"],
+        "evidence_photo_paths": [
+          "OUTPUT/jpeg_photos/From-Outside-Looking-SW-to-Deck-double-doors.jpg",
+          "OUTPUT/jpeg_photos/Inside-Kitchen-Looking-NW-2.jpg"
+        ],
+        "display_px": {
+          "type": "polygon",
+          "points": [
+            [829, 410],
+            [837, 410],
+            [837, 484],
+            [829, 484]
+          ]
+        },
+        "notes": "Restored NE-facing kitchen/dining window from the earlier reference plan symbol so current and future designs retain the original kitchen glazing as well as the measured short deck-side window above the doors."
+      },
+      {
         "id": "dining_west_window",
         "type": "window",
         "room": "kitchen_dining",

@@ -441,6 +441,13 @@ describe("three-dimensional scene config", () => {
     const loungeWindow = config.openings.find((opening) => opening.id === "lounge_north_left_window");
     expect(loungeWindow?.anchor?.sourceWallId).toContain("measured-wall:");
     expect(loungeWindow?.anchor?.widthM).toBeGreaterThan(0.3);
+    const kitchenWindow = config.openings.find((opening) => opening.id === "kitchen_east_window");
+    expect(kitchenWindow).toMatchObject({
+      type: "window",
+      room: "kitchen_dining",
+    });
+    expect(kitchenWindow?.anchor?.sourceWallId).toContain("measured-wall:");
+    expect(kitchenWindow?.anchor?.widthM).toBeGreaterThan(0.4);
     expect(config.furniture.map((item) => item.id)).toContain("l_sofa-1");
     expect(config.furniture.find((item) => item.id === "partition_wall-1")?.depthM).toBeLessThanOrEqual(0.04);
     expect(config.furniture.find((item) => item.type === "l_sofa")?.shape).toBe("l_sofa");
@@ -585,6 +592,7 @@ describe("three-dimensional scene config", () => {
       "lounge_north_left_window",
       "lounge_north_right_window",
       "deck_side_dining_window",
+      "kitchen_window",
       "dining_west_window",
       "future_day_room_east_full_height_window",
       "future_old_laundry_north_floor_window",
@@ -605,6 +613,14 @@ describe("three-dimensional scene config", () => {
     expect(futureConfig.openings.find((opening) => opening.id === "deck_side_dining_window")?.anchor?.widthM)
       .toBeCloseTo(0.57, 2);
     expect(futureConfig.openings.find((opening) => opening.id === "deck_side_dining_window")?.anchor?.sourceWallId)
+      .toBe("plan-vector-wall:kitchen-dining-east-wall");
+    expect(futureConfig.openings.find((opening) => opening.id === "kitchen_window")).toMatchObject({
+      room: "kitchen_dining_chill_zone",
+      heightM: expect.closeTo(1.08, 2),
+    });
+    expect(futureConfig.openings.find((opening) => opening.id === "kitchen_window")?.anchor?.widthM)
+      .toBeCloseTo(2.7, 1);
+    expect(futureConfig.openings.find((opening) => opening.id === "kitchen_window")?.anchor?.sourceWallId)
       .toBe("plan-vector-wall:kitchen-dining-east-wall");
     expect(futureConfig.openings.find((opening) => opening.id === "dining_west_window")).toMatchObject({
       room: "kitchen_dining_chill_zone",

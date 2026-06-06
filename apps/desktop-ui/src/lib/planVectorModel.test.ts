@@ -39,6 +39,32 @@ describe("plan vector model", () => {
     ]));
     expect(currentPlanVectorModel.features.find((feature) => feature.id === "sunroom_front_double_doors")?.renderGroup).toBe("door");
     expect(currentPlanVectorModel.features.find((feature) => feature.id === "sunroom_wraparound_glazing")?.shape.kind).toBe("multi_polygon");
+    expect(currentPlanVectorModel.features.find((feature) => feature.id === "deck_side_dining_window")).toMatchObject({
+      type: "window",
+      renderGroup: "window",
+      shape: {
+        kind: "polygon",
+        points: [
+          [833, 332.5],
+          [839, 332.5],
+          [839, 347.7],
+          [833, 347.7],
+        ],
+      },
+    });
+    expect(currentPlanVectorModel.features.find((feature) => feature.id === "kitchen_window")).toMatchObject({
+      type: "window",
+      renderGroup: "window",
+      shape: {
+        kind: "polygon",
+        points: [
+          [829, 410],
+          [837, 410],
+          [837, 484],
+          [829, 484],
+        ],
+      },
+    });
   });
 
   it("loads current wall segments as renderable vector data", () => {
@@ -154,6 +180,8 @@ describe("plan vector model", () => {
       "future_main_entry_west_floor_window",
       "future_main_entry_east_floor_window",
       "future_old_laundry_north_floor_window",
+      "deck_side_dining_window",
+      "kitchen_window",
     ]));
     expect(featureIds).not.toContain("future_kitchen_day_room_opening");
     expect(featureIds).not.toContain("future_day_room_wide_opening");
@@ -242,6 +270,24 @@ describe("plan vector model", () => {
         [950.6, 485.1],
         [950.6, 493.1],
         [914, 493.1],
+      ],
+    });
+    expect(model.features.find((feature) => feature.id === "deck_side_dining_window")?.shape).toEqual({
+      kind: "polygon",
+      points: [
+        [833, 332.5],
+        [839, 332.5],
+        [839, 347.7],
+        [833, 347.7],
+      ],
+    });
+    expect(model.features.find((feature) => feature.id === "kitchen_window")?.shape).toEqual({
+      kind: "polygon",
+      points: [
+        [829, 410],
+        [837, 410],
+        [837, 484],
+        [829, 484],
       ],
     });
   });
