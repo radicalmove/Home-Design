@@ -87,24 +87,24 @@ describe("design structural transitions", () => {
     });
     expect(transition?.openings.find((opening) => opening.id === "design-2-main-entry-west-floor-window")).toMatchObject({
       kind: "window",
-      x1: 844,
-      x2: 852,
+      x1: 846,
+      x2: 854,
       y1: 489.1,
       y2: 489.1,
       strokeWidth: 8,
     });
     expect(transition?.openings.find((opening) => opening.id === "design-2-main-entry-east-floor-window")).toMatchObject({
       kind: "window",
-      x1: 888,
-      x2: 896,
+      x1: 886,
+      x2: 894,
       y1: 489.1,
       y2: 489.1,
       strokeWidth: 8,
     });
     expect(transition?.openings.find((opening) => opening.id === "design-2-main-lounge-deck-doors")).toMatchObject({
       kind: "door",
-      x1: 854,
-      x2: 886,
+      x1: 858,
+      x2: 882,
       y1: 489.1,
       y2: 489.1,
       strokeWidth: 8,

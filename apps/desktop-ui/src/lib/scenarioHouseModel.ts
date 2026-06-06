@@ -23,6 +23,7 @@ type ScenarioFeatureMetadata = {
   between?: string[];
   swing?: string;
   window_context?: string;
+  wall_id?: string;
   width_m?: number;
   height_m?: number;
 };
@@ -30,8 +31,9 @@ type ScenarioFeatureMetadata = {
 const SCENARIO_FEATURE_METADATA: Record<string, ScenarioFeatureMetadata> = {
   future_front_door: {
     between: ["future_living_dining_day_room", "deck"],
-    swing: "inward_to_living",
-    width_m: 0.86,
+    swing: "closed_glazed_entry",
+    wall_id: "plan-vector-wall:entrance-deck-wall-east",
+    width_m: 0.68,
     height_m: 2.05,
   },
   lounge_north_left_window: {
@@ -46,11 +48,13 @@ const SCENARIO_FEATURE_METADATA: Record<string, ScenarioFeatureMetadata> = {
   },
   deck_side_dining_window: {
     room: "kitchen_dining_chill_zone",
+    wall_id: "plan-vector-wall:kitchen-dining-east-wall",
     width_m: 0.57,
     height_m: 1.08,
   },
   dining_west_window: {
     room: "kitchen_dining_chill_zone",
+    wall_id: "plan-vector-wall:kitchen-dining-west-wall",
     width_m: 0.66,
     height_m: 1.08,
   },
@@ -76,11 +80,13 @@ const SCENARIO_FEATURE_METADATA: Record<string, ScenarioFeatureMetadata> = {
   },
   future_main_entry_west_floor_window: {
     room: "future_living_dining_day_room",
+    wall_id: "plan-vector-wall:entrance-deck-wall-west",
     width_m: 0.3,
     height_m: 1.95,
   },
   future_main_entry_east_floor_window: {
     room: "future_living_dining_day_room",
+    wall_id: "plan-vector-wall:entrance-deck-wall-east",
     width_m: 0.3,
     height_m: 1.95,
   },

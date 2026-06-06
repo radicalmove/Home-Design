@@ -631,17 +631,21 @@
         } else {
           addSolidSlidingDoorPanel(targetScene, visiblePanel, `opening:${opening.id}:${index}:solid-sliding`);
         }
+      } else if (isClosedGlazedEntryDoor(opening)) {
+        addClosedGlazedEntryDoor(targetScene, visiblePanel, `opening:${opening.id}:${index}:entry-door`);
       } else if (isDoubleDoorOpening(opening.type)) {
         addDoubleDoorLeaves(targetScene, visiblePanel, opening, `opening:${opening.id}:${index}:double-door`);
       } else if (!isDoorLikeOpening(opening.type) && !isPlainOpening(opening.type)) {
         addWindowGlass(targetScene, visiblePanel, material, `opening:${opening.id}:${index}`);
       }
       if (isDoubleDoorOpening(opening.type)) {
-        addOpeningFrame(targetScene, visiblePanel, `opening:${opening.id}:${index}:frame`, false);
+        addOpeningFrame(targetScene, visiblePanel, `opening:${opening.id}:${index}:frame`, false, "door");
+      } else if (isDoorLikeOpening(opening.type)) {
+        addOpeningFrame(targetScene, visiblePanel, `opening:${opening.id}:${index}:frame`, false, "door");
       } else {
         addOpeningFrame(targetScene, visiblePanel, `opening:${opening.id}:${index}:frame`);
       }
-      if (isDoorLikeOpening(opening.type) && !isSlidingDoorOpening(opening.type) && !isDoubleDoorOpening(opening.type)) {
+      if (isDoorLikeOpening(opening.type) && !isSlidingDoorOpening(opening.type) && !isDoubleDoorOpening(opening.type) && !isClosedGlazedEntryDoor(opening)) {
         addOpenDoorLeaf(targetScene, visiblePanel, opening.type, `opening:${opening.id}:${index}:open-leaf`);
       }
     }
@@ -879,17 +883,20 @@
     panel: OpeningPanelRenderSpec,
     namePrefix: string,
     includeCentreMullion = true,
+    frameStyle: "window" | "door" = "window",
   ) {
     const frameMaterial = materialFor("frameWhite", "#f4f5ef");
-    const frameWidth = 0.075;
-    const frameDepth = panel.depthM;
+    const frameWidth = frameStyle === "door" ? 0.04 : 0.075;
+    const frameDepth = frameStyle === "door" ? Math.min(panel.depthM, 0.05) : panel.depthM;
     const frameHeight = panel.heightM + frameWidth * 2;
     const sideOffset = Math.max(panel.widthM / 2 - frameWidth / 2, frameWidth);
     const rotationDeg = -THREE.MathUtils.radToDeg(panel.rotationY);
     addBox(targetScene, frameWidth, frameHeight, frameDepth, offsetOpeningPosition(panel, -sideOffset, 0), frameMaterial, rotationDeg, `${namePrefix}:left`);
     addBox(targetScene, frameWidth, frameHeight, frameDepth, offsetOpeningPosition(panel, sideOffset, 0), frameMaterial, rotationDeg, `${namePrefix}:right`);
     addBox(targetScene, panel.widthM + frameWidth, frameWidth, frameDepth, offsetOpeningPosition(panel, 0, frameHeight / 2), frameMaterial, rotationDeg, `${namePrefix}:top`);
-    addBox(targetScene, panel.widthM + frameWidth, frameWidth, frameDepth, offsetOpeningPosition(panel, 0, -frameHeight / 2), frameMaterial, rotationDeg, `${namePrefix}:bottom`);
+    if (frameStyle === "window") {
+      addBox(targetScene, panel.widthM + frameWidth, frameWidth, frameDepth, offsetOpeningPosition(panel, 0, -frameHeight / 2), frameMaterial, rotationDeg, `${namePrefix}:bottom`);
+    }
     if (includeCentreMullion && panel.widthM > 1.1) {
       addBox(targetScene, frameWidth * 0.78, panel.heightM, frameDepth, panel.position, frameMaterial, rotationDeg, `${namePrefix}:mullion`);
     }
@@ -982,6 +989,10 @@
 
   function isDoubleDoorOpening(openingType: string): boolean {
     return openingType === "door_group";
+  }
+
+  function isClosedGlazedEntryDoor(opening: ThreeDSceneConfig["openings"][number]): boolean {
+    return opening.id === "future_front_door" || opening.swing === "closed_glazed_entry";
   }
 
   function isPlainOpening(openingType: string): boolean {
@@ -1141,6 +1152,112 @@
 
       targetScene.add(leafGroup);
     });
+  }
+
+  function addClosedGlazedEntryDoor(
+    targetScene: THREE.Scene,
+    panel: OpeningPanelRenderSpec,
+    namePrefix: string,
+  ) {
+    const doorMaterial = materialFor("entryDoorPaint", "#d8ead6");
+    const frameMaterial = materialFor("frameWhite", "#f4f5ef");
+    const glassMaterial = materialFor("glazing");
+    const handleMaterial = materialFor("doorHandle", "#1f2424");
+    const rotationDeg = -THREE.MathUtils.radToDeg(panel.rotationY);
+    const doorDepth = 0.04;
+    const railHeight = Math.max(0.08, panel.heightM * 0.06);
+    const stileWidth = Math.max(0.045, panel.widthM * 0.08);
+    const glassWidth = Math.max(0.12, panel.widthM - stileWidth * 2.4);
+    const glassHeight = Math.max(0.4, panel.heightM * 0.56);
+    const glassYOffsetM = panel.heightM * 0.13;
+    const lowerPanelHeight = Math.max(0.18, panel.heightM * 0.18);
+    const lowerPanelYOffsetM = -panel.heightM * 0.29;
+
+    addBox(
+      targetScene,
+      panel.widthM,
+      panel.heightM,
+      doorDepth,
+      panel.position,
+      doorMaterial,
+      rotationDeg,
+      `${namePrefix}:slab`,
+    );
+
+    addBox(
+      targetScene,
+      glassWidth,
+      glassHeight,
+      doorDepth + 0.004,
+      {
+        x: panel.position.x,
+        y: panel.position.y + glassYOffsetM,
+        z: panel.position.z,
+      },
+      glassMaterial,
+      rotationDeg,
+      `${namePrefix}:glass`,
+    );
+
+    [-panel.widthM / 2 + stileWidth / 2, panel.widthM / 2 - stileWidth / 2].forEach((acrossM, index) => {
+      addBox(
+        targetScene,
+        stileWidth,
+        panel.heightM,
+        doorDepth + 0.01,
+        offsetOpeningPosition(panel, acrossM, 0),
+        frameMaterial,
+        rotationDeg,
+        `${namePrefix}:stile:${index}`,
+      );
+    });
+
+    [
+      -panel.heightM / 2 + railHeight / 2,
+      glassYOffsetM - glassHeight / 2 - railHeight / 2,
+      glassYOffsetM + glassHeight / 2 + railHeight / 2,
+      panel.heightM / 2 - railHeight / 2,
+    ].forEach((localY, index) => {
+      addBox(
+        targetScene,
+        panel.widthM,
+        railHeight,
+        doorDepth + 0.01,
+        {
+          ...panel.position,
+          y: panel.position.y + localY,
+        },
+        frameMaterial,
+        rotationDeg,
+        `${namePrefix}:rail:${index}`,
+      );
+    });
+
+    addBox(
+      targetScene,
+      panel.widthM * 0.72,
+      lowerPanelHeight,
+      doorDepth + 0.012,
+      {
+        x: panel.position.x,
+        y: panel.position.y + lowerPanelYOffsetM,
+        z: panel.position.z,
+      },
+      frameMaterial,
+      rotationDeg,
+      `${namePrefix}:lower-panel`,
+    );
+
+    addBox(
+      targetScene,
+      0.035,
+      0.34,
+      doorDepth + 0.02,
+      offsetOpeningPosition(panel, panel.widthM * 0.28, -0.12),
+      handleMaterial,
+      rotationDeg,
+      `${namePrefix}:handle`,
+    );
   }
 
   function addOpenDoorLeaf(

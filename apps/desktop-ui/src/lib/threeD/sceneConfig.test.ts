@@ -602,10 +602,20 @@ describe("three-dimensional scene config", () => {
       room: "kitchen_dining_chill_zone",
       heightM: expect.closeTo(1.08, 2),
     });
+    expect(futureConfig.openings.find((opening) => opening.id === "deck_side_dining_window")?.anchor?.widthM)
+      .toBeCloseTo(0.57, 2);
+    expect(futureConfig.openings.find((opening) => opening.id === "deck_side_dining_window")?.anchor?.sourceWallId)
+      .toBe("plan-vector-wall:kitchen-dining-east-wall");
     expect(futureConfig.openings.find((opening) => opening.id === "dining_west_window")).toMatchObject({
       room: "kitchen_dining_chill_zone",
       heightM: expect.closeTo(1.08, 2),
     });
+    expect(futureConfig.openings.find((opening) => opening.id === "future_front_door")?.anchor?.sourceWallId)
+      .toBe("plan-vector-wall:entrance-deck-wall-east");
+    expect(futureConfig.openings.find((opening) => opening.id === "future_main_entry_west_floor_window")?.anchor?.sourceWallId)
+      .toBe("plan-vector-wall:entrance-deck-wall-west");
+    expect(futureConfig.openings.find((opening) => opening.id === "future_main_entry_east_floor_window")?.anchor?.sourceWallId)
+      .toBe("plan-vector-wall:entrance-deck-wall-east");
     expect(futureConfig.openings.find((opening) => opening.id === "future_day_room_east_full_height_window")?.heightM)
       .toBeCloseTo(2.2, 2);
     expect(futureConfig.openings.find((opening) => opening.id === "future_old_laundry_north_floor_window")?.heightM)

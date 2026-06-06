@@ -60,6 +60,7 @@ export type ThreeDOpening = {
   windowContext: string | null;
   room: string | null;
   between: string[];
+  sourceWallId: string | null;
   heightM: number | null;
   geometry: SceneGeometry;
   centre: ScenePoint;
@@ -369,6 +370,7 @@ function buildOpenings(model: JsonRecord, transform: PlanTransform): ThreeDOpeni
         windowContext: asString(feature.window_context) || null,
         room: asString(feature.room) || null,
         between: asStringArray(feature.between),
+        sourceWallId: asString(feature.wall_id) || null,
         heightM: asNumber(feature.height_m),
         geometry,
         centre: sceneGeometryCentre(geometry),
@@ -650,6 +652,12 @@ function anchorOpeningBoundsToWall(
   walls: ThreeDWall[],
   requestedWidthM: number | null,
 ): ThreeDOpeningAnchor | null {
+  const requestedWall = opening.sourceWallId
+    ? walls.find((wall) => wall.id === opening.sourceWallId)
+    : null;
+  if (requestedWall) {
+    return anchorOpeningBoundsToWallFromCandidates(opening, descriptor, [requestedWall], requestedWidthM);
+  }
   return anchorOpeningBoundsToWallFromCandidates(
     opening,
     descriptor,
@@ -820,6 +828,7 @@ function syntheticOpeningFromTopLevelRecord(record: JsonRecord, walls: ThreeDWal
     windowContext: asString(record.window_context) || null,
     room: asString(record.room) || null,
     between,
+    sourceWallId: asString(record.wall_id) || null,
     heightM: asNumber(record.height_m),
     geometry,
     centre: sceneGeometryCentre(geometry),

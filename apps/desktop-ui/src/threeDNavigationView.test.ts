@@ -108,7 +108,7 @@ describe("native 3D navigation view wiring", () => {
   it("keeps opening infill at wall thickness and renders doors open", () => {
     expect(viewSource).toContain("depthM: Math.max(anchor.wallThicknessM, panelThicknessM)");
     expect(viewSource).toContain("const infillDepth = panel.depthM;");
-    expect(viewSource).toContain("const frameDepth = panel.depthM;");
+    expect(viewSource).toContain("const frameDepth = frameStyle === \"door\" ? Math.min(panel.depthM, 0.05) : panel.depthM;");
     expect(viewSource).toContain("addOpenDoorLeaf");
     expect(viewSource).toContain("isDoorLikeOpening");
   });
@@ -151,13 +151,27 @@ describe("native 3D navigation view wiring", () => {
     expect(viewSource).toContain("addGlazedDoubleDoorLeaves");
     expect(viewSource).toContain('const doorGlassMaterial = materialFor("glazing");');
     expect(viewSource).toContain("includeCentreMullion = true");
-    expect(viewSource).toContain("addOpeningFrame(targetScene, visiblePanel, `opening:${opening.id}:${index}:frame`, false)");
+    expect(viewSource).toContain("addOpeningFrame(targetScene, visiblePanel, `opening:${opening.id}:${index}:frame`, false, \"door\")");
     expect(viewSource).toContain("const hingeOffset = index === 0 ? -panel.widthM / 2 : panel.widthM / 2;");
     expect(viewSource).toContain("const leafGroup = new THREE.Group();");
     expect(viewSource).toContain("leafGroup.position.set(hinge.x, panel.position.y, hinge.z);");
     expect(viewSource).toContain("leafGroup.rotation.y = panel.rotationY + swingDirection * (index === 0 ? openAngleRad : -openAngleRad);");
     expect(viewSource).toContain("targetScene.add(leafGroup);");
     expect(viewSource).not.toContain("openingPositionFromLeafRotation");
+  });
+
+  it("uses thinner door jambs instead of window frames for door openings", () => {
+    expect(viewSource).toContain("frameStyle: \"window\" | \"door\" = \"window\"");
+    expect(viewSource).toContain("const frameWidth = frameStyle === \"door\" ? 0.04 : 0.075;");
+    expect(viewSource).toContain("if (frameStyle === \"window\")");
+    expect(viewSource).toContain("addOpeningFrame(targetScene, visiblePanel, `opening:${opening.id}:${index}:frame`, false, \"door\")");
+  });
+
+  it("renders the Design 2 front door as a closed glazed entry assembly", () => {
+    expect(viewSource).toContain("isClosedGlazedEntryDoor");
+    expect(viewSource).toContain('opening.id === "future_front_door"');
+    expect(viewSource).toContain("addClosedGlazedEntryDoor(targetScene, visiblePanel");
+    expect(viewSource).toContain("!isClosedGlazedEntryDoor(opening)");
   });
 
   it("flips double-door leaf swing when the model marks doors as outward to the front path", () => {
