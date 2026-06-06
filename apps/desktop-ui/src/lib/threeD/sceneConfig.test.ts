@@ -635,21 +635,30 @@ describe("three-dimensional scene config", () => {
       heightM: expect.closeTo(1.08, 2),
     });
     expect(futureConfig.openings.find((opening) => opening.id === "future_front_door")?.anchor?.sourceWallId)
-      .toBe("plan-vector-wall:entrance-deck-wall-east");
+      .toBe("plan-vector-wall:future-main-entry-wall");
     expect(futureConfig.openings.find((opening) => opening.id === "future_front_door")).toMatchObject({
       swing: "closed_glazed_entry",
       heightM: expect.closeTo(2.05, 2),
     });
     expect(futureConfig.openings.find((opening) => opening.id === "future_front_door")?.anchor?.widthM)
-      .toBeCloseTo(0.62, 2);
+      .toBeCloseTo(0.78, 2);
     expect(futureConfig.openings.find((opening) => opening.id === "future_main_entry_west_floor_window")?.anchor?.sourceWallId)
-      .toBe("plan-vector-wall:entrance-deck-wall-west");
+      .toBe("plan-vector-wall:future-main-entry-wall");
     expect(futureConfig.openings.find((opening) => opening.id === "future_main_entry_east_floor_window")?.anchor?.sourceWallId)
-      .toBe("plan-vector-wall:entrance-deck-wall-east");
+      .toBe("plan-vector-wall:future-main-entry-wall");
     const futureFrontDoorAnchor = futureConfig.openings.find((opening) => opening.id === "future_front_door")?.anchor;
+    const futureEntryWestWindowAnchor = futureConfig.openings.find((opening) => opening.id === "future_main_entry_west_floor_window")?.anchor;
     const futureEntryEastWindowAnchor = futureConfig.openings.find((opening) => opening.id === "future_main_entry_east_floor_window")?.anchor;
     expect(futureFrontDoorAnchor?.centre.x).toBeGreaterThan(9.0);
+    expect(futureEntryWestWindowAnchor?.centre.x).toBeLessThan((futureFrontDoorAnchor?.centre.x ?? 0) - 0.45);
     expect(futureEntryEastWindowAnchor?.centre.x).toBeGreaterThan((futureFrontDoorAnchor?.centre.x ?? 0) + 0.45);
+    const futureEntryWall = futureConfig.walls.find((wall) => wall.id === "plan-vector-wall:future-main-entry-wall");
+    expect(futureEntryWall?.segments).toEqual([
+      expect.objectContaining({
+        x1: expect.closeTo(11.64, 1),
+        x2: expect.closeTo(16.13, 1),
+      }),
+    ]);
     expect(futureConfig.openings.find((opening) => opening.id === "future_day_room_east_full_height_window")?.heightM)
       .toBeCloseTo(2.2, 2);
     expect(futureConfig.openings.find((opening) => opening.id === "future_old_laundry_north_floor_window")?.heightM)

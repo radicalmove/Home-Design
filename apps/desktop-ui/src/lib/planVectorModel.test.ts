@@ -124,6 +124,8 @@ describe("plan vector model", () => {
     ]));
     expect(wallIds).not.toContain("bedroom2-east-wall");
     expect(wallIds).not.toContain("bedroom2-north-wall-east");
+    expect(wallIds).not.toContain("entrance-deck-wall-west");
+    expect(wallIds).not.toContain("entrance-deck-wall-east");
     expect(wallIds).not.toContain("entrance-north-return-wall");
     expect(wallIds).toContain("office-bathroom-wall");
     expect(wallIds).toContain("bathroom-bedroom2-wall");
@@ -133,6 +135,7 @@ describe("plan vector model", () => {
       "replacement-bedroom-envelope",
       "lounge-bedroom-chill-wall-infill",
       "bathroom-laundry-divider",
+      "future-main-entry-wall",
     ]));
     expect(wallIds).not.toEqual(expect.arrayContaining([
       "day-room-retained-east-exterior-wall",
@@ -166,6 +169,16 @@ describe("plan vector model", () => {
         y1: 523,
         x2: 727.1,
         y2: 601.8,
+      },
+      thicknessPx: 3.7,
+    });
+    expect(model.walls.find((wall) => wall.id === "future-main-entry-wall")).toMatchObject({
+      shape: {
+        kind: "line",
+        x1: 834.3,
+        y1: 489.1,
+        x2: 956.4,
+        y2: 489.1,
       },
       thicknessPx: 3.7,
     });
@@ -203,10 +216,10 @@ describe("plan vector model", () => {
     expect(model.features.find((feature) => feature.id === "future_front_door")?.shape).toEqual({
       kind: "polygon",
       points: [
-        [881, 486.6],
-        [898, 486.6],
-        [898, 491.6],
-        [881, 491.6],
+        [864, 486.6],
+        [887, 486.6],
+        [887, 491.6],
+        [864, 491.6],
       ],
     });
     expect(model.features.find((feature) => feature.id === "lounge_north_left_window")?.shape).toEqual({
@@ -248,19 +261,19 @@ describe("plan vector model", () => {
     expect(model.features.find((feature) => feature.id === "future_main_entry_west_floor_window")?.shape).toEqual({
       kind: "polygon",
       points: [
-        [846, 485.1],
-        [854, 485.1],
-        [854, 493.1],
-        [846, 493.1],
+        [852, 485.1],
+        [860, 485.1],
+        [860, 493.1],
+        [852, 493.1],
       ],
     });
     expect(model.features.find((feature) => feature.id === "future_main_entry_east_floor_window")?.shape).toEqual({
       kind: "polygon",
       points: [
-        [902, 485.1],
-        [910, 485.1],
-        [910, 493.1],
-        [902, 493.1],
+        [891, 485.1],
+        [899, 485.1],
+        [899, 493.1],
+        [891, 493.1],
       ],
     });
     expect(model.features.find((feature) => feature.id === "future_old_laundry_north_floor_window")?.shape).toEqual({

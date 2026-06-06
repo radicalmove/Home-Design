@@ -32,8 +32,8 @@ const SCENARIO_FEATURE_METADATA: Record<string, ScenarioFeatureMetadata> = {
   future_front_door: {
     between: ["future_living_dining_day_room", "deck"],
     swing: "closed_glazed_entry",
-    wall_id: "plan-vector-wall:entrance-deck-wall-east",
-    width_m: 0.62,
+    wall_id: "plan-vector-wall:future-main-entry-wall",
+    width_m: 0.78,
     height_m: 2.05,
   },
   lounge_north_left_window: {
@@ -86,13 +86,13 @@ const SCENARIO_FEATURE_METADATA: Record<string, ScenarioFeatureMetadata> = {
   },
   future_main_entry_west_floor_window: {
     room: "future_living_dining_day_room",
-    wall_id: "plan-vector-wall:entrance-deck-wall-west",
+    wall_id: "plan-vector-wall:future-main-entry-wall",
     width_m: 0.3,
     height_m: 1.95,
   },
   future_main_entry_east_floor_window: {
     room: "future_living_dining_day_room",
-    wall_id: "plan-vector-wall:entrance-deck-wall-east",
+    wall_id: "plan-vector-wall:future-main-entry-wall",
     width_m: 0.3,
     height_m: 1.95,
   },

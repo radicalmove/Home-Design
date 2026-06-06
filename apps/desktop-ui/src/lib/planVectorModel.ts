@@ -404,6 +404,8 @@ const DESIGN_2_REMOVED_WALL_IDS = new Set([
   "lounge-sunroom-lower-wall",
   "bedroom2-east-wall",
   "bedroom2-north-wall-east",
+  "entrance-deck-wall-west",
+  "entrance-deck-wall-east",
   "kitchen-entrance-return-wall",
   "entrance-north-return-wall",
   "entrance-laundry-wall",
@@ -445,6 +447,17 @@ const DESIGN_2_ADDED_WALLS: PlanVectorWall[] = [
     },
     thicknessPx: WALL_THICKNESS_PX.interior,
   },
+  {
+    id: "future-main-entry-wall",
+    shape: {
+      kind: "line",
+      x1: 834.3,
+      y1: 489.1,
+      x2: 956.4,
+      y2: 489.1,
+    },
+    thicknessPx: WALL_THICKNESS_PX.thinExterior,
+  },
 ];
 
 const DESIGN_2_REMOVED_FEATURE_IDS = new Set([
@@ -470,10 +483,10 @@ const DESIGN_2_ADDED_FEATURES: PlanVectorFeature[] = [
     shape: {
       kind: "polygon",
       points: [
-        [881, 486.6],
-        [898, 486.6],
-        [898, 491.6],
-        [881, 491.6],
+        [864, 486.6],
+        [887, 486.6],
+        [887, 491.6],
+        [864, 491.6],
       ],
     },
   },
@@ -540,10 +553,10 @@ const DESIGN_2_ADDED_FEATURES: PlanVectorFeature[] = [
     shape: {
       kind: "polygon",
       points: [
-        [846, 485.1],
-        [854, 485.1],
-        [854, 493.1],
-        [846, 493.1],
+        [852, 485.1],
+        [860, 485.1],
+        [860, 493.1],
+        [852, 493.1],
       ],
     },
   },
@@ -554,10 +567,10 @@ const DESIGN_2_ADDED_FEATURES: PlanVectorFeature[] = [
     shape: {
       kind: "polygon",
       points: [
-        [902, 485.1],
-        [910, 485.1],
-        [910, 493.1],
-        [902, 493.1],
+        [891, 485.1],
+        [899, 485.1],
+        [899, 493.1],
+        [891, 493.1],
       ],
     },
   },
