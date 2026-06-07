@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from html import escape
+
 from .geometry import layout_bounds
 from .model import HouseModel
 from .validate import SEASONS, TIME_BANDS
@@ -76,11 +78,19 @@ def render_calibration_report(model: HouseModel) -> str:
         legacy_layers = ", ".join(current_structure.get("legacy_layers", []))
         lines.append(f"- Legacy comparison layers: {legacy_layers or 'none'}")
         spaces = current_structure.get("spaces", [])
+        built_ins = current_structure.get("built_ins", [])
         features = current_structure.get("features", [])
         lines.append(f"- Spaces promoted: {len(spaces)}")
         for space in spaces:
             checks = ", ".join(space.get("evidence_check_ids", []))
             lines.append(f"  Space: {space['id']} ({space.get('confidence', 'unknown')}; evidence: {checks or 'none'})")
+        lines.append(f"- Built-ins recorded: {len(built_ins)}")
+        for item in built_ins:
+            checks = ", ".join(item.get("evidence_check_ids", []))
+            lines.append(
+                f"  Built-in: {item['id']} ({item.get('type', 'built_in')}; "
+                f"{item.get('status', 'unknown')}; evidence: {checks or 'none'})"
+            )
         lines.append(f"- Features promoted: {len(features)}")
         for feature in features:
             checks = ", ".join(feature.get("evidence_check_ids", []))
@@ -88,6 +98,9 @@ def render_calibration_report(model: HouseModel) -> str:
                 f"  Feature: {feature['id']} ({feature.get('type', 'feature')}; "
                 f"{feature.get('status', 'unknown')}; evidence: {checks or 'none'})"
             )
+            detail = _feature_detail(feature)
+            if detail:
+                lines.append(f"    Detail: {detail}")
 
     current_site = model.raw.get("current_site", {})
     if current_site:
@@ -139,6 +152,16 @@ def render_calibration_report(model: HouseModel) -> str:
         ]
     )
 
+    design_issues = model.raw.get("design_issues", [])
+    if design_issues:
+        lines.extend(["", "## Design Issues", ""])
+        for issue in design_issues:
+            severity = _display_label(issue.get("severity", "issue"))
+            lines.append(f"- {issue['title']} ({severity}): {issue['summary']}")
+            possible_solution = issue.get("possible_solution")
+            if possible_solution:
+                lines.append(f"  Possible solution: {possible_solution}")
+
     lines.extend(["", "## Next Measurements", ""])
     lines.extend(
         [
@@ -153,10 +176,162 @@ def render_calibration_report(model: HouseModel) -> str:
     return "\n".join(lines) + "\n"
 
 
+def render_calibration_report_html(model: HouseModel) -> str:
+    return _render_report_html(render_calibration_report(model))
+
+
 def _m(value: object) -> str:
     if isinstance(value, int | float):
         return f"{value:g}m"
     return "unknown"
+
+
+def _display_label(value: object) -> str:
+    if isinstance(value, str):
+        return value.replace("_", " ")
+    return "issue"
+
+
+def _render_report_html(markdown: str) -> str:
+    body_lines: list[str] = []
+    in_list = False
+    open_item = False
+
+    def close_item() -> None:
+        nonlocal open_item
+        if open_item:
+            body_lines.append("</li>")
+            open_item = False
+
+    def close_list() -> None:
+        nonlocal in_list
+        close_item()
+        if in_list:
+            body_lines.append("</ul>")
+            in_list = False
+
+    for raw_line in markdown.splitlines():
+        line = raw_line.rstrip()
+        if not line:
+            close_list()
+            continue
+        if line.startswith("# "):
+            close_list()
+            body_lines.append(f"<h1>{escape(line[2:])}</h1>")
+            continue
+        if line.startswith("## "):
+            close_list()
+            body_lines.append(f"<h2>{escape(line[3:])}</h2>")
+            continue
+        if line.startswith("- "):
+            if not in_list:
+                body_lines.append("<ul>")
+                in_list = True
+            close_item()
+            body_lines.append(f"<li>{escape(line[2:])}")
+            open_item = True
+            continue
+        if line.startswith("  ") and open_item:
+            body_lines.append(f'<p class="detail">{escape(line.strip())}</p>')
+            continue
+
+        close_list()
+        body_lines.append(f"<p>{escape(line)}</p>")
+
+    close_list()
+    body = "\n".join(body_lines)
+    return f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Home Design Calibration Report</title>
+  <style>
+    :root {{
+      color: #1f2933;
+      background: #f6f8f9;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }}
+    body {{
+      margin: 0;
+      padding: 32px;
+    }}
+    main {{
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 30px;
+      background: #ffffff;
+      border: 1px solid #d6dde1;
+      border-radius: 8px;
+    }}
+    h1, h2 {{
+      margin: 0;
+      letter-spacing: 0;
+      line-height: 1.18;
+    }}
+    h1 {{
+      font-size: 2rem;
+    }}
+    h2 {{
+      margin-top: 30px;
+      padding-top: 20px;
+      color: #24323a;
+      font-size: 1.25rem;
+      border-top: 1px solid #e2e8ec;
+    }}
+    ul {{
+      margin: 12px 0 0;
+      padding-left: 22px;
+    }}
+    li {{
+      margin: 8px 0;
+      line-height: 1.48;
+    }}
+    .detail {{
+      margin: 6px 0 0;
+      color: #42535b;
+    }}
+    p {{
+      line-height: 1.5;
+    }}
+    @media (max-width: 700px) {{
+      body {{
+        padding: 16px;
+      }}
+      main {{
+        padding: 20px;
+      }}
+    }}
+  </style>
+</head>
+<body>
+  <main>
+{body}
+  </main>
+</body>
+</html>
+"""
+
+
+def _feature_detail(feature: dict[str, object]) -> str:
+    parts: list[str] = []
+    if "width_m" in feature:
+        parts.append(f"width {_m(feature['width_m'])}")
+    offsets = feature.get("wall_offsets_m")
+    if isinstance(offsets, dict):
+        formatted_offsets = ", ".join(f"{key} {_m(value)}" for key, value in offsets.items())
+        if formatted_offsets:
+            parts.append(f"offsets {formatted_offsets}")
+    position_reference = feature.get("position_reference")
+    if isinstance(position_reference, str):
+        parts.append(f"position {position_reference}")
+    swing = feature.get("swing")
+    if isinstance(swing, str):
+        parts.append(f"swing {swing}")
+    projection = feature.get("right_corner_nub_projection_m")
+    if projection is not None:
+        parts.append(f"right corner nub projection {_m(projection)}")
+    return "; ".join(parts)
 
 
 def _daylight_value_count(room_daylight: dict[str, object]) -> int:

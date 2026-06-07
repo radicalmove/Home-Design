@@ -18,6 +18,12 @@ class CliTests(unittest.TestCase):
         self.assertEqual(args.command, "reference-plan")
         self.assertEqual(args.output, "OUTPUT/reference_plan.html")
 
+    def test_cli_accepts_house_3d_command(self):
+        args = build_parser().parse_args(["house-3d", "--output", "OUTPUT/house_3d.html"])
+
+        self.assertEqual(args.command, "house-3d")
+        self.assertEqual(args.output, "OUTPUT/house_3d.html")
+
     def test_cli_can_write_presentation_svg(self):
         path = Path("/private/tmp/home-design-presentation-test.svg")
         result = main(["presentation", "--output", str(path)])
@@ -45,3 +51,21 @@ class CliTests(unittest.TestCase):
 
         self.assertEqual(result, 0)
         self.assertIn("Reference Style Plan", path.read_text())
+
+    def test_cli_can_write_house_3d_html(self):
+        path = Path("/private/tmp/home-design-house-3d-test.html")
+        result = main(["house-3d", "--output", str(path)])
+
+        self.assertEqual(result, 0)
+        html = path.read_text()
+        self.assertIn("House 3D Viewer", html)
+        self.assertIn('id="house-3d-config"', html)
+
+    def test_cli_can_write_report_html(self):
+        path = Path("/private/tmp/home-design-calibration-report-test.html")
+        result = main(["report", "--output", str(path)])
+
+        self.assertEqual(result, 0)
+        html = path.read_text()
+        self.assertIn("<h1>Home Design Calibration Report</h1>", html)
+        self.assertIn("No second toilet (practical design issue)", html)

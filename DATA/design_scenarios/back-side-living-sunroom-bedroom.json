@@ -1,0 +1,147 @@
+{
+  "id": "back-side-living-sunroom-bedroom",
+  "label": "Design 2 - Back-Side Living Rebuild + Sunroom Bedroom Replacement",
+  "rank": 2,
+  "status": "draft",
+  "transition_from": "current",
+  "cost_band": "High to very high",
+  "summary": "The strongest whole-house move: daily living and dining shift to the brighter back/deck side, the current dining edge becomes a softer chill/reading zone beside the retained kitchen, the current lounge becomes a proper bedroom, laundry and WC move toward separated office-side service rooms, and the current sunroom is replaced by a proper insulated bedroom.",
+  "room_changes": [
+    "Bedroom 2, laundry, toilet, and entrance become a larger living/dining/day room.",
+    "The current dining edge becomes a softer chill/reading zone beside the retained kitchen.",
+    "The current lounge becomes a proper bedroom rather than a media room.",
+    "Laundry and WC move toward the office/bathroom side.",
+    "Bathroom, WC, and laundry functions are replanned as separate adjacent rooms rather than one combined laundry/bathroom.",
+    "The sunroom is demolished and replaced with a properly insulated bedroom that can push west to align with the master-bedroom wall.",
+    "The renovated kitchen stays broadly intact."
+  ],
+  "daylight_strategy": [
+    "Put the most-used daytime lounge function where morning-to-early-afternoon light is more valuable.",
+    "Stop spending the best back-side daylight on laundry and transient entrance use.",
+    "Design the replacement bedroom with controlled glazing, privacy, curtains, and thermal performance rather than repeating the sunroom problem.",
+    "Add deck shade and wind control that preserves useful daylight into kitchen/dining."
+  ],
+  "movement_strategy": [
+    "Make back/garage arrival feel deliberate rather than secondary.",
+    "Improve the route from entry to kitchen, deck, and new lounge.",
+    "Reduce the current lounge's role as a circulation junction by making it a private bedroom with a clear doorway.",
+    "Keep guest toilet access logical after the WC relocation."
+  ],
+  "build_scope": [
+    "Demolish or substantially remove the existing sunroom.",
+    "Construct a new insulated bedroom envelope on or near the sunroom site.",
+    "Alter internal walls around Bedroom 2, entrance, laundry, and toilet.",
+    "Relocate laundry and WC plumbing toward the office/bathroom side while keeping laundry separate from bathing functions.",
+    "Upgrade electrical, heating, flooring, and finishes in the changed zones.",
+    "Add a designed deck shade or roof solution."
+  ],
+  "risks": [
+    "Service-room relocation and office loss make this disruptive and expensive.",
+    "The replacement bedroom must not inherit the sunroom's exposure, glare, privacy, heat, and cold problems.",
+    "The new living/dining/day room must not become a long narrow leftover room.",
+    "The current lounge needs proper bedroom privacy, door position, window placement, and heating before it can work as a sleeping room.",
+    "Services, structure, drainage, consent, and staged construction need builder/designer review."
+  ],
+  "cost_notes": [
+    "Likely a real architectural renovation rather than a small alteration.",
+    "Broad planning band: NZD 140k to 500k+ depending on structure, wet-area relocation, and new bedroom envelope."
+  ],
+  "furniture_reuse": [
+    {
+      "category": "reuse_in_place",
+      "item": "Renovated kitchen cabinetry and main kitchen appliances",
+      "current_location": "Kitchen / Dining",
+      "proposed_location": "Kitchen / Dining",
+      "action": "Protect during works and keep the renovated kitchen broadly intact unless later design testing proves a very high-value reason to alter it.",
+      "cost_note": "Avoids turning this into a kitchen-renovation project."
+    },
+    {
+      "category": "reuse_relocated",
+      "item": "Dining table and dining chairs",
+      "current_location": "Kitchen / Dining",
+      "proposed_location": "Bedroom 2 living/dining/day room",
+      "action": "Relocate the existing dining set into the larger bright rear room so dining no longer occupies the retained kitchen chill edge.",
+      "linked_object_types": ["dining_table", "chair"]
+    },
+    {
+      "category": "reuse_relocated",
+      "item": "Existing lounge sofa and armchairs",
+      "current_location": "Current lounge",
+      "proposed_location": "Bedroom 2 living/dining/day room",
+      "action": "Move the main sitting furniture into the brighter back-side room so the best daytime light supports the most-used daytime living space.",
+      "linked_object_types": ["l_sofa", "sofa", "armchair"]
+    },
+    {
+      "category": "new_required",
+      "item": "Lounge TV, fireplace relationship, and media pieces",
+      "current_location": "Current lounge",
+      "proposed_location": "New living/dining/day room or chill/reading edge",
+      "action": "Do not assume the TV/fireplace relationship stays in the current lounge, because that room is now being tested as a bedroom.",
+      "linked_object_types": ["tv", "fireplace", "cabinet"]
+    },
+    {
+      "category": "reuse_relocated",
+      "item": "Teen bedroom bed, dresser, bedside table, TV, and loose storage",
+      "current_location": "Bedroom 2",
+      "proposed_location": "Replacement insulated bedroom on the sunroom site",
+      "action": "Reuse the existing teen-bedroom furniture where it fits, then design the replacement bedroom around privacy, warmth, blackout control, and a calmer storage wall.",
+      "linked_object_types": ["bed", "queen_bed", "dresser_drawers", "bedside_table", "tv", "bookcase"]
+    },
+    {
+      "category": "modify_reuse",
+      "item": "Laundry cabinetry and bench storage",
+      "current_location": "Laundry",
+      "proposed_location": "Office-side separated laundry/WC service rooms",
+      "action": "Allow for careful removal and reuse of cabinets where dimensions suit the new laundry/WC/storage rooms, accepting that some panels or benchtops may need alteration.",
+      "cost_note": "Can reduce joinery cost, but plumbing and refitting still need a builder/joiner allowance.",
+      "linked_object_types": ["cabinet", "sink", "vanity"]
+    },
+    {
+      "category": "reuse_relocated",
+      "item": "Washer and dryer",
+      "current_location": "Laundry",
+      "proposed_location": "Office-side separated laundry/WC service rooms",
+      "action": "Relocate the existing appliances if their age and condition justify keeping them through the renovation.",
+      "linked_object_types": ["washer", "dryer"]
+    },
+    {
+      "category": "modify_reuse",
+      "item": "Bookcases and loose storage",
+      "current_location": "Lounge, Bedroom 2, office, and hallway-adjacent rooms",
+      "proposed_location": "Chill/reading edge, living/dining/day room, or replacement bedroom",
+      "action": "Reuse only the pieces that help each room's new purpose; avoid carrying tall storage into the new bright room if it blocks light or circulation.",
+      "linked_object_types": ["bookcase", "cabinet"]
+    },
+    {
+      "category": "remove_store_sell",
+      "item": "Office desk and surplus office storage",
+      "current_location": "Office",
+      "proposed_location": "Kitchen chill/reading edge, replacement bedroom study corner, or off-site",
+      "action": "The office is sacrificed to separated service rooms in this option, so test whether the desk is still needed before forcing it into a poorer room.",
+      "linked_object_types": ["l_desk", "desk", "bookcase"]
+    },
+    {
+      "category": "new_required",
+      "item": "Bedroom storage, blackout/privacy window treatment, and heating for the replacement bedroom",
+      "proposed_location": "Replacement insulated bedroom on the sunroom site",
+      "action": "Budget for the items that make the new bedroom genuinely better than the existing sunroom: robe/storage, curtains or blinds, heating, privacy, and controlled glazing.",
+      "cost_note": "Small compared with building works, but important to avoid recreating the sunroom comfort problem."
+    },
+    {
+      "category": "new_required",
+      "item": "Deck shade, wind control, and outdoor living pieces",
+      "proposed_location": "Deck and back-side living edge",
+      "action": "Add a proper shade/wind solution so the deck can support the new living arrangement instead of relying on the current umbrella.",
+      "cost_note": "Can range from a modest pergola/shade-sail package to a more expensive roofed structure."
+    }
+  ],
+  "transition_mapping": [
+    { "from": "bedroom_2", "to": "living_dining_day_room" },
+    { "from": "laundry", "to": "absorbed_living_dining_day_room" },
+    { "from": "toilet", "to": "relocated_wc_in_service_zone" },
+    { "from": "office", "to": "separated_laundry_wc_service_rooms" },
+    { "from": "sunroom", "to": "new_insulated_bedroom" },
+    { "from": "lounge", "to": "proper_bedroom" },
+    { "from": "kitchen_dining", "to": "retained_kitchen_chill_reading_edge" }
+  ]
+}

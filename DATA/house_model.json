@@ -10,6 +10,16 @@
       "Property extends rightward/rearward from the street.",
       "Compass-facing notes are taken from the measurement brief and photo filenames."
     ],
+    "compass": {
+      "north": "slightly up-right on the straightened plan",
+      "south": "slightly down-left on the straightened plan",
+      "east": "slightly down-right on the straightened plan",
+      "west": "slightly up-left on the straightened plan",
+      "north_arrow_degrees_clockwise_from_plan_up": 37.5,
+      "plan_right_bearing_degrees": 52.5,
+      "source": "Cadastral map screenshot shared 2026-05-16; parcel-line image orientation places the straightened plan's front-to-rear axis at approximately 52.5 degrees clockwise from true north.",
+      "confidence": "estimated_from_cadastral_map"
+    },
     "confidence": "inferred"
   },
   "site": {
@@ -22,9 +32,19 @@
     "exterior_wall_thickness_m": 0.3,
     "internal_wall_thickness_m": 0.14,
     "sunroom_frame_thickness_m": 0.1,
+    "wall_thickness_overrides_m": {
+      "entrance_deck_wall": 0.14,
+      "kitchen_entrance_return_wall": 0.13,
+      "laundry_toilet_wall": 0.12,
+      "toilet_south_external_wall": 0.27
+    },
     "notes": [
       "Exterior wall thickness is based on measured Rockcote-to-internal-wall reveal of approximately 290-300mm.",
       "Internal wall thickness is based on user measurement of approximately 140mm.",
+      "Entrance/deck-side wall segment is user-measured at 140mm and is drawn as a thinner exterior wall in the reference plan.",
+      "Entrance narrowing return wall is user-measured at 130mm and is drawn as a thinner interior return wall in the reference plan.",
+      "Laundry/toilet separating wall is user-measured at 120mm and is drawn as a thinner internal wall in the reference plan.",
+      "The toilet bottom exterior wall is user-remeasured as 270mm and is drawn just under normal external wall thickness.",
       "Sunroom frame thickness is an initial assumption pending direct measurement."
     ]
   },
@@ -70,21 +90,21 @@
       "name": "Kitchen / Dining",
       "category": "living",
       "dimensions_m": {
-        "length": 8.2,
+        "length": 8.12,
         "width": 2.5,
         "height": 2.4
       },
       "confidence": "measured",
       "notes": [
         "Kitchen and dining are completely open to each other.",
-        "Kitchen length is 4.5m and dining length is 3.7m.",
+        "Combined kitchen/dining length from the Bedroom 2 entrance to the dining end wall is remeasured at 8.12m.",
         "Combined space is close to the deck/patio."
       ],
       "layout": {
         "type": "rect",
         "x": 6.9,
         "y": 0.8,
-        "width": 8.2,
+        "width": 8.12,
         "depth": 2.5,
         "confidence": "inferred"
       }
@@ -172,11 +192,24 @@
           "label": "Left side run",
           "value_m": 2.15,
           "confidence": "hand_measured"
+        },
+        {
+          "id": "hallway_wall_to_nw_window_inside",
+          "label": "Hallway/Sunroom inside edge to inside of sunroom NW window",
+          "value_m": 5.02,
+          "confidence": "direct_measured"
+        },
+        {
+          "id": "lounge_wall_to_west_window_inside",
+          "label": "Lounge/Sunroom inside edge to inside of sunroom west window",
+          "value_m": 4.07,
+          "confidence": "direct_measured"
         }
       ],
       "notes": [
         "Irregular glazed enclosure.",
         "Hand sketch gives internal segment measurements: 5.0m top run, 4.14m right side, 1.55m bottom run, 0.71m lower vertical return, 1.86m diagonal, 1.20m inset horizontal, and 2.15m left side.",
+        "Later direct span checks measure 5.02m from the Hallway/Sunroom inside edge to the inside of the sunroom NW window and 4.07m from the Lounge/Sunroom inside edge to the inside of the sunroom west window.",
         "Angled exterior/front door is important and still approximate."
       ],
       "layout": {
@@ -230,7 +263,8 @@
       "notes": [
         "Street-facing exterior width measured at approximately 4.77m.",
         "Window facing SW out to road and another window facing NW into sunroom.",
-        "Wardrobe side is NE."
+        "Wardrobe side is NE.",
+        "Built-in wardrobe depth is 0.62m as a bay between the master bedroom and office; previous master bedroom internal measurements are treated as clear floor area and are not reduced by the wardrobe."
       ],
       "layout": {
         "type": "rect",
@@ -247,7 +281,7 @@
       "category": "bedroom",
       "dimensions_m": {
         "length": 2.9,
-        "width": 2.7,
+        "width": 2.75,
         "height": 2.4
       },
       "confidence": "measured",
@@ -257,7 +291,7 @@
       ],
       "layout": {
         "type": "rect",
-        "x": 3.3,
+        "x": 3.92,
         "y": 7.58,
         "width": 2.9,
         "depth": 2.7,
@@ -269,7 +303,7 @@
       "name": "Bathroom",
       "category": "wet",
       "dimensions_m": {
-        "length": 2.7,
+        "length": 2.75,
         "width": 1.64,
         "height": 2.4
       },
@@ -281,10 +315,10 @@
       ],
       "layout": {
         "type": "rect",
-        "x": 6.2,
+        "x": 6.82,
         "y": 7.58,
-        "width": 2.7,
-        "depth": 1.64,
+        "width": 1.64,
+        "depth": 2.75,
         "confidence": "inferred"
       }
     },
@@ -294,7 +328,7 @@
       "category": "bedroom",
       "dimensions_m": {
         "length": 4.73,
-        "width": 2.8,
+        "width": 2.75,
         "height": 2.4
       },
       "confidence": "measured",
@@ -305,10 +339,10 @@
       ],
       "layout": {
         "type": "rect",
-        "x": 8.9,
+        "x": 8.46,
         "y": 7.58,
         "width": 4.73,
-        "depth": 2.8,
+        "depth": 2.75,
         "confidence": "inferred"
       }
     },
@@ -318,21 +352,22 @@
       "category": "circulation",
       "dimensions_m": {
         "length": 3.7,
-        "width": 1.15,
+        "width": 1.16,
         "height": 2.45
       },
       "confidence": "measured",
       "notes": [
         "Entrance connects off the deck/patio side.",
-        "Narrower at the kitchen end, approximately 0.9m wide.",
-        "Sliding door width is 1.7m."
+        "Narrower at the kitchen end, approximately 0.89m wide, then widens by about 0.25m to the 1.16m entrance depth.",
+        "Sliding door width is remeasured at 1.47m and starts 0.28m from the inside wall corner where the entrance narrows.",
+        "Measured entrance chain is 2.52m from the entrance/laundry opening line to the narrowing point, then 1.13m back to the inside of the kitchen door frame."
       ],
       "layout": {
         "type": "rect",
         "x": 10.0,
         "y": 3.3,
         "width": 3.7,
-        "depth": 1.15,
+        "depth": 1.16,
         "confidence": "inferred"
       }
     },
@@ -341,22 +376,23 @@
       "name": "Laundry",
       "category": "wet",
       "dimensions_m": {
-        "length": 3.0,
+        "length": 3.03,
         "width": 1.8,
         "height": 2.45
       },
       "confidence": "measured",
       "notes": [
         "At end of house near Bedroom 2 and toilet.",
-        "Two windows, one facing NE and one facing NW.",
-        "Door connects to entrance on SW side."
+        "Two windows: the north/deck-side window is 1.38m wide and 0.22m from the top-right/north corner; the east/right-side window is 1.10m wide and 0.95m from the same corner.",
+        "Open connection to entrance is 0.74m wide and centred within the 1.16m entrance depth.",
+        "Laundry connects to the toilet through a 120mm internal partition."
       ],
       "layout": {
         "type": "rect",
         "x": 13.7,
         "y": 3.3,
         "width": 1.8,
-        "depth": 3.0,
+        "depth": 3.03,
         "confidence": "inferred"
       }
     },
@@ -365,20 +401,24 @@
       "name": "Toilet",
       "category": "wet",
       "dimensions_m": {
-        "length": 1.85,
-        "width": 0.92,
+        "length": 0.91,
+        "width": 1.8,
         "height": 2.45
       },
       "confidence": "measured",
       "notes": [
-        "Connects from laundry."
+        "Connects from laundry.",
+        "Toilet clear internal depth in the laundry/toilet stack is 0.91m.",
+        "Toilet/laundry clear internal width is 1.80m.",
+        "Toilet bottom exterior wall is remeasured as 270mm.",
+        "Frosted toilet window is 0.52m wide and centred."
       ],
       "layout": {
         "type": "rect",
         "x": 13.7,
         "y": 6.3,
-        "width": 0.92,
-        "depth": 1.85,
+        "width": 1.8,
+        "depth": 0.91,
         "confidence": "inferred"
       }
     }
@@ -390,13 +430,23 @@
       "between": ["lounge", "kitchen_dining"],
       "width_m": 1.3,
       "height_m": 1.95,
-      "confidence": "measured"
+      "confidence": "measured",
+      "display_px": {
+        "type": "polygon",
+        "points": [
+          [757.9, 365.2],
+          [763.9, 365.2],
+          [763.9, 400.6],
+          [757.9, 400.6]
+        ]
+      },
+      "notes": "Display geometry anchors the lounge to kitchen/dining opening to the upper divider gap shown in the 2D plan rather than allowing the 3D scene to synthesize it at the midpoint of the full shared wall."
     },
     {
       "id": "sunroom_to_lounge_slider",
       "type": "slider",
       "between": ["sunroom", "lounge"],
-      "width_m": 3.1,
+      "width_m": 3.15,
       "height_m": 1.95,
       "confidence": "measured"
     },
@@ -404,7 +454,7 @@
       "id": "entrance_slider",
       "type": "slider",
       "room": "entrance",
-      "width_m": 1.7,
+      "width_m": 1.47,
       "confidence": "measured"
     },
     {
@@ -442,6 +492,412 @@
       "confidence": "inferred"
     }
   ],
+  "measurement_audit": {
+    "status": "active_measurement_audit",
+    "units": "metres",
+    "method": "Persistent audit records consolidate the room dimensions, anchor measurements, built-ins, wall-thickness assumptions, source records, and photo evidence already held in the model and calibration report. Room dimensions are clear internal measurements unless a note says otherwise.",
+    "items": [
+      {
+        "id": "room:kitchen_dining",
+        "target_kind": "room",
+        "target_id": "kitchen_dining",
+        "label": "Kitchen / Dining clear internal dimensions",
+        "measurement_status": "measured",
+        "confidence": "measured_dimensions_photo_verified_openings",
+        "dimension_source": "direct_user_measurement",
+        "dimensions_m": {
+          "length": 8.12,
+          "width": 2.5,
+          "height": 2.4
+        },
+        "evidence_check_ids": ["deck_doors_and_kitchen_window"],
+        "source_records": [
+          "DATA/house_model.json.rooms.kitchen_dining.dimensions_m",
+          "DATA/house_model.json.current_structure.spaces.kitchen_dining"
+        ],
+        "notes": [
+          "Length is measured from the Bedroom 2 entrance to the dining end wall.",
+          "Display dimension endpoints should use internal wall faces."
+        ]
+      },
+      {
+        "id": "room:lounge",
+        "target_kind": "room",
+        "target_id": "lounge",
+        "label": "Lounge clear internal dimensions",
+        "measurement_status": "measured",
+        "confidence": "measured_dimensions_inferred_position",
+        "dimension_source": "direct_user_measurement",
+        "dimensions_m": {
+          "length": 4.9,
+          "width": 3.7,
+          "height": 2.4
+        },
+        "evidence_check_ids": ["sunroom_lounge_slider", "lounge_photo_context"],
+        "source_records": [
+          "DATA/house_model.json.rooms.lounge.dimensions_m",
+          "DATA/house_model.json.current_structure.spaces.lounge"
+        ],
+        "notes": [
+          "Dimensions are measured; display position is inferred from the surrounding calibrated model."
+        ]
+      },
+      {
+        "id": "room:sunroom",
+        "target_kind": "room",
+        "target_id": "sunroom",
+        "label": "Sunroom irregular internal segments",
+        "measurement_status": "partly_measured",
+        "confidence": "measured_approx",
+        "dimension_source": "hand_drawn_internal_measurement_sketch",
+        "dimensions_m": {
+          "top_run": 5.0,
+          "right_side": 4.14,
+          "bottom_run": 1.55,
+          "lower_vertical": 0.71,
+          "diagonal": 1.86,
+          "inset_horizontal": 1.2,
+          "left_side": 2.15,
+          "hallway_wall_to_nw_window_inside": 5.02,
+          "lounge_wall_to_west_window_inside": 4.07,
+          "height": 2.1
+        },
+        "evidence_check_ids": ["sunroom_wraparound_glazing"],
+        "source_records": [
+          "DATA/house_model.json.rooms.sunroom.measured_segments_m",
+          "sunroom-dimensions.HEIC"
+        ],
+        "notes": [
+          "Segments are measured but the polygon is still treated as an approximate fitted shape."
+        ]
+      },
+      {
+        "id": "room:hallway",
+        "target_kind": "room",
+        "target_id": "hallway",
+        "label": "Hallway clear internal dimensions",
+        "measurement_status": "measured",
+        "confidence": "measured_dimensions_photo_verified",
+        "dimension_source": "direct_user_measurement",
+        "dimensions_m": {
+          "length": 4.8,
+          "width": 1.3,
+          "height": 2.4
+        },
+        "evidence_check_ids": ["hallway_spine_and_room_connections"],
+        "source_records": [
+          "DATA/house_model.json.rooms.hallway.dimensions_m",
+          "DATA/house_model.json.current_structure.spaces.hallway"
+        ],
+        "notes": [
+          "Interior circulation spine is measured and photo verified."
+        ]
+      },
+      {
+        "id": "room:master_bedroom",
+        "target_kind": "room",
+        "target_id": "master_bedroom",
+        "label": "Master Bedroom clear internal dimensions",
+        "measurement_status": "measured",
+        "confidence": "measured_dimensions_reference_position_photo_context",
+        "dimension_source": "direct_user_measurement",
+        "dimensions_m": {
+          "length": 3.3,
+          "width": 4.2,
+          "height": 2.4
+        },
+        "evidence_check_ids": ["master_bedroom_photo_context"],
+        "source_records": [
+          "DATA/house_model.json.rooms.master_bedroom.dimensions_m",
+          "DATA/house_model.json.current_structure.spaces.master_bedroom"
+        ],
+        "notes": [
+          "Clear floor area does not subtract the separate 0.62m wardrobe bay."
+        ]
+      },
+      {
+        "id": "room:office",
+        "target_kind": "room",
+        "target_id": "office",
+        "label": "Office clear internal dimensions",
+        "measurement_status": "measured",
+        "confidence": "measured_dimensions_reference_position_photo_context",
+        "dimension_source": "direct_user_measurement",
+        "dimensions_m": {
+          "length": 2.9,
+          "width": 2.75,
+          "height": 2.4
+        },
+        "evidence_check_ids": ["office_photo_context", "hallway_spine_and_room_connections"],
+        "source_records": [
+          "DATA/house_model.json.rooms.office.dimensions_m",
+          "DATA/house_model.json.current_structure.spaces.office"
+        ],
+        "notes": [
+          "Current-structure geometry uses the rechecked 2.75m depth."
+        ]
+      },
+      {
+        "id": "room:bathroom",
+        "target_kind": "room",
+        "target_id": "bathroom",
+        "label": "Bathroom clear internal dimensions",
+        "measurement_status": "measured",
+        "confidence": "measured_dimensions_reference_position_photo_context",
+        "dimension_source": "direct_user_measurement",
+        "dimensions_m": {
+          "length": 1.64,
+          "width": 2.75,
+          "height": 2.4
+        },
+        "evidence_check_ids": ["bathroom_photo_context", "hallway_spine_and_room_connections"],
+        "source_records": [
+          "DATA/house_model.json.rooms.bathroom.dimensions_m",
+          "DATA/house_model.json.current_structure.spaces.bathroom"
+        ],
+        "notes": [
+          "Current-structure geometry stores the clear horizontal span as 1.64m and the clear vertical room depth as 2.75m."
+        ]
+      },
+      {
+        "id": "room:bedroom_2",
+        "target_kind": "room",
+        "target_id": "bedroom_2",
+        "label": "Bedroom 2 clear internal dimensions",
+        "measurement_status": "measured",
+        "confidence": "measured_dimensions_reference_position_photo_context",
+        "dimension_source": "direct_user_measurement",
+        "dimensions_m": {
+          "length": 4.73,
+          "width": 2.75,
+          "height": 2.4
+        },
+        "evidence_check_ids": ["bedroom2_photo_context"],
+        "source_records": [
+          "DATA/house_model.json.rooms.bedroom_2.dimensions_m",
+          "DATA/house_model.json.current_structure.spaces.bedroom_2"
+        ],
+        "notes": [
+          "Longer, narrower room; dimensions must not be swapped.",
+          "Display dimension endpoints should use internal wall faces."
+        ]
+      },
+      {
+        "id": "room:entrance",
+        "target_kind": "room",
+        "target_id": "entrance",
+        "label": "Entrance clear internal dimensions",
+        "measurement_status": "measured",
+        "confidence": "measured_dimensions_photo_verified",
+        "dimension_source": "direct_user_measurement",
+        "dimensions_m": {
+          "length": 3.7,
+          "width": 1.16,
+          "height": 2.45
+        },
+        "evidence_check_ids": ["entrance_laundry_back_entry"],
+        "source_records": [
+          "DATA/house_model.json.rooms.entrance.dimensions_m",
+          "DATA/house_model.json.current_structure.spaces.entrance"
+        ],
+        "notes": [
+          "Narrowing and sliding-door chain measurements remain in the room notes."
+        ]
+      },
+      {
+        "id": "room:laundry",
+        "target_kind": "room",
+        "target_id": "laundry",
+        "label": "Laundry clear internal dimensions",
+        "measurement_status": "measured",
+        "confidence": "measured_dimensions_photo_verified",
+        "dimension_source": "direct_user_measurement",
+        "dimensions_m": {
+          "length": 3.03,
+          "width": 1.8,
+          "height": 2.45
+        },
+        "evidence_check_ids": ["entrance_laundry_back_entry"],
+        "source_records": [
+          "DATA/house_model.json.rooms.laundry.dimensions_m",
+          "DATA/house_model.json.current_structure.spaces.laundry"
+        ],
+        "notes": [
+          "Laundry/toilet clear internal width is 1.80m."
+        ]
+      },
+      {
+        "id": "room:toilet",
+        "target_kind": "room",
+        "target_id": "toilet",
+        "label": "Toilet clear internal dimensions",
+        "measurement_status": "measured",
+        "confidence": "measured_dimensions_photo_verified",
+        "dimension_source": "direct_user_measurement",
+        "dimensions_m": {
+          "length": 0.91,
+          "width": 1.8,
+          "height": 2.45
+        },
+        "evidence_check_ids": ["toilet_laundry_connection"],
+        "source_records": [
+          "DATA/house_model.json.rooms.toilet.dimensions_m",
+          "DATA/house_model.json.current_structure.spaces.toilet"
+        ],
+        "notes": [
+          "Toilet clear internal depth is 0.91m."
+        ]
+      },
+      {
+        "id": "anchor:long_side_master_to_laundry",
+        "target_kind": "anchor",
+        "target_id": "long_side_master_to_laundry",
+        "label": "Long straight side run from master end to laundry/toilet end",
+        "measurement_status": "estimated",
+        "confidence": "measured_rough",
+        "dimension_source": "rough_external_measurement",
+        "dimensions_m": {
+          "length": 16.1,
+          "tolerance": 0.45
+        },
+        "evidence_check_ids": ["external_site_driveway_garage_deck_rear_garden"],
+        "source_records": [
+          "DATA/house_model.json.anchors.long_side_master_to_laundry",
+          "OUTPUT/calibration_report.md"
+        ],
+        "notes": [
+          "Use as a flexible calibration guide rather than a hard constraint."
+        ]
+      },
+      {
+        "id": "anchor:master_street_frontage",
+        "target_kind": "anchor",
+        "target_id": "master_street_frontage",
+        "label": "Master bedroom exterior width parallel with street",
+        "measurement_status": "measured",
+        "confidence": "measured_approx",
+        "dimension_source": "external_user_measurement",
+        "dimensions_m": {
+          "width": 4.77
+        },
+        "evidence_check_ids": ["master_bedroom_photo_context"],
+        "source_records": [
+          "DATA/house_model.json.anchors.master_street_frontage",
+          "OUTPUT/calibration_report.md"
+        ],
+        "notes": [
+          "External frontage anchor for the master bedroom side."
+        ]
+      },
+      {
+        "id": "anchor:dining_edge_to_entrance_laundry_edge",
+        "target_kind": "anchor",
+        "target_id": "dining_edge_to_entrance_laundry_edge",
+        "label": "Dining-room outside edge to entrance/laundry edge",
+        "measurement_status": "measured",
+        "confidence": "measured",
+        "dimension_source": "external_user_measurement",
+        "dimensions_m": {
+          "length": 7.12
+        },
+        "evidence_check_ids": ["deck_doors_and_kitchen_window", "entrance_laundry_back_entry"],
+        "source_records": [
+          "DATA/house_model.json.anchors.dining_edge_to_entrance_laundry_edge",
+          "OUTPUT/calibration_report.md"
+        ],
+        "notes": [
+          "External anchor used with the laundry/toilet projection for combined depth."
+        ]
+      },
+      {
+        "id": "anchor:laundry_toilet_projection_wall",
+        "target_kind": "anchor",
+        "target_id": "laundry_toilet_projection_wall",
+        "label": "Laundry/toilet rear jut-out wall",
+        "measurement_status": "measured",
+        "confidence": "measured",
+        "dimension_source": "external_user_measurement",
+        "dimensions_m": {
+          "length": 4.46
+        },
+        "evidence_check_ids": ["entrance_laundry_back_entry", "toilet_laundry_connection"],
+        "source_records": [
+          "DATA/house_model.json.anchors.laundry_toilet_projection_wall",
+          "OUTPUT/calibration_report.md"
+        ],
+        "notes": [
+          "External anchor for laundry/toilet projection."
+        ]
+      },
+      {
+        "id": "anchor:combined_external_depth",
+        "target_kind": "anchor",
+        "target_id": "combined_external_depth",
+        "label": "Combined external depth across dining/entrance/laundry line",
+        "measurement_status": "measured",
+        "confidence": "derived_measured",
+        "dimension_source": "derived_from_measured_anchors",
+        "dimensions_m": {
+          "length": 11.58,
+          "tolerance": 0.15
+        },
+        "evidence_check_ids": ["deck_doors_and_kitchen_window", "entrance_laundry_back_entry"],
+        "source_records": [
+          "DATA/house_model.json.anchors.combined_external_depth",
+          "OUTPUT/calibration_report.md"
+        ],
+        "notes": [
+          "Derived as 7.12m plus 4.46m."
+        ]
+      },
+      {
+        "id": "built_in:master_bedroom_wardrobe",
+        "target_kind": "built_in",
+        "target_id": "master_bedroom_wardrobe",
+        "label": "Master Bedroom Wardrobe built-in bay",
+        "measurement_status": "measured",
+        "confidence": "measured_photo_context",
+        "dimension_source": "direct_user_measurement",
+        "dimensions_m": {
+          "depth": 0.62,
+          "width": 2.7
+        },
+        "evidence_check_ids": ["master_bedroom_photo_context", "office_photo_context"],
+        "source_records": [
+          "DATA/house_model.json.current_structure.built_ins.master_bedroom_wardrobe"
+        ],
+        "notes": [
+          "Wardrobe bay is separate from the master bedroom clear floor area."
+        ]
+      },
+      {
+        "id": "assumption:wall_thicknesses",
+        "target_kind": "assumption",
+        "target_id": "wall_thicknesses",
+        "label": "Wall thickness calibration assumptions",
+        "measurement_status": "estimated",
+        "confidence": "mixed_measured_and_pending",
+        "dimension_source": "user_measurements_and_assumptions",
+        "dimensions_m": {
+          "exterior_wall_thickness": 0.3,
+          "internal_wall_thickness": 0.14,
+          "sunroom_frame_thickness": 0.1,
+          "entrance_deck_wall": 0.14,
+          "kitchen_entrance_return_wall": 0.13,
+          "laundry_toilet_wall": 0.12,
+          "toilet_south_external_wall": 0.27
+        },
+        "evidence_check_ids": [],
+        "source_records": [
+          "DATA/house_model.json.assumptions",
+          "OUTPUT/calibration_report.md"
+        ],
+        "notes": [
+          "Most wall thicknesses are measured or remeasured, while the sunroom frame thickness remains an initial assumption."
+        ]
+      }
+    ]
+  },
   "overlay_calibration": {
     "reference_image": "House-Outline-Internal-walls.png",
     "canvas_px": {
@@ -489,17 +945,17 @@
         "display_px": {
           "type": "polygon",
           "points": [
-            [536, 486],
-            [646, 486],
-            [646, 360],
-            [597, 360],
-            [597, 408],
-            [552, 452],
-            [536, 452],
-            [536, 486]
+            [549.2, 483.4],
+            [667.1, 483.4],
+            [667.1, 346.7],
+            [606, 346.7],
+            [606, 401.6],
+            [568, 442.3],
+            [549.2, 442.3],
+            [549.2, 483.4]
           ]
         },
-        "notes": "First current-structure slice: measured sunroom shape with photo-verified wraparound glazing."
+        "notes": "First current-structure slice: measured sunroom shape with photo-verified wraparound glazing. Display geometry was redrawn from the direct 5.02m Hallway/Sunroom-to-NW-window and 4.07m Lounge/Sunroom-to-west-window checks while preserving the accepted lounge slider position. The 5.02m sunroom span is retained as a measured check but is not treated as a vertical projection, so the NW/top sunroom edge stays roughly level with and just below the lounge external wall."
       },
       {
         "id": "lounge",
@@ -507,22 +963,22 @@
         "source_room_id": "lounge",
         "category": "living",
         "confidence": "measured_dimensions_inferred_position",
-        "evidence_check_ids": ["sunroom_lounge_slider"],
+        "evidence_check_ids": ["sunroom_lounge_slider", "lounge_photo_context"],
         "geometry_m": {
           "type": "rect",
           "x": 2.4,
           "y": 2.1,
-          "width": 4.9,
-          "depth": 3.7
+          "width": 3.7,
+          "depth": 4.9
         },
         "display_px": {
           "type": "rect",
-          "x": 638,
-          "y": 358,
-          "width": 104,
-          "height": 127
+          "x": 659.1,
+          "y": 348.8,
+          "width": 101.8,
+          "height": 133.6
         },
-        "notes": "Included only to anchor the photo-verified sunroom-to-lounge slider relationship."
+        "notes": "Included only to anchor the photo-verified sunroom-to-lounge slider relationship. The sunroom-side wall is shifted right so the clear lounge width reads as the measured 3.70m while the kitchen/dining divider stays fixed. The north external wall is pushed outward so the lounge clear depth reads as the measured 4.90m."
       },
       {
         "id": "kitchen_dining",
@@ -535,23 +991,25 @@
           "type": "rect",
           "x": 6.9,
           "y": 0.8,
-          "width": 8.2,
+          "width": 8.12,
           "depth": 2.5
         },
         "display_px": {
           "type": "polygon",
           "points": [
-            [742, 314],
-            [822, 314],
-            [822, 496],
-            [784, 496],
-            [784, 523],
-            [758, 523],
-            [758, 500],
-            [742, 500]
+            [758.8, 302.3],
+            [833, 302.3],
+            [833, 489.1],
+            [834.3, 489.1],
+            [834.3, 495.9],
+            [803.7, 495.9],
+            [803.7, 523.3],
+            [760.9, 523],
+            [760.9, 348.8],
+            [758.8, 348.8]
           ]
         },
-        "notes": "Promoted after deck-side photos verified the large door group and adjacent glazing. Position remains visually calibrated until full metric alignment is completed."
+        "notes": "Promoted after deck-side photos verified the large door group and adjacent glazing. Lower-left vinyl flooring now continues down to the hallway/entrance line to avoid the old notch in the rendered floor surface, while the left boundary below the dining external wall is pulled back to the kitchen/lounge divider line so hard flooring does not creep into the lounge or hallway. The north dining external wall is pushed outward so the clear span from the Bedroom 2 entrance to the dining end wall reads as the remeasured 8.12m."
       },
       {
         "id": "entrance",
@@ -565,18 +1023,20 @@
           "x": 11.7,
           "y": 5.0,
           "width": 3.7,
-          "depth": 1.15
+          "depth": 1.16
         },
         "display_px": {
           "type": "polygon",
           "points": [
-            [784, 500],
-            [890, 500],
-            [890, 523],
-            [784, 523]
+            [803.7, 495.9],
+            [834.3, 495.9],
+            [834.3, 489.1],
+            [902.8, 489.1],
+            [902.8, 523.3],
+            [803.7, 523.3]
           ]
         },
-        "notes": "Photo-verified glazed deck-side entrance/back-entry space connected to laundry. Display geometry keeps the exterior wall line straight with the laundry/kitchen side; the left side uses the narrower internal entry width aligned to the Bedroom 2 doorway."
+        "notes": "Photo-verified glazed deck-side entrance/back-entry space connected to laundry. Display geometry now follows the updated measured chain: 2.52m from the entrance/laundry opening line back to the narrowing point, then 1.13m left to the inside of the kitchen door frame before the entrance widens by 0.25m. The return wall remains recorded at 130mm thick."
       },
       {
         "id": "laundry",
@@ -589,17 +1049,17 @@
           "type": "rect",
           "x": 13.4,
           "y": 5.0,
-          "width": 1.2,
-          "depth": 2.3
+          "width": 1.8,
+          "depth": 3.03
         },
         "display_px": {
           "type": "rect",
-          "x": 890,
-          "y": 500,
-          "width": 50,
-          "height": 80
+          "x": 902.8,
+          "y": 489.1,
+          "width": 53.6,
+          "height": 83.8
         },
-        "notes": "Photo-verified laundry beyond entrance with washing machines, sink/bench, and exterior window."
+        "notes": "Photo-verified laundry beyond entrance with washing machines, sink/bench, and exterior window. Display top edge is aligned to the deck-side entrance internal line. The Bedroom 2/laundry wall is shifted left so the laundry/toilet clear internal width is 1.80m, with the lower divider reset from the remeasured stack so the laundry clear height is about 3.03m."
       },
       {
         "id": "toilet",
@@ -612,17 +1072,17 @@
           "type": "rect",
           "x": 13.7,
           "y": 6.3,
-          "width": 0.92,
-          "depth": 1.85
+          "width": 1.8,
+          "depth": 0.91
         },
         "display_px": {
           "type": "rect",
-          "x": 890,
-          "y": 580,
-          "width": 50,
-          "height": 30
+          "x": 902.8,
+          "y": 572.9,
+          "width": 53.6,
+          "height": 29.3
         },
-        "notes": "Photo-verified small toilet room connected from laundry with frosted exterior window."
+        "notes": "Photo-verified small toilet room connected from laundry with frosted exterior window. The Bedroom 2/laundry wall is shifted left so the laundry/toilet clear internal width is 1.80m. The bottom exterior wall strip is remeasured as 270mm, and the laundry/toilet divider preserves the remeasured 0.91m toilet clear depth."
       },
       {
         "id": "hallway",
@@ -639,13 +1099,15 @@
           "depth": 1.3
         },
         "display_px": {
-          "type": "rect",
-          "x": 608,
-          "y": 485,
-          "width": 150,
-          "height": 38
+          "type": "polygon",
+          "points": [
+            [627.1, 482.4],
+            [760.9, 482.4],
+            [760.9, 523],
+            [627.1, 523]
+          ]
         },
-        "notes": "Photo-verified interior circulation spine connecting lounge/office side toward entrance and laundry, with bathroom sliding door visible on the side wall."
+        "notes": "Photo-verified interior circulation spine connecting lounge/office side toward entrance and laundry, with bathroom sliding door visible on the side wall. Display floor footprint stops at the kitchen wall line so carpet does not overlay the vinyl flooring continuation at the entrance/kitchen corner."
       },
       {
         "id": "master_bedroom",
@@ -663,12 +1125,12 @@
         },
         "display_px": {
           "type": "rect",
-          "x": 518,
-          "y": 485,
-          "width": 90,
-          "height": 125
+          "x": 533.9,
+          "y": 482.4,
+          "width": 93.2,
+          "height": 119.4
         },
-        "notes": "Measured room dimensions promoted into the current layer. Pixel width was recalibrated against the adjacent office/bathroom/Bedroom 2 row so the 3.3m master width is represented consistently. Pixel position remains photo-context checked against master bedroom photos and exterior street/front views."
+        "notes": "Measured room dimensions promoted into the current layer as clear floor area. The 0.62m-deep built-in wardrobe is a separate bay between the master bedroom and office rather than space taken from the master floor area. Pixel width was recalibrated against the adjacent office/bathroom/Bedroom 2 row so the 3.3m clear master width is represented consistently. Pixel position remains photo-context checked against master bedroom photos and exterior street/front views."
       },
       {
         "id": "office",
@@ -679,19 +1141,19 @@
         "evidence_check_ids": ["office_photo_context", "hallway_spine_and_room_connections"],
         "geometry_m": {
           "type": "rect",
-          "x": 3.3,
+          "x": 3.92,
           "y": 7.58,
           "width": 2.9,
-          "depth": 2.7
+          "depth": 2.75
         },
         "display_px": {
           "type": "rect",
-          "x": 608,
+          "x": 646.8,
           "y": 523,
-          "width": 80,
-          "height": 87
+          "width": 80.3,
+          "height": 78.8
         },
-        "notes": "Measured room dimensions promoted into the current layer. Pixel position follows the calibrated reference plan and is supported by office photos and hallway doorway photos."
+        "notes": "Measured room dimensions promoted into the current layer. Pixel position is shifted right by the 0.62m master wardrobe bay so the office clear dimensions remain intact while the wardrobe sits between the master bedroom and office."
       },
       {
         "id": "bathroom",
@@ -702,19 +1164,19 @@
         "evidence_check_ids": ["bathroom_photo_context", "hallway_spine_and_room_connections"],
         "geometry_m": {
           "type": "rect",
-          "x": 6.2,
+          "x": 6.82,
           "y": 7.58,
-          "width": 2.7,
-          "depth": 1.64
+          "width": 1.64,
+          "depth": 2.75
         },
         "display_px": {
           "type": "rect",
-          "x": 688,
+          "x": 727.1,
           "y": 523,
-          "width": 70,
-          "height": 87
+          "width": 46.8,
+          "height": 78.8
         },
-        "notes": "Measured bathroom dimensions promoted into the current layer. Pixel position follows the calibrated reference plan and is supported by bathroom photos plus hallway sliding-door evidence."
+        "notes": "Measured bathroom dimensions promoted into the current layer. Pixel position is shifted right with the office-side private-room row after adding the 0.62m master wardrobe bay. The bathroom/Bedroom 2 divider is nudged left slightly so Bedroom 2 renders to its remeasured 4.73m internal length."
       },
       {
         "id": "bedroom_2",
@@ -725,19 +1187,49 @@
         "evidence_check_ids": ["bedroom2_photo_context"],
         "geometry_m": {
           "type": "rect",
-          "x": 8.9,
+          "x": 8.46,
           "y": 7.58,
           "width": 4.73,
-          "depth": 2.8
+          "depth": 2.75
         },
         "display_px": {
           "type": "rect",
-          "x": 758,
+          "x": 773.9,
           "y": 523,
-          "width": 132,
-          "height": 87
+          "width": 128.9,
+          "height": 78.8
         },
-        "notes": "Measured room dimensions promoted into the current layer. Pixel position follows the calibrated reference plan and is photo-context checked against bedroom 2 interior photos."
+        "notes": "Measured room dimensions promoted into the current layer. The east wall is shifted left to widen the laundry/toilet bay to 1.80m clear internal width, and the bathroom divider is nudged left so the room renders to the remeasured 4.73m internal length."
+      }
+    ],
+    "built_ins": [
+      {
+        "id": "master_bedroom_wardrobe",
+        "name": "Master Bedroom Wardrobe",
+        "type": "built_in_wardrobe",
+        "room": "master_bedroom",
+        "adjacent_room": "office",
+        "access_from": "master_bedroom",
+        "door_configuration": "two_sliding_door_sets_with_central_divider",
+        "status": "measured_photo_context",
+        "evidence_check_ids": ["master_bedroom_photo_context", "office_photo_context"],
+        "depth_m": 0.62,
+        "span": "full_office_shared_internal_wall",
+        "geometry_m": {
+          "type": "rect",
+          "x": 3.3,
+          "y": 7.58,
+          "width": 0.62,
+          "depth": 2.7
+        },
+        "display_px": {
+          "type": "rect",
+          "x": 627.1,
+          "y": 523,
+          "width": 19.7,
+          "height": 78.8
+        },
+        "notes": "Measured built-in wardrobe bay is 0.62m deep and sits between the master bedroom and office rather than inside either room's clear floor area. It spans from the top internal wall line to the bottom/rear internal wall edge along the office-side private-room row."
       }
     ],
     "features": [
@@ -747,8 +1239,13 @@
         "between": ["sunroom", "lounge"],
         "status": "photo_verified",
         "source_opening_id": "sunroom_to_lounge_slider",
-        "width_m": 3.1,
+        "width_m": 3.15,
         "height_m": 1.95,
+        "wall_sequence_m": {
+          "before": 0.86,
+          "slider": 3.15,
+          "after": 0.86
+        },
         "evidence_check_ids": ["sunroom_lounge_slider"],
         "evidence_photo_paths": [
           "OUTPUT/jpeg_photos/Inside-Sunroom-Looking-NE.jpg",
@@ -757,19 +1254,25 @@
         "display_px": {
           "type": "polygon",
           "points": [
-            [641, 388],
-            [646, 388],
-            [646, 454],
-            [641, 454]
+            [662.1, 377.8],
+            [667.1, 377.8],
+            [667.1, 460.0],
+            [662.1, 460.0]
           ]
-        }
+        },
+        "notes": "Position updated from user measurement: across the lounge/sunroom wall the sequence is 0.86m wall return, 3.15m slider, then 0.86m wall return, so the slider is centred on that wall span. Pixel geometry is distributed across the current rendered wall span."
       },
       {
         "id": "sunroom_wraparound_glazing",
         "type": "window_group",
         "room": "sunroom",
         "status": "photo_verified",
-        "feature_members": ["sunroom_right_glazing", "sunroom_top_window", "sunroom_left_window"],
+        "feature_members": [
+          "sunroom_north_fixed_window",
+          "sunroom_path_side_fixed_window",
+          "sunroom_path_left_fixed_window",
+          "sunroom_street_side_fixed_window"
+        ],
         "evidence_check_ids": ["sunroom_wraparound_glazing"],
         "evidence_photo_paths": [
           "OUTPUT/jpeg_photos/From-Outside-front-looking-NE-towards-sunroom.jpg",
@@ -780,25 +1283,117 @@
           "type": "multi_polygon",
           "polygons": [
             [
-              [640, 368],
-              [646, 368],
-              [646, 476],
-              [640, 476]
+              [610.0, 344.7],
+              [655.2, 344.7],
+              [655.2, 348.7],
+              [610.0, 348.7]
             ],
             [
-              [604, 362],
-              [640, 362],
-              [640, 368],
-              [604, 368]
+              [604, 354.7],
+              [608, 354.7],
+              [608, 393.6],
+              [604, 393.6]
             ],
             [
-              [590, 410],
-              [596, 416],
-              [558, 452],
-              [552, 446]
+              [549.2, 440.3],
+              [568.0, 440.3],
+              [568.0, 444.3],
+              [549.2, 444.3]
+            ],
+            [
+              [547.2, 446.3],
+              [551.2, 446.3],
+              [551.2, 477.9],
+              [547.2, 477.9]
             ]
           ]
-        }
+        },
+        "notes": "Wraparound glazing redrawn with the west window inside edge tied to the direct sunroom span measurement. The NW/top glazing is visually constrained to sit roughly level with the lounge external wall because the 5.02m sunroom check is not a pure vertical projection in plan view."
+      },
+      {
+        "id": "sunroom_front_double_doors",
+        "type": "door_group",
+        "between": ["sunroom", "front_path"],
+        "status": "photo_verified",
+        "swing": "outward_to_front_path",
+        "evidence_check_ids": ["sunroom_front_double_doors"],
+        "evidence_photo_paths": [
+          "OUTPUT/jpeg_photos/From-Outside-front-looking-NE-towards-sunroom.jpg",
+          "OUTPUT/jpeg_photos/From-Outside-front-looking-NW-towards-sunroom.jpg"
+        ],
+        "display_px": {
+          "type": "polygon",
+          "points": [
+            [603, 398.6],
+            [609, 404.6],
+            [571, 445.3],
+            [565, 439.3]
+          ]
+        },
+        "confidence": "visual_reference",
+        "notes": "The angled face to the front path is photo-verified as paired glazed doors. It is rendered separately from the fixed sunroom glazing so the opening reads like the other double-door symbols."
+      },
+      {
+        "id": "lounge_north_left_window",
+        "type": "window",
+        "room": "lounge",
+        "status": "measured_position_photo_context",
+        "width_m": 0.42,
+        "wall_offsets_m": {
+          "left": 0.32
+        },
+        "wall_offset_reference": "internal_corner",
+        "internal_corner_reference_px": {
+          "x": 667.1,
+          "y": 354.8
+        },
+        "right_corner_nub_projection_m": 0.47,
+        "evidence_check_ids": ["lounge_photo_context"],
+        "evidence_photo_paths": [
+          "OUTPUT/jpeg_photos/Inside-Lounge-looking-N.jpg",
+          "OUTPUT/jpeg_photos/Inside-Lounge-Looking-NE.jpg"
+        ],
+        "display_px": {
+          "type": "polygon",
+          "points": [
+            [675.8, 348.8],
+            [687.2, 348.8],
+            [687.2, 354.8],
+            [675.8, 354.8]
+          ]
+        },
+        "notes": "Measured small north-wall lounge window. User measured it as 0.42m wide, starting 0.32m in from the internal left corner, not the exterior wall centreline."
+      },
+      {
+        "id": "lounge_north_right_window",
+        "type": "window",
+        "room": "lounge",
+        "status": "measured_position_photo_context",
+        "width_m": 0.42,
+        "wall_offsets_m": {
+          "right": 0.32
+        },
+        "wall_offset_reference": "internal_corner",
+        "internal_corner_reference_px": {
+          "x": 751.4,
+          "y": 354.8
+        },
+        "right_corner_nub_projection_m": 0.47,
+        "evidence_check_ids": ["lounge_photo_context"],
+        "evidence_photo_paths": [
+          "OUTPUT/jpeg_photos/Inside-Lounge-looking-N.jpg",
+          "OUTPUT/jpeg_photos/Inside-Lounge-Looking-NE.jpg"
+        ],
+        "display_px": {
+          "type": "polygon",
+          "points": [
+            [731.3, 348.8],
+            [742.7, 348.8],
+            [742.7, 354.8],
+            [731.3, 354.8]
+          ]
+        },
+        "notes": "Measured small north-wall lounge window. User measured it as 0.42m wide, starting 0.32m in from the internal right corner of the projecting nub, noted as 0.47m."
       },
       {
         "id": "deck_door_group",
@@ -806,6 +1401,12 @@
         "room": "kitchen_dining",
         "status": "photo_verified",
         "source_reference_opening_id": "deck_doors",
+        "width_m": 1.62,
+        "wall_offsets_m": {
+          "top_right_inside_corner": 1.14,
+          "window_above_m": 0.57,
+          "wall_between_window_and_doors_m": 0.12
+        },
         "evidence_check_ids": ["deck_doors_and_kitchen_window"],
         "evidence_photo_paths": [
           "OUTPUT/jpeg_photos/From-Outside-Looking-SW-to-Deck-double-doors.jpg",
@@ -815,19 +1416,23 @@
         "display_px": {
           "type": "polygon",
           "points": [
-            [822, 338],
-            [830, 338],
-            [830, 396],
-            [822, 396]
+            [833, 350.8],
+            [841, 350.8],
+            [841, 393.8],
+            [833, 393.8]
           ]
         },
-        "notes": "Photo-verified large deck-side glazed door group. Old reference geometry is retained as display_px pending full metric calibration."
+        "notes": "Measured deck-side double doors below the short deck-side window, separated by a 0.12m wall section. Sequence from the top-right inside kitchen/dining corner is 1.14m to the window, 0.57m window, 0.12m wall, then 1.62m double doors."
       },
       {
         "id": "deck_side_dining_window",
         "type": "window",
         "room": "kitchen_dining",
-        "status": "photo_verified",
+        "status": "measured_position_photo_context",
+        "width_m": 0.57,
+        "wall_offsets_m": {
+          "top_right_inside_corner": 1.14
+        },
         "source_reference_opening_id": "kitchen_window",
         "evidence_check_ids": ["deck_doors_and_kitchen_window"],
         "evidence_photo_paths": [
@@ -837,20 +1442,79 @@
         "display_px": {
           "type": "polygon",
           "points": [
-            [822, 410],
-            [828, 410],
-            [828, 484],
-            [822, 484]
+            [833, 332.5],
+            [839, 332.5],
+            [839, 347.7],
+            [833, 347.7]
           ]
         },
-        "notes": "Photo-verified tall deck-side glazing adjacent to the door group; renamed from the legacy kitchen_window reference for clarity."
+        "notes": "Measured short deck-side kitchen/dining window above the double doors. It starts 1.14m below the top-right inside corner and is 0.57m wide along the deck-side wall."
+      },
+      {
+        "id": "kitchen_window",
+        "type": "window",
+        "room": "kitchen_dining",
+        "status": "restored_reference_plan_window",
+        "wall_id": "plan-vector-wall:kitchen-dining-east-wall",
+        "width_m": 2.7,
+        "height_m": 1.08,
+        "source_reference_opening_id": "kitchen_window",
+        "evidence_check_ids": ["deck_doors_and_kitchen_window"],
+        "evidence_photo_paths": [
+          "OUTPUT/jpeg_photos/From-Outside-Looking-SW-to-Deck-double-doors.jpg",
+          "OUTPUT/jpeg_photos/Inside-Kitchen-Looking-NW-2.jpg"
+        ],
+        "display_px": {
+          "type": "polygon",
+          "points": [
+            [829, 410],
+            [837, 410],
+            [837, 484],
+            [829, 484]
+          ]
+        },
+        "notes": "Restored NE-facing kitchen/dining window from the earlier reference plan symbol so current and future designs retain the original kitchen glazing as well as the measured short deck-side window above the doors."
+      },
+      {
+        "id": "dining_west_window",
+        "type": "window",
+        "room": "kitchen_dining",
+        "wall_id": "dining_west_external_wall",
+        "status": "measured_position_photo_context",
+        "width_m": 0.66,
+        "wall_offsets_m": {
+          "top_internal_corner": 0.32
+        },
+        "wall_offset_reference": "internal_corner",
+        "internal_corner_reference_px": {
+          "x": 764.8,
+          "y": 308.3
+        },
+        "evidence_check_ids": ["deck_doors_and_kitchen_window"],
+        "evidence_photo_paths": [
+          "OUTPUT/jpeg_photos/Inside-Dining-Room-looking-N.jpg",
+          "OUTPUT/jpeg_photos/Inside-Dining-Room-looking-NW.jpg"
+        ],
+        "display_px": {
+          "type": "polygon",
+          "points": [
+            [758.8, 316.8],
+            [764.8, 316.8],
+            [764.8, 334.3],
+            [758.8, 334.3]
+          ]
+        },
+        "notes": "Measured dining-room west/left-wall window. User remeasured it as 0.66m long, starting 0.32m down from the dining-room internal corner. Shifted with the west external wall so the external wall inner face aligns with the kitchen/lounge divider face."
       },
       {
         "id": "entrance_deck_slider",
         "type": "slider",
         "room": "entrance",
         "status": "photo_verified",
-        "width_m": 1.7,
+        "width_m": 1.47,
+        "wall_offsets_m": {
+          "left_side_from_entrance_narrowing_corner": 0.28
+        },
         "source_opening_id": "entrance_slider",
         "evidence_check_ids": ["entrance_laundry_back_entry"],
         "evidence_photo_paths": [
@@ -861,13 +1525,13 @@
         "display_px": {
           "type": "polygon",
           "points": [
-            [836, 496],
-            [877, 496],
-            [877, 502],
-            [836, 502]
+            [841.9, 489.1],
+            [881.8, 489.1],
+            [881.8, 495.1],
+            [841.9, 495.1]
           ]
         },
-        "notes": "Photo-verified deck-side glazed entrance/slider. Rendered as the measured 1.7m sliding-door portion on the widened entrance wall, aligned with the adjacent exterior wall."
+        "notes": "Photo-verified deck-side glazed entrance/slider. User remeasured it as 1.47m wide, starting 0.28m from the inside wall corner where the entrance narrows. Rendered on the 140mm deck-side entrance wall using the local 810mm internal-door scale."
       },
       {
         "id": "entrance_to_laundry_opening",
@@ -884,13 +1548,66 @@
         "display_px": {
           "type": "polygon",
           "points": [
-            [887, 504.0],
-            [893, 504.0],
-            [893, 524.1],
-            [887, 524.1]
+            [899.8, 496.5],
+            [905.8, 496.5],
+            [905.8, 516.1],
+            [899.8, 516.1]
           ]
         },
-        "notes": "User-measured 740mm opening between the entrance and laundry. Display geometry is centred on the entrance/laundry internal wall and scaled from the current internal-door reference."
+        "notes": "User-measured 740mm opening between the entrance and laundry. Display geometry is centred within the 1.16m entrance depth, leaving about 0.21m of wall nub above and below the opening."
+      },
+      {
+        "id": "laundry_north_window",
+        "type": "window",
+        "room": "laundry",
+        "wall_id": "entrance_deck_wall",
+        "status": "measured_position_photo_context",
+        "width_m": 1.38,
+        "wall_offsets_m": {
+          "top_right_north_corner": 0.22
+        },
+        "evidence_check_ids": ["entrance_laundry_back_entry"],
+        "evidence_photo_paths": [
+          "OUTPUT/jpeg_photos/Inside-Laundry-Looking-N.jpg",
+          "OUTPUT/jpeg_photos/Inside-Laundry-Looking-NE.jpg",
+          "OUTPUT/jpeg_photos/From-Deck-Looking-SE-to-laundry.jpg"
+        ],
+        "display_px": {
+          "type": "polygon",
+          "points": [
+            [914, 487.1],
+            [950.6, 487.1],
+            [950.6, 491.1],
+            [914, 491.1]
+          ]
+        },
+        "notes": "Measured wide laundry window over the bench/sink on the deck-side/top wall. User measured it as 1.38m wide and 0.22m from the top-right/north corner."
+      },
+      {
+        "id": "laundry_east_window",
+        "type": "window",
+        "room": "laundry",
+        "wall_id": "laundry_toilet_exterior",
+        "status": "measured_position_photo_context",
+        "width_m": 1.1,
+        "wall_offsets_m": {
+          "top_right_north_corner": 0.95
+        },
+        "evidence_check_ids": ["entrance_laundry_back_entry"],
+        "evidence_photo_paths": [
+          "OUTPUT/jpeg_photos/Inside-Laundry-Looking-NW.jpg",
+          "OUTPUT/jpeg_photos/Inside-Laundry-Looking-NE.jpg"
+        ],
+        "display_px": {
+          "type": "polygon",
+          "points": [
+            [952.4, 514.3],
+            [956.4, 514.3],
+            [956.4, 543.5],
+            [952.4, 543.5]
+          ]
+        },
+        "notes": "Measured laundry side-wall window on the right/east exterior wall. User measured it as 1.10m wide and 0.95m from the top-right/north corner."
       },
       {
         "id": "laundry_to_toilet_door",
@@ -907,10 +1624,10 @@
         "display_px": {
           "type": "polygon",
           "points": [
-            [896, 580],
-            [912, 580],
-            [912, 586],
-            [896, 586]
+            [908.8, 572.9],
+            [924.8, 572.9],
+            [924.8, 578.9],
+            [908.8, 578.9]
           ]
         },
         "notes": "Photo-verified narrower internal door from laundry into the toilet. Updated to the measured 588mm width, shifted closer to the west side wall without touching it, with the hinge on the left/west jamb and the swing arc following the door leaf into the toilet."
@@ -919,7 +1636,9 @@
         "id": "toilet_frosted_window",
         "type": "window",
         "room": "toilet",
-        "status": "photo_verified",
+        "status": "measured_position_photo_context",
+        "width_m": 0.52,
+        "position_reference": "centred",
         "evidence_check_ids": ["toilet_laundry_connection"],
         "evidence_photo_paths": [
           "OUTPUT/jpeg_photos/Inside-Toilet-Looking-S.jpg",
@@ -928,13 +1647,13 @@
         "display_px": {
           "type": "polygon",
           "points": [
-            [936, 586],
-            [940, 586],
-            [940, 606],
-            [936, 606]
+            [952.4, 580.7],
+            [956.4, 580.7],
+            [956.4, 594.4],
+            [952.4, 594.4]
           ]
         },
-        "notes": "Photo-verified frosted toilet window. Display geometry is approximate pending exterior side-wall calibration."
+        "notes": "Measured compact frosted toilet window, 0.52m wide and centred on the toilet east wall."
       },
       {
         "id": "hallway_to_entrance_laundry",
@@ -949,13 +1668,13 @@
         "display_px": {
           "type": "polygon",
           "points": [
-            [758, 500],
-            [784, 500],
-            [784, 523],
-            [758, 523]
+            [760.9, 495.9],
+            [803.7, 495.9],
+            [803.7, 523.3],
+            [760.9, 523.3]
           ]
         },
-        "notes": "Photo-verified hallway continuation toward the entrance/laundry end. Display geometry marks the transitional circulation zone."
+        "notes": "Photo-verified hallway continuation toward the entrance/laundry end. Display geometry now aligns with the kitchen wall/opening line so vinyl flooring does not bleed into the carpeted hallway."
       },
       {
         "id": "kitchen_dining_to_bedroom2_door",
@@ -972,10 +1691,10 @@
         "display_px": {
           "type": "polygon",
           "points": [
-            [762, 520],
-            [784, 520],
-            [784, 526],
-            [762, 526]
+            [778.6, 520.3],
+            [800.6, 520.3],
+            [800.6, 526.3],
+            [778.6, 526.3]
           ]
         },
         "notes": "Photo-verified standard internal door on the northwest side of Bedroom 2, connecting back to the kitchen/dining circulation edge. Rendered at the measured 810mm internal-door scale and opening into Bedroom 2."
@@ -985,7 +1704,7 @@
         "type": "door",
         "between": ["entrance", "kitchen_dining"],
         "status": "photo_verified",
-        "width_m": 0.81,
+        "width_m": 0.73,
         "evidence_check_ids": ["entrance_laundry_back_entry", "deck_doors_and_kitchen_window"],
         "evidence_photo_paths": [
           "OUTPUT/jpeg_photos/Inside-Kitchen-Looking-S.jpg",
@@ -996,13 +1715,13 @@
         "display_px": {
           "type": "polygon",
           "points": [
-            [781, 500],
-            [787, 500],
-            [787, 522],
-            [781, 522]
+            [800.7, 499.7],
+            [806.7, 499.7],
+            [806.7, 519.5],
+            [800.7, 519.5]
           ]
         },
-        "notes": "Photo-verified standard internal door between the kitchen/dining area and the narrow entrance/back-entry space. Rendered at the measured 810mm internal-door scale, opening from the entrance into the kitchen/dining side with the swing mirrored from the earlier upper-hinged draft."
+        "notes": "Photo-verified internal door between the kitchen/dining area and the narrow entrance/back-entry space. Updated to the user's measured 730mm width and rendered locally at 19.8px on the recalibrated entrance/kitchen return wall. Its frame position now follows the measured entrance chain: 2.52m from the entrance/laundry opening line to the narrowing point, then 1.13m back to this kitchen door frame. It is centred vertically within the measured narrow entrance wall and opens from the entrance into the kitchen/dining side."
       },
       {
         "id": "hallway_to_lounge_door",
@@ -1010,6 +1729,9 @@
         "between": ["hallway", "lounge"],
         "status": "photo_verified",
         "width_m": 0.81,
+        "wall_offsets_m": {
+          "right_jamb_from_kitchen_hallway_north_corner": 1.41
+        },
         "evidence_check_ids": ["hallway_spine_and_room_connections"],
         "evidence_photo_paths": [
           "OUTPUT/jpeg_photos/Inside-Lounge-Looking-SE.jpg",
@@ -1019,13 +1741,37 @@
         "display_px": {
           "type": "polygon",
           "points": [
-            [683, 486],
-            [705, 486],
-            [705, 492],
-            [683, 492]
+            [701.5, 481.6],
+            [723.5, 481.6],
+            [723.5, 487.6],
+            [701.5, 487.6]
           ]
         },
-        "notes": "Photo-verified doorway between the hallway and lounge. Rendered at the measured 810mm internal-door scale, with the leaf hinged on the lounge-side/east jamb and opening into the lounge. Its display centerline is slightly lowered so the hallway-side edge of the thinner internal wall aligns visually with the adjacent old external wall."
+        "notes": "Photo-verified doorway between the hallway and lounge. User measured the right-hand jamb as 1.41m from the north hallway corner beside the kitchen entrance, making the doorway roughly centred on the lounge/hallway wall. Rendered at the measured 810mm internal-door scale, with the leaf hinged on the lounge-side/east jamb and opening into the lounge. Its display centerline is slightly lowered so the hallway-side edge of the thinner internal wall aligns visually with the adjacent old external wall."
+      },
+      {
+        "id": "hallway_to_sunroom_old_front_door",
+        "type": "door",
+        "between": ["hallway", "sunroom"],
+        "status": "measured_user_confirmed",
+        "width_m": 0.77,
+        "swing": "opens_into_hallway_towards_master_bedroom",
+        "evidence_check_ids": ["hallway_spine_and_room_connections"],
+        "evidence_photo_paths": [
+          "OUTPUT/jpeg_photos/Inside-Hallway-looking-SW.jpg",
+          "OUTPUT/jpeg_photos/Inside-hallway-looking-SW-2.jpg",
+          "OUTPUT/jpeg_photos/Inside-Sunroom-Looking-NW.jpg"
+        ],
+        "display_px": {
+          "type": "polygon",
+          "points": [
+            [635.2, 479.4],
+            [655.4, 479.4],
+            [655.4, 485.4],
+            [635.2, 485.4]
+          ]
+        },
+        "notes": "User-confirmed old front door between the hallway and sunroom. It is 770mm wide, its frame sits tight to the master-bedroom entrance side, and it opens into the hallway toward the master bedroom. The rendered wall is split at this opening rather than drawing the previous short continuous wall segment."
       },
       {
         "id": "hallway_to_kitchen_dining_door",
@@ -1042,13 +1788,13 @@
         "display_px": {
           "type": "polygon",
           "points": [
-            [742, 493],
-            [748, 493],
-            [748, 515],
-            [742, 515]
+            [760.9, 493],
+            [766.9, 493],
+            [766.9, 515],
+            [760.9, 515]
           ]
         },
-        "notes": "Photo-verified door between the hallway and kitchen/dining area. Its opening lines up with the lounge/kitchen divider wall and is centered vertically within that short wall run. It opens into the hallway, with the open leaf parallel to the hallway's northern wall."
+        "notes": "Photo-verified door between the hallway and kitchen/dining area. Its opening lines up with the lounge/kitchen divider wall and is centered vertically within that short wall run. Latest measurement anchors the Bedroom 2 doorway-to-kitchen wall gap at 0.59m, so the lounge/sunroom divider and connected kitchen/deck slice move right together. It opens into the hallway, with the open leaf parallel to the hallway's northern wall."
       },
       {
         "id": "hallway_to_bathroom_sliding_door",
@@ -1066,10 +1812,10 @@
         "display_px": {
           "type": "polygon",
           "points": [
-            [688, 523],
-            [722, 523],
-            [722, 529],
-            [688, 529]
+            [727.1, 523],
+            [743.4, 523],
+            [743.4, 529],
+            [727.1, 529]
           ]
         },
         "notes": "Photo-verified bathroom pocket/sliding door opening off the hallway. Rendered with a pocket-door panel and wall recess marker; exact lateral placement remains approximate until a hallway wall survey."
@@ -1090,10 +1836,10 @@
         "display_px": {
           "type": "polygon",
           "points": [
-            [608, 494],
-            [614, 494],
-            [614, 516],
-            [608, 516]
+            [627.1, 494],
+            [633.1, 494],
+            [633.1, 516],
+            [627.1, 516]
           ]
         },
         "notes": "Photo-verified master bedroom door off the hallway. Door swings into the master bedroom from the lower/south jamb, matching the open door visible against the wardrobe side in master-bedroom photos."
@@ -1114,10 +1860,10 @@
         "display_px": {
           "type": "polygon",
           "points": [
-            [657, 520],
-            [679, 520],
-            [679, 526],
-            [657, 526]
+            [695.5, 520],
+            [717.3, 520],
+            [717.3, 526],
+            [695.5, 526]
           ]
         },
         "notes": "Photo-verified office doorway relationship to the hallway. Opening sits on the right-hand side of the office's hallway wall, leaving the wall continuous to the left. Reduced to a standard internal-door scale based on the hallway and office photos; swing is into the office from the east/right jamb."
@@ -1126,7 +1872,11 @@
         "id": "master_street_window",
         "type": "window",
         "room": "master_bedroom",
-        "status": "photo_context_approx",
+        "status": "measured_position_photo_context",
+        "width_m": 2.15,
+        "wall_offsets_m": {
+          "top_left_west_corner": 1.04
+        },
         "evidence_check_ids": ["master_bedroom_photo_context"],
         "evidence_photo_paths": [
           "OUTPUT/jpeg_photos/Inside-Master-Bedroom-looking-SW.jpg",
@@ -1136,19 +1886,22 @@
         "display_px": {
           "type": "polygon",
           "points": [
-            [518, 528],
-            [524, 528],
-            [524, 588],
-            [518, 588]
+            [534.9, 514],
+            [540.9, 514],
+            [540.9, 571],
+            [534.9, 571]
           ]
         },
-        "notes": "Approximate street/front-facing master bedroom window marker. Position needs direct wall/window offset measurement."
+        "notes": "Street/front-facing master bedroom window marker updated from direct user measurement: 2.15m wide and 1.04m from the top-left/west corner."
       },
       {
         "id": "master_sunroom_window",
         "type": "window",
         "room": "master_bedroom",
-        "status": "photo_context_approx",
+        "status": "measured_position_photo_context",
+        "window_context": "former_external",
+        "width_m": 2.14,
+        "position_reference": "centred",
         "evidence_check_ids": ["master_bedroom_photo_context", "sunroom_wraparound_glazing"],
         "evidence_photo_paths": [
           "OUTPUT/jpeg_photos/Inside-Master-Bedroom-Looking-NW.jpg",
@@ -1158,19 +1911,50 @@
         "display_px": {
           "type": "polygon",
           "points": [
-            [552, 485],
-            [604, 485],
-            [604, 491],
-            [552, 491]
+            [552.1, 482.4],
+            [608.9, 482.4],
+            [608.9, 488.4],
+            [552.1, 488.4]
           ]
         },
-        "notes": "Approximate master bedroom window facing the sunroom side. Position needs direct wall/window offset measurement."
+        "notes": "Master bedroom window facing the sunroom side. This sits in the original external wall before the sunroom was added, so it is rendered with the exterior-window symbol. User measured it as 2.14m wide and centred."
+      },
+      {
+        "id": "master_rear_high_window",
+        "type": "window",
+        "room": "master_bedroom",
+        "status": "measured_position_photo_context",
+        "height_position": "high_above_bed_headboard",
+        "wall_offsets_m": {
+          "left": 1.32,
+          "right": 1.32
+        },
+        "evidence_check_ids": ["master_bedroom_photo_context"],
+        "evidence_photo_paths": [
+          "OUTPUT/jpeg_photos/Inside-Master-Bedroom-Looking-S.jpg",
+          "OUTPUT/jpeg_photos/Inside-Master-Bedroom-Looking-S-2.jpg"
+        ],
+        "display_px": {
+          "type": "polygon",
+          "points": [
+            [571.4, 595.8],
+            [589.6, 595.8],
+            [589.6, 601.8],
+            [571.4, 601.8]
+          ]
+        },
+        "notes": "Rear/south high window in the master bedroom above the bed headboard. Position updated from direct user measurement: it is centred on the rear wall with 1.32m clearance on both sides."
       },
       {
         "id": "office_se_window",
         "type": "window",
         "room": "office",
-        "status": "photo_context_approx",
+        "status": "measured_position_photo_context",
+        "width_m": 1.07,
+        "wall_offsets_m": {
+          "left": 0.87,
+          "right": 0.87
+        },
         "evidence_check_ids": ["office_photo_context"],
         "evidence_photo_paths": [
           "OUTPUT/jpeg_photos/Inside-Office-Looking-SE.jpg",
@@ -1180,19 +1964,24 @@
         "display_px": {
           "type": "polygon",
           "points": [
-            [625, 604],
-            [675, 604],
-            [675, 610],
-            [625, 610]
+            [672.8, 595.8],
+            [701.1, 595.8],
+            [701.1, 601.8],
+            [672.8, 601.8]
           ]
         },
-        "notes": "Approximate SE-facing office window marker. Position needs exterior wall/window offset measurement."
+        "notes": "Measured SE-facing office window marker. User corrected it to 1.07m wide, with about 0.87m clear wall either side. Current office clear width is retained at 2.90m, so the display centres the window on the office wall and leaves about 0.92m each side until the office width is rechecked."
       },
       {
         "id": "bathroom_se_window",
         "type": "window",
         "room": "bathroom",
-        "status": "photo_context_approx",
+        "status": "measured_position_photo_context",
+        "width_m": 1.1,
+        "wall_offsets_m": {
+          "left": 0.27,
+          "right": 0.27
+        },
         "evidence_check_ids": ["bathroom_photo_context"],
         "evidence_photo_paths": [
           "OUTPUT/jpeg_photos/Inside-Bathroom-Looking-SE-2.jpg",
@@ -1202,19 +1991,21 @@
         "display_px": {
           "type": "polygon",
           "points": [
-            [704, 604],
-            [746, 604],
-            [746, 610],
-            [704, 610]
+            [735.9, 595.8],
+            [765.1, 595.8],
+            [765.1, 601.8],
+            [735.9, 601.8]
           ]
         },
-        "notes": "Approximate SE-facing bathroom window marker. Position needs exterior wall/window offset measurement."
+        "notes": "Measured SE-facing bathroom window marker. User measured it as 1.10m wide and centred on the wall."
       },
       {
         "id": "bedroom2_se_window",
         "type": "window",
         "room": "bedroom_2",
-        "status": "photo_context_approx",
+        "status": "measured_position_photo_context",
+        "width_m": 2.0,
+        "position_reference": "centred",
         "evidence_check_ids": ["bedroom2_photo_context"],
         "evidence_photo_paths": [
           "OUTPUT/jpeg_photos/Inside-Bedroom-2-Looking-SE.jpg",
@@ -1224,13 +2015,38 @@
         "display_px": {
           "type": "polygon",
           "points": [
-            [790, 604],
-            [862, 604],
-            [862, 610],
-            [790, 610]
+            [811.7, 595.8],
+            [864.8, 595.8],
+            [864.8, 601.8],
+            [811.7, 601.8]
           ]
         },
-        "notes": "Approximate SE-facing bedroom 2 window marker. Position needs exterior wall/window offset measurement."
+        "notes": "Measured SE-facing bedroom 2 window marker. User measured it as 2.00m wide and centred."
+      },
+      {
+        "id": "bedroom2_entrance_internal_window",
+        "type": "window",
+        "between": ["bedroom_2", "entrance"],
+        "status": "measured_position_photo_context",
+        "width_m": 0.9,
+        "wall_offsets_m": {
+          "right": 1.02
+        },
+        "evidence_check_ids": ["bedroom2_photo_context", "entrance_laundry_back_entry"],
+        "evidence_photo_paths": [
+          "OUTPUT/jpeg_photos/Inside-Bedroom-2-Looking-NW.jpg",
+          "OUTPUT/jpeg_photos/Inside-Entrance-Looking-NE.jpg"
+        ],
+        "display_px": {
+          "type": "polygon",
+          "points": [
+            [854.4, 521.3],
+            [878.7, 521.3],
+            [878.7, 525.3],
+            [854.4, 525.3]
+          ]
+        },
+        "notes": "Measured internal window in the wall between Bedroom 2 and the entrance. User measured it as 0.9m long, with the right edge 1.02m from the right-hand wall."
       }
     ],
     "migration_notes": [
@@ -1278,15 +2094,15 @@
         "display_px": {
           "type": "polygon",
           "points": [
-            [188, 307],
-            [650, 263],
-            [1034, 267],
-            [1034, 338],
-            [872, 336],
-            [842, 365],
-            [518, 361],
-            [474, 376],
-            [194, 393]
+            [188, 304.4],
+            [650, 260.4],
+            [1034, 264.4],
+            [1034, 335.4],
+            [872, 333.4],
+            [842, 362.4],
+            [518, 358.4],
+            [474, 373.4],
+            [194, 390.4]
           ]
         },
         "notes": "Satellite/photo-verified main concrete driveway running from the street side along the upper side of the property toward the garage. Replaces the earlier generic path polygon."
@@ -1300,13 +2116,44 @@
         "display_px": {
           "type": "polygon",
           "points": [
-            [474, 376],
-            [518, 361],
-            [586, 465],
-            [563, 477]
+            [474, 373.4],
+            [518, 358.4],
+            [586, 462.4],
+            [563, 474.4]
           ]
         },
         "notes": "Satellite-visible diagonal concrete path from the driveway/front hardscape toward the sunroom/front-house area."
+      },
+      {
+        "id": "sunroom_front_steps",
+        "type": "timber_steps",
+        "category": "deck",
+        "confidence": "photo_verified_approx",
+        "evidence_check_ids": ["external_site_driveway_garage_deck_rear_garden"],
+        "display_px": {
+          "type": "multi_polygon",
+          "polygons": [
+            [
+              [606, 401.6],
+              [568, 442.3],
+              [563, 437.3],
+              [601, 396.6]
+            ],
+            [
+              [601, 396.6],
+              [563, 437.3],
+              [558, 432.3],
+              [596, 391.6]
+            ],
+            [
+              [596, 391.6],
+              [558, 432.3],
+              [553, 427.3],
+              [591, 386.6]
+            ]
+          ]
+        },
+        "notes": "Photo-verified dark timber steps/landing outside the angled sunroom double doors. The treads span the full angled doorway and project outward slightly toward the front path; direct step depth measurements would improve this."
       },
       {
         "id": "rear_timber_deck",
@@ -1317,13 +2164,13 @@
         "display_px": {
           "type": "polygon",
           "points": [
-            [822, 319.4],
-            [924, 420.3],
-            [934, 420.3],
-            [954, 432.3],
-            [954, 496.3],
-            [940, 496.3],
-            [822, 496.3]
+            [833, 307.6],
+            [935, 420.3],
+            [945, 420.3],
+            [965, 432.3],
+            [965, 489.4],
+            [951, 489.4],
+            [833, 489.4]
           ]
         },
         "measured_edges_m": {
@@ -1429,10 +2276,10 @@
           "type": "multi_polygon",
           "polygons": [
             [
-              [188, 307],
-              [650, 263],
-              [650, 288],
-              [194, 393]
+              [188, 304.4],
+              [650, 260.4],
+              [650, 285.4],
+              [194, 390.4]
             ],
             [
               [1010, 228],
@@ -1636,8 +2483,8 @@
         "room": "kitchen_dining",
         "polygon": [
           [822, 410],
-          [828, 410],
-          [828, 484],
+          [833, 410],
+          [833, 484],
           [822, 484]
         ],
         "confidence": "visual_reference",
@@ -1730,8 +2577,13 @@
       {
         "id": "sunroom_wraparound_glazing",
         "status": "photo_verified",
-        "feature_ids": ["sunroom_right_glazing", "sunroom_top_window", "sunroom_left_window"],
-        "summary": "Exterior and interior sunroom photos confirm wraparound glazing on the front/angled and side faces; corrected pixel markers should remain on the current sunroom polygon.",
+        "feature_ids": [
+          "sunroom_north_fixed_window",
+          "sunroom_path_side_fixed_window",
+          "sunroom_path_left_fixed_window",
+          "sunroom_street_side_fixed_window"
+        ],
+        "summary": "Exterior and interior sunroom photos confirm fixed glazing around the sunroom perimeter, separate from the path-facing double doors.",
         "photos": [
           {
             "path": "OUTPUT/jpeg_photos/From-Outside-front-looking-NE-towards-sunroom.jpg",
@@ -1744,6 +2596,22 @@
           {
             "path": "OUTPUT/jpeg_photos/Inside-Sunroom-Looking-NW.jpg",
             "view": "Interior sunroom view showing the broad front glazing."
+          }
+        ]
+      },
+      {
+        "id": "sunroom_front_double_doors",
+        "status": "photo_verified",
+        "feature_ids": ["sunroom_front_double_doors"],
+        "summary": "The angled sunroom face that meets the front path is a pair of glazed doors rather than a fixed window panel.",
+        "photos": [
+          {
+            "path": "OUTPUT/jpeg_photos/From-Outside-front-looking-NE-towards-sunroom.jpg",
+            "view": "Exterior front/NE view showing the paired doors on the angled sunroom face and their relationship to the path."
+          },
+          {
+            "path": "OUTPUT/jpeg_photos/From-Outside-front-looking-NW-towards-sunroom.jpg",
+            "view": "Exterior close view showing the adjacent fixed panes and the paired front doors."
           }
         ]
       },
@@ -1764,10 +2632,30 @@
         ]
       },
       {
+        "id": "lounge_photo_context",
+        "status": "photo_context_verified",
+        "feature_ids": ["lounge", "lounge_north_left_window", "lounge_north_right_window", "hallway_to_lounge_door", "sunroom_lounge_slider"],
+        "summary": "Lounge photos support the north-wall window context, the sliding connection to the sunroom, and the doorway back to the hallway. North-wall window positions use direct user measurements.",
+        "photos": [
+          {
+            "path": "OUTPUT/jpeg_photos/Inside-Lounge-looking-N.jpg",
+            "view": "Lounge view toward the north wall and small window relationship."
+          },
+          {
+            "path": "OUTPUT/jpeg_photos/Inside-Lounge-Looking-NE.jpg",
+            "view": "Lounge view giving additional north/east wall context."
+          },
+          {
+            "path": "OUTPUT/jpeg_photos/Inside-Lounge-Looking-SE.jpg",
+            "view": "Lounge view confirming the hallway doorway relationship."
+          }
+        ]
+      },
+      {
         "id": "deck_doors_and_kitchen_window",
         "status": "photo_verified",
-        "feature_ids": ["deck_doors", "kitchen_window", "entrance_to_kitchen_dining_door"],
-        "summary": "Exterior deck photo confirms the large deck door group and adjacent tall deck-side glazing. Interior kitchen photos confirm this is the kitchen/dining deck-side wall, but the old kitchen_window label is treated as deck-side dining/kitchen glazing. Kitchen-side photos also support the narrow hinged door between the kitchen/dining area and entrance.",
+        "feature_ids": ["deck_doors", "kitchen_window", "dining_west_window", "entrance_to_kitchen_dining_door"],
+        "summary": "Exterior deck photo confirms the large deck door group and adjacent tall deck-side glazing. Interior kitchen/dining photos confirm this is the kitchen/dining deck-side wall, but the old kitchen_window label is treated as deck-side dining/kitchen glazing. Dining photos also support the measured small west/left-wall dining window. Kitchen-side photos support the narrow hinged door between the kitchen/dining area and entrance.",
         "photos": [
           {
             "path": "OUTPUT/jpeg_photos/From-Outside-Looking-SW-to-Deck-double-doors.jpg",
@@ -1776,14 +2664,22 @@
           {
             "path": "OUTPUT/jpeg_photos/Inside-Kitchen-Looking-NW-2.jpg",
             "view": "Interior kitchen/dining view showing the deck-side door/window wall."
+          },
+          {
+            "path": "OUTPUT/jpeg_photos/Inside-Dining-Room-looking-N.jpg",
+            "view": "Interior dining view giving context for the measured west/left-wall window."
+          },
+          {
+            "path": "OUTPUT/jpeg_photos/Inside-Dining-Room-looking-NW.jpg",
+            "view": "Interior dining view giving additional context for the measured north-wall window."
           }
         ]
       },
       {
         "id": "entrance_laundry_back_entry",
         "status": "photo_verified",
-        "feature_ids": ["entrance", "laundry", "entrance_deck_slider", "entrance_to_kitchen_dining_door"],
-        "summary": "Entrance/back-entry photos confirm a glazed deck-side entrance leading directly to the laundry, with laundry bench, appliances, sink, exterior window, and the kitchen/dining door relationship visible.",
+        "feature_ids": ["entrance", "laundry", "entrance_deck_slider", "entrance_to_kitchen_dining_door", "laundry_north_window", "laundry_east_window"],
+        "summary": "Entrance/back-entry photos confirm a glazed deck-side entrance leading directly to the laundry, with laundry bench, appliances, sink, the top/north laundry window, the right/east laundry window, and the kitchen/dining door relationship visible.",
         "photos": [
           {
             "path": "OUTPUT/jpeg_photos/Inside-Entrance-Looking-NE.jpg",
@@ -1796,6 +2692,14 @@
           {
             "path": "OUTPUT/jpeg_photos/Inside-Laundry-Looking-NE.jpg",
             "view": "Laundry view showing appliances, bench, sink, and exterior window."
+          },
+          {
+            "path": "OUTPUT/jpeg_photos/Inside-Laundry-Looking-N.jpg",
+            "view": "Laundry view showing the wide top/north window over the bench and sink."
+          },
+          {
+            "path": "OUTPUT/jpeg_photos/Inside-Laundry-Looking-NW.jpg",
+            "view": "Laundry view giving context for the side-wall window and room depth."
           },
           {
             "path": "OUTPUT/jpeg_photos/From-Deck-Looking-SE-to-laundry.jpg",
@@ -1830,8 +2734,8 @@
       {
         "id": "hallway_spine_and_room_connections",
         "status": "photo_verified",
-        "feature_ids": ["hallway", "hallway_to_entrance_laundry", "hallway_to_lounge_door", "hallway_to_kitchen_dining_door", "hallway_to_bathroom_sliding_door", "hallway_to_master_bedroom_door", "hallway_to_office_door"],
-        "summary": "Hallway photos confirm the internal circulation spine from the lounge/office side toward the entrance/laundry end. Bathroom photos confirm the sliding bathroom door off the hallway, lounge photos confirm the hinged lounge doorway, kitchen/hall photos confirm the kitchen-side door aligned with the lounge/kitchen divider, office photos confirm the office doorway relationship, and master bedroom photos confirm the master doorway swing into the room.",
+        "feature_ids": ["hallway", "hallway_to_entrance_laundry", "hallway_to_lounge_door", "hallway_to_sunroom_old_front_door", "hallway_to_kitchen_dining_door", "hallway_to_bathroom_sliding_door", "hallway_to_master_bedroom_door", "hallway_to_office_door"],
+        "summary": "Hallway photos confirm the internal circulation spine from the lounge/office side toward the entrance/laundry end. User measurement confirms the old front door between the hallway and sunroom, opening into the hallway toward the master bedroom. Bathroom photos confirm the sliding bathroom door off the hallway, lounge photos confirm the hinged lounge doorway, kitchen/hall photos confirm the kitchen-side door aligned with the lounge/kitchen divider, office photos confirm the office doorway relationship, and master bedroom photos confirm the master doorway swing into the room.",
         "photos": [
           {
             "path": "OUTPUT/jpeg_photos/Inside-hallway-looking-NE.jpg",
@@ -1866,8 +2770,8 @@
       {
         "id": "master_bedroom_photo_context",
         "status": "photo_context_verified",
-        "feature_ids": ["master_bedroom", "hallway_to_master_bedroom_door", "master_street_window", "master_sunroom_window"],
-        "summary": "Master bedroom photos provide current-condition context for the room, its hallway door, and its two window relationships: street/front side and sunroom side. Window markers are approximate until offsets are measured.",
+        "feature_ids": ["master_bedroom", "master_bedroom_wardrobe", "hallway_to_master_bedroom_door", "master_street_window", "master_sunroom_window", "master_rear_high_window"],
+        "summary": "Master bedroom photos provide current-condition context for the room, its built-in wardrobe on the office-side internal wall, its hallway door, and its three window relationships: street/front side, sunroom side, and the rear high window above the bed headboard. The master bedroom window markers now include user-measured wall offsets.",
         "photos": [
           {
             "path": "OUTPUT/jpeg_photos/Inside-Master-Bedroom-looking-SW.jpg",
@@ -1884,6 +2788,14 @@
           {
             "path": "OUTPUT/jpeg_photos/Inside-Master-Bedroom-Looking-N.jpg",
             "view": "Master bedroom view giving additional context for the sunroom-side wall."
+          },
+          {
+            "path": "OUTPUT/jpeg_photos/Inside-Master-Bedroom-Looking-S.jpg",
+            "view": "Master bedroom view toward the rear high window above the bed headboard."
+          },
+          {
+            "path": "OUTPUT/jpeg_photos/Inside-Master-Bedroom-Looking-S-2.jpg",
+            "view": "Second master bedroom view confirming the rear high-window relationship above the bed headboard."
           },
           {
             "path": "OUTPUT/jpeg_photos/From-Outside-front-looking-SW-towards-road.jpg",
@@ -1942,8 +2854,8 @@
       {
         "id": "bedroom2_photo_context",
         "status": "photo_context_verified",
-        "feature_ids": ["bedroom_2", "bedroom2_se_window", "kitchen_dining_to_bedroom2_door"],
-        "summary": "Bedroom 2 photos confirm current room context, the NW-side door back to the kitchen/dining edge, and the SE-facing exterior window side. Window marker is approximate until offsets are measured.",
+        "feature_ids": ["bedroom_2", "bedroom2_se_window", "bedroom2_entrance_internal_window", "kitchen_dining_to_bedroom2_door"],
+        "summary": "Bedroom 2 photos confirm current room context, the NW-side door back to the kitchen/dining edge, the internal window to the entrance wall, and the SE-facing exterior window side. SE window marker is approximate until offsets are measured.",
         "photos": [
           {
             "path": "OUTPUT/jpeg_photos/Inside-Bedroom-2-Looking-SE.jpg",
@@ -1966,9 +2878,9 @@
       {
         "id": "external_site_driveway_garage_deck_rear_garden",
         "status": "photo_verified",
-        "feature_ids": ["property_boundary", "upper_side_driveway", "front_diagonal_path", "rear_timber_deck", "cottage_end_deck", "garage_concrete_pad", "garage_cottage_side_path", "garage_shed", "cottage", "boundary_hedges_and_fences"],
+        "feature_ids": ["property_boundary", "upper_side_driveway", "front_diagonal_path", "sunroom_front_steps", "rear_timber_deck", "cottage_end_deck", "garage_concrete_pad", "garage_cottage_side_path", "garage_shed", "cottage", "boundary_hedges_and_fences"],
         "reference_images": ["36-Victors-satelite.png", "House-Outline.png", "House-Outline-Internal-walls.png"],
-        "summary": "Satellite and outside photos confirm the main site topology: street-side driveway along the upper side of the section, a diagonal front path near the sunroom/front lawn, the timber deck outside the kitchen/dining and entrance/laundry side, a small cottage-end deck, the larger concrete area in front of the garage/cottage line, the narrow concrete path along the garage/cottage side, the current side-by-side garage/cottage relationship near the top boundary, and tall boundary hedges/fences that affect shade and privacy. Open grass/lawn remains the default ground context except where hardscape is explicitly mapped. External photos supersede the satellite where the cottage replaced part of the rear garage footprint.",
+        "summary": "Satellite and outside photos confirm the main site topology: street-side driveway along the upper side of the section, a diagonal front path near the sunroom/front lawn, small timber steps outside the angled sunroom double doors, the timber deck outside the kitchen/dining and entrance/laundry side, a small cottage-end deck, the larger concrete area in front of the garage/cottage line, the narrow concrete path along the garage/cottage side, the current side-by-side garage/cottage relationship near the top boundary, and tall boundary hedges/fences that affect shade and privacy. Open grass/lawn remains the default ground context except where hardscape is explicitly mapped. External photos supersede the satellite where the cottage replaced part of the rear garage footprint.",
         "photos": [
           {
             "path": "OUTPUT/jpeg_photos/From-Outside-front-looking-NE-towards-garage.jpg",
@@ -1997,11 +2909,28 @@
           {
             "path": "OUTPUT/jpeg_photos/From-Outside-Back-of-section-looking-NW-to-back-of-cottage.jpg",
             "view": "Rear section view confirming the cottage as a current-condition element behind/alongside the older garage area."
+          },
+          {
+            "path": "OUTPUT/jpeg_photos/From-Outside-front-looking-NE-towards-sunroom.jpg",
+            "view": "Front sunroom view showing the small dark timber steps outside the angled double doors and their relationship to the concrete path."
+          },
+          {
+            "path": "OUTPUT/jpeg_photos/From-Outside-side-looking-S-towards-sunroom.jpg",
+            "view": "Side sunroom view showing the timber step edge between the sunroom glazing, lawn, and front concrete path."
           }
         ]
       }
     ]
   },
+  "design_issues": [
+    {
+      "id": "missing_second_toilet",
+      "title": "No second toilet",
+      "severity": "practical_design_issue",
+      "summary": "The current layout has only one toilet, accessed through the laundry. That creates a practical constraint for guests, shared use, and times when the toilet or laundry is occupied.",
+      "possible_solution": "Redo the bathroom layout to include a second toilet, subject to checking fixture clearances, plumbing route, waterproofing, ventilation, and whether storage or basin/shower positions need to change."
+    }
+  ],
   "daylight": {
     "method": "qualitative_season_time_matrix",
     "levels": ["low", "medium", "high", "unknown"],

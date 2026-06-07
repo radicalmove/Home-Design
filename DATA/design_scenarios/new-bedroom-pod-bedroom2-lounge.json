@@ -1,0 +1,49 @@
+{
+  "id": "new-bedroom-pod-bedroom2-lounge",
+  "label": "Design 6 - New Bedroom Pod + Bedroom 2 Lounge",
+  "rank": 6,
+  "status": "draft",
+  "transition_from": "current",
+  "cost_band": "Very high",
+  "summary": "An addition-led alternative: build a compact new bedroom where the site works best, turn Bedroom 2 into a better lounge/day room, and avoid forcing the replacement bedroom into the old sunroom shape.",
+  "room_changes": [
+    "Bedroom 2 becomes the lounge/day room.",
+    "A new compact bedroom pod is added in the best available legal and practical location.",
+    "The office may become part of a wet/service core if needed.",
+    "The current lounge becomes media, snug, guest overflow, or quiet room.",
+    "The sunroom is removed, reduced, or converted only if it still earns its place.",
+    "The renovated kitchen stays unless minor connection work is needed."
+  ],
+  "daylight_strategy": [
+    "Use Bedroom 2 and the back/service side for daily living instead of a low-use bedroom/service mix.",
+    "Place the new bedroom so it does not steal the best living light or darken kitchen/dining.",
+    "Treat the deck as part of the living system with shade and wind control."
+  ],
+  "movement_strategy": [
+    "Strengthen garage/back arrival to kitchen, deck, and the new lounge.",
+    "Keep the new bedroom private enough for sleeping rather than placing it in the active deck route.",
+    "Use the current lounge as a quieter secondary space after the main living function moves."
+  ],
+  "build_scope": [
+    "Construct a new bedroom pod/addition with foundations, envelope, insulation, windows, heating, and finishes.",
+    "Alter Bedroom 2, entrance, laundry, and possibly office/bathroom relationships.",
+    "Resolve deck circulation and shade around the new addition.",
+    "Potentially remove or reduce the sunroom."
+  ],
+  "risks": [
+    "Site setbacks, drainage, foundations, roof connection, and consent may drive cost.",
+    "A poorly placed pod could damage deck use, garden space, or kitchen/dining light.",
+    "This may be more expensive than replacing the sunroom if the sunroom footprint is actually buildable.",
+    "Needs professional feasibility before detailed app modelling goes too far."
+  ],
+  "cost_notes": [
+    "Broad planning band: NZD 280k to 500k+ depending on addition size, site constraints, services, and envelope complexity."
+  ],
+  "transition_mapping": [
+    { "from": "new_external_area", "to": "new_bedroom_pod" },
+    { "from": "bedroom_2", "to": "main_lounge_day_room" },
+    { "from": "office", "to": "possible_wet_core" },
+    { "from": "lounge", "to": "media_snug_guest_overflow" },
+    { "from": "sunroom", "to": "removed_reduced_or_secondary_space" }
+  ]
+}
