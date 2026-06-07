@@ -108,7 +108,7 @@ describe("native 3D navigation view wiring", () => {
   it("keeps opening infill at wall thickness and renders doors open", () => {
     expect(viewSource).toContain("depthM: Math.max(anchor.wallThicknessM, panelThicknessM)");
     expect(viewSource).toContain("const infillDepth = panel.depthM;");
-    expect(viewSource).toContain("const frameDepth = frameStyle === \"door\" ? Math.min(panel.depthM, 0.05) : panel.depthM;");
+    expect(viewSource).toContain("const frameDepth = panel.depthM;");
     expect(viewSource).toContain("addOpenDoorLeaf");
     expect(viewSource).toContain("isDoorLikeOpening");
   });
@@ -163,6 +163,9 @@ describe("native 3D navigation view wiring", () => {
   it("uses thinner door jambs instead of window frames for door openings", () => {
     expect(viewSource).toContain("frameStyle: \"window\" | \"door\" = \"window\"");
     expect(viewSource).toContain("const frameWidth = frameStyle === \"door\" ? 0.04 : 0.075;");
+    expect(viewSource).toContain("const frameDepth = panel.depthM;");
+    expect(viewSource).toContain("shouldRenderOpeningFrame");
+    expect(viewSource).toContain('return opening.type !== "door" || isClosedGlazedEntryDoor(opening);');
     expect(viewSource).toContain("if (frameStyle === \"window\")");
     expect(viewSource).toContain("addOpeningFrame(targetScene, visiblePanel, `opening:${opening.id}:${index}:frame`, false, \"door\")");
   });

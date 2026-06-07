@@ -638,12 +638,14 @@
       } else if (!isDoorLikeOpening(opening.type) && !isPlainOpening(opening.type)) {
         addWindowGlass(targetScene, visiblePanel, material, `opening:${opening.id}:${index}`);
       }
-      if (isDoubleDoorOpening(opening.type)) {
-        addOpeningFrame(targetScene, visiblePanel, `opening:${opening.id}:${index}:frame`, false, "door");
-      } else if (isDoorLikeOpening(opening.type)) {
-        addOpeningFrame(targetScene, visiblePanel, `opening:${opening.id}:${index}:frame`, false, "door");
-      } else {
-        addOpeningFrame(targetScene, visiblePanel, `opening:${opening.id}:${index}:frame`);
+      if (shouldRenderOpeningFrame(opening)) {
+        if (isDoubleDoorOpening(opening.type)) {
+          addOpeningFrame(targetScene, visiblePanel, `opening:${opening.id}:${index}:frame`, false, "door");
+        } else if (isDoorLikeOpening(opening.type)) {
+          addOpeningFrame(targetScene, visiblePanel, `opening:${opening.id}:${index}:frame`, false, "door");
+        } else {
+          addOpeningFrame(targetScene, visiblePanel, `opening:${opening.id}:${index}:frame`);
+        }
       }
       if (isDoorLikeOpening(opening.type) && !isSlidingDoorOpening(opening.type) && !isDoubleDoorOpening(opening.type) && !isClosedGlazedEntryDoor(opening)) {
         addOpenDoorLeaf(targetScene, visiblePanel, opening.type, `opening:${opening.id}:${index}:open-leaf`);
@@ -887,7 +889,7 @@
   ) {
     const frameMaterial = materialFor("frameWhite", "#f4f5ef");
     const frameWidth = frameStyle === "door" ? 0.04 : 0.075;
-    const frameDepth = frameStyle === "door" ? Math.min(panel.depthM, 0.05) : panel.depthM;
+    const frameDepth = panel.depthM;
     const frameHeight = panel.heightM + frameWidth * 2;
     const sideOffset = Math.max(panel.widthM / 2 - frameWidth / 2, frameWidth);
     const rotationDeg = -THREE.MathUtils.radToDeg(panel.rotationY);
@@ -993,6 +995,10 @@
 
   function isClosedGlazedEntryDoor(opening: ThreeDSceneConfig["openings"][number]): boolean {
     return opening.id === "future_front_door" || opening.swing === "closed_glazed_entry";
+  }
+
+  function shouldRenderOpeningFrame(opening: ThreeDSceneConfig["openings"][number]): boolean {
+    return opening.type !== "door" || isClosedGlazedEntryDoor(opening);
   }
 
   function isPlainOpening(openingType: string): boolean {
